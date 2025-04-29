@@ -58,6 +58,9 @@ namespace ArcadeVP
         public float MaxPitch;
         public AudioSource SkidSound;
 
+        [Tooltip("How quickly the engine pitch reacts to speed changes (smaller value = faster response)")]
+        public float enginePitchSmoothTime = 0.1f; // Adjust in Inspector (e.g., 0.05 to 0.2)
+
         [Header("Skid Mark Settings")]
         [Tooltip("Width of the skid mark trails")]
         public float skidWidth = 0.4f; // Restore this variable
@@ -73,7 +76,8 @@ namespace ArcadeVP
         private float lastLaneChangeTime = -Mathf.Infinity;
         private float previousSteeringInput = 0f;
         private float visualSteeringInput = 0f; // -1, 0, or 1 for visual lean/turn
-
+        private float currentSmoothedEnginePitch; // Stores the actual pitch being applied
+        private float enginePitchSmoothVelocity;  // Used internally by SmoothDamp
         // --- Input Vars ---
         private float steeringInput;
         private float accelerationInput;
@@ -140,6 +144,16 @@ namespace ArcadeVP
                 Debug.Log($"Lanes Initialized: Left={lanes[0]}, Middle={lanes[1]}, Right={lanes[2]}");
             }
 
+            if (engineSound != null)
+            {
+                // Start the smoothed pitch at the AudioSource's initial pitch or minPitch
+                currentSmoothedEnginePitch = Mathf.Max(engineSound.pitch, minPitch);
+            }
+            else
+            {
+                currentSmoothedEnginePitch = minPitch; // Default if no sound source
+            }
+            enginePitchSmoothVelocity = 0f; // Initialize velocity to zero
 
             // Make sure the initial index corresponds to the intended middle lane X value
             // Find which index holds the value closest to the 'middleLaneX' parameter
@@ -252,11 +266,26 @@ namespace ArcadeVP
 
         void UpdateEngineSound()
         {
-            float forwardSpeed = transform.InverseTransformDirection(rb.velocity).z;
-            if (engineSound != null)
-            {
-                engineSound.pitch = Mathf.Lerp(minPitch, MaxPitch, Mathf.Abs(forwardSpeed) / (MaxSpeed > 0 ? MaxSpeed : 1f));
-            }
+            if (engineSound == null || MaxSpeed <= 0) return; // Exit if disabled or no max speed
+
+            // 1. Calculate Target Pitch based on current speed (using carVelocity from FixedUpdate)
+            float forwardSpeedAbs = Mathf.Abs(carVelocity.z);
+            float speedRatio = Mathf.Clamp01(forwardSpeedAbs / MaxSpeed); // Ensure ratio is 0-1
+            float targetPitch = Mathf.Lerp(minPitch, MaxPitch, speedRatio);
+
+            // 2. Smoothly Damp the current pitch towards the target pitch
+            currentSmoothedEnginePitch = Mathf.SmoothDamp(
+                currentSmoothedEnginePitch,     // Current value
+                targetPitch,                  // Target value
+                ref enginePitchSmoothVelocity,  // Reference to the velocity (updated by the function)
+                enginePitchSmoothTime         // Approximate time to reach the target
+                                              // Optional: Add , Time.deltaTime here if SmoothDamp feels too slow/fast depending on framerate
+                                              // ,Time.deltaTime
+            );
+
+            // 3. Apply the Smoothed Pitch to the AudioSource
+            // Add a small safeguard against invalid pitch values if needed
+            engineSound.pitch = Mathf.Clamp(currentSmoothedEnginePitch, minPitch * 0.9f, MaxPitch * 1.1f); // Clamp near min/max
         }
 
         public void ProvideInputs(float _steer, float _accel, float _driftBrake, float _slowBrake)
