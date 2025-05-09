@@ -84,6 +84,12 @@ namespace ArcadeVP
         [Range(0f, 1f)] public float minPitch = 1f;
         [Range(1f, 3f)] public float maxPitch = 3f;
         public AudioSource skidSound;
+
+        [Tooltip("Max volume the skid sound reaches")]
+        [Range(0f, 1f)] public float skidMaxVolume = 1f;
+        [Tooltip("Seconds it takes to fade in or out")]
+        public float skidFadeTime = 0.25f;
+
         public float maxPitchChangePerSecond = 2.0f;
         private float currentEnginePitch;
         private float enginePitchSmoothVelocity;
@@ -96,6 +102,19 @@ namespace ArcadeVP
         private float speedRatioSmoothVelocity = 0f;
         public float speedRatioSmoothTime = 0.05f;
 
+
+        [Header("Speed-Limit Penalty")]
+        public float speedOvershootTolerance = 0.05f;   // 5?% leeway
+        public float overshootBrakeDecel = 15f;     // how hard we auto?brake
+        public float overshootLockTime = 1.5f;    // seconds controls are frozen
+        public float overshootCornerAngle = 10f;
+        bool overshootRequiresCorner;
+        public SpeedLimitUI speedLimitUI;               // optional UI reference
+
+        float activeSpeedLimit = 0f;      // 0 ? none
+        float controlLockUntil = -999f;   // time until which player input is frozen
+        Sprite currentSign;
+
         private float steeringInput, accelerationInput, driftInput, slowInput;
         // --- End Other Headers ---
 
@@ -104,29 +123,134 @@ namespace ArcadeVP
         public bool IsDrifting => isDrifting;
         public bool IsGrounded => isGrounded; // Public accessor for grounded state
 
+        public bool IsBrakePressed => driftInput > 0.1f;   // NEW
+
+
+        public void EnterSpeedLimit(float limit, Sprite sign, bool forceCorner = false)
+        {
+            activeSpeedLimit = limit;
+            currentSign = sign;
+            overshootRequiresCorner = !forceCorner;     // only skip corner check if forced
+            if (speedLimitUI) speedLimitUI.Show(sign);
+        }
+
+        public void ExitSpeedLimit(float limit)
+        {
+            if (Mathf.Approximately(limit, activeSpeedLimit))
+            {
+                activeSpeedLimit = 0f;
+                if (speedLimitUI) speedLimitUI.Show(null);
+            }
+        }
+
+        public void SetSpeedLimit(float limit, Sprite sign)
+        {
+            activeSpeedLimit = limit;
+            if (speedLimitUI) speedLimitUI.Show(sign);
+        }
 
         // Start remains the same
         void Start()
         {
-            if (splineContainer == null) { Debug.LogError("No SplineContainer on " + name); enabled = false; return; }
+            if (splineContainer == null)
+            {
+                Debug.LogError("No SplineContainer on " + name);
+                enabled = false;
+                return;
+            }
+
             spline = splineContainer.Spline;
             splineLength = spline.GetLength();
-            laneOffsets[0] = -laneOffsetDistance; laneOffsets[1] = 0f; laneOffsets[2] = +laneOffsetDistance;
+
+            laneOffsets[0] = -laneOffsetDistance;
+            laneOffsets[1] = 0f;
+            laneOffsets[2] = +laneOffsetDistance;
             targetOffset = currentOffset = laneOffsets[currentLane];
-            if (engineSound != null) currentEnginePitch = engineSound.pitch; else currentEnginePitch = minPitch;
-            enginePitchSmoothVelocity = 0f; smoothedSpeedRatio = 0f; speedRatioSmoothVelocity = 0f;
+
+            if (engineSound != null)
+            {
+                engineSound.pitch = minPitch;   // force AudioSource itself
+                currentEnginePitch = minPitch;   // internal state in sync
+            }
+            else
+            {
+                currentEnginePitch = minPitch;    // still initialise safely
+            }
+
+            enginePitchSmoothVelocity = 0f;
+            smoothedSpeedRatio = 0f;
+            speedRatioSmoothVelocity = 0f;
+
             if (bodyMesh == null) bodyMesh = transform.GetChild(0);
-            if (bodyMesh == null) Debug.LogWarning("Body Mesh not assigned for tilt/drift visuals on " + name);
-            if (maxCornerAngleForFullDrift <= cornerAngleThreshold) { Debug.LogWarning("maxCornerAngleForFullDrift > cornerAngleThreshold. Adjusting."); maxCornerAngleForFullDrift = cornerAngleThreshold + 10f; }
-            if (maxDriftYawAngle < minDriftYawAngle) { Debug.LogWarning("maxDriftYawAngle >= minDriftYawAngle. Adjusting."); maxDriftYawAngle = minDriftYawAngle; }
-            if (maxSpeedFractionForYawEffect < minSpeedFractionForYawEffect) { Debug.LogWarning("maxSpeedFractionForYawEffect >= minSpeedFractionForYawEffect. Adjusting."); maxSpeedFractionForYawEffect = minSpeedFractionForYawEffect + 0.1f; }
+            if (bodyMesh == null)
+                Debug.LogWarning("Body Mesh not assigned for tilt/drift visuals on " + name);
+
+            if (maxCornerAngleForFullDrift <= cornerAngleThreshold)
+            {
+                Debug.LogWarning("maxCornerAngleForFullDrift > cornerAngleThreshold. Adjusting.");
+                maxCornerAngleForFullDrift = cornerAngleThreshold + 10f;
+            }
+            if (maxDriftYawAngle < minDriftYawAngle)
+            {
+                Debug.LogWarning("maxDriftYawAngle >= minDriftYawAngle. Adjusting.");
+                maxDriftYawAngle = minDriftYawAngle;
+            }
+            if (maxSpeedFractionForYawEffect < minSpeedFractionForYawEffect)
+            {
+                Debug.LogWarning("maxSpeedFractionForYawEffect >= minSpeedFractionForYawEffect. Adjusting.");
+                maxSpeedFractionForYawEffect = minSpeedFractionForYawEffect + 0.1f;
+            }
+
             // Ensure car starts grounded
-            isGrounded = CheckIfGrounded(out _); // Perform initial ground check
+            isGrounded = CheckIfGrounded(out _);
         }
 
         void Update()
         {
             float dt = Time.deltaTime;
+
+            bool controlsLocked = Time.time < controlLockUntil;
+
+            bool roadIsCorner = detectedCornerAngle > overshootCornerAngle;
+            bool inSpeedZone = activeSpeedLimit > 0f;
+            bool tooFast = activeSpeedLimit > 0f &&
+               Mathf.Abs(speed) > activeSpeedLimit * (1f + speedOvershootTolerance);
+
+            if (tooFast && Time.time > controlLockUntil)
+            {
+                controlLockUntil = Time.time + overshootLockTime;
+
+                int dir = UnityEngine.Random.value > .5f ? 1 : -1;
+
+                // throw car sideways & rotate hard
+                currentLane = dir > 0 ? 2 : 0;
+                targetOffset = laneOffsets[currentLane];
+
+                currentDriftYaw = dir * 80f;                      // cartoon spin
+                if (bodyMesh) bodyMesh.localRotation =
+                      Quaternion.Euler(0, 0, -dir * 45f);
+
+                speed *= 0.4f;                                   // keep ~40?%
+                verticalVelocity = 4f;                           // hop a bit
+
+                SendMessage("DoCameraShake", 1.2f, SendMessageOptions.DontRequireReceiver);
+                if (speedLimitUI) speedLimitUI.FlashRed();
+                if (skidSound) skidSound.Play();
+            }
+
+            /* -------------------------------------------------------------------
+               2. zero?out inputs while locked
+            ----------------------------------------------------------------------*/
+            if (controlsLocked)
+            {
+                steeringInput = 0f;
+                accelerationInput = 0f;
+                driftInput = 0f;
+                slowInput = 0f;
+
+                // heavy braking
+                speed = Mathf.MoveTowards(speed, 0f, overshootBrakeDecel * dt);
+            }
 
             // Speed Calculation
             speed += accelerationInput * acceleration * dt;
@@ -145,8 +269,7 @@ namespace ArcadeVP
 
             // Skid sound trigger - only if actually grounded
             bool shouldSkid = isGrounded && (isChangingLane || isDrifting); // Use isGrounded state
-            if (shouldSkid && !wasSkidding && skidSound != null) skidSound.Play();
-            if ((!shouldSkid || !isGrounded) && wasSkidding && skidSound != null && skidSound.isPlaying) skidSound.Stop(); // Stop if not skidding OR not grounded
+            UpdateSkidSound(shouldSkid, dt);
             wasSkidding = shouldSkid;
 
             // Engine sound update
@@ -164,13 +287,33 @@ namespace ArcadeVP
             previousSteer = steeringInput;
         }
 
-        // ProvideInputs remains the same
+        private void UpdateSkidSound(bool active, float dt)
+        {
+            if (skidSound == null) return;
+
+            /* 1. target volume */
+            float targetVol = active ? skidMaxVolume : 0f;
+            float fadeRate = (skidFadeTime > 0f) ? (skidMaxVolume / skidFadeTime) : 999f;
+            skidSound.volume = Mathf.MoveTowards(skidSound.volume, targetVol, fadeRate * dt);
+
+            /* 2. start/stop the clip only when necessary */
+            if (!skidSound.isPlaying && skidSound.volume > 0f)
+                skidSound.Play();
+            else if (skidSound.isPlaying && skidSound.volume <= 0f)
+                skidSound.Stop();
+
+            /* 3. gentle pitch variation makes the loop feel alive */
+            float desiredPitch = Mathf.Lerp(0.9f, 1.25f, smoothedSpeedRatio);
+            skidSound.pitch = desiredPitch;
+
+            wasSkidding = active;   // keep the flag for any other logic that uses it
+        }
+
         public void ProvideInputs(float steer, float accel, float drift, float slow)
         {
             steeringInput = steer; accelerationInput = accel; driftInput = drift; slowInput = slow;
         }
 
-        // HandleLaneChangeTap remains the same
         private void HandleLaneChangeTap()
         {
             if (Time.time < lastLaneChangeTime + laneChangeCooldown) return;
@@ -188,7 +331,9 @@ namespace ArcadeVP
         {
             if (spline == null || splineLength <= 0f) { isDrifting = false; driftDirection = 0; detectedCornerAngle = 0f; return; }
             float currentT = traveledDistance / splineLength;
-            float futureDistance = traveledDistance + Mathf.Sign(speed) * cornerDetectionLookahead;
+            float futureDistance = traveledDistance
+                       + Mathf.Sign(speed) * cornerDetectionLookahead
+                       * Mathf.Lerp(1f, 2.5f, Mathf.Abs(speed) / maxSpeed);
             if (Mathf.Abs(speed) < 0.1f) futureDistance = traveledDistance;
             float futureT = Mathf.Repeat(futureDistance / splineLength, 1f);
             float3 localTangentCurrent = math.normalizesafe(spline.EvaluateTangent(currentT));
@@ -277,22 +422,31 @@ namespace ArcadeVP
             transform.position = finalPosition;
 
             // 5. Handle Rotation (Same as before)
-            Vector3 forwardXZ = new Vector3(worldT.x, 0f, worldT.z).normalized;
-            if (forwardXZ == Vector3.zero) forwardXZ = transform.forward;
+            Vector3 forwardDir = worldT.normalized;
+            if (forwardDir == Vector3.zero) forwardDir = transform.forward;
 
-            Quaternion baseRotation = Quaternion.LookRotation(forwardXZ, worldUp_Spline);
+            // use road normal when grounded, fall back to spline?up in the air
+            Vector3 upDir = (groundHit ? hit.normal : worldUp_Spline).normalized;
 
+            Quaternion baseRotation = Quaternion.LookRotation(forwardDir, upDir);
+
+            /* ------------------ drift yaw stays exactly the same ------------------ */
             float targetDriftYaw = 0f;
             if (isDrifting)
             {
-                float cornerIntensity = Mathf.Clamp01(Mathf.InverseLerp(cornerAngleThreshold, maxCornerAngleForFullDrift, detectedCornerAngle));
+                float cornerIntensity = Mathf.Clamp01(Mathf.InverseLerp(cornerAngleThreshold,
+                                                 maxCornerAngleForFullDrift, detectedCornerAngle));
                 float cornerBasedYaw = Mathf.Lerp(minDriftYawAngle, maxDriftYawAngle, cornerIntensity);
-                float speedScaleFactor = Mathf.Clamp01(Mathf.InverseLerp(minSpeedFractionForYawEffect, maxSpeedFractionForYawEffect, smoothedSpeedRatio));
+                float speedScaleFactor = Mathf.Clamp01(Mathf.InverseLerp(minSpeedFractionForYawEffect,
+                                                 maxSpeedFractionForYawEffect, smoothedSpeedRatio));
                 float speedScaledYaw = cornerBasedYaw * speedScaleFactor;
                 targetDriftYaw = speedScaledYaw * driftDirection;
             }
-            currentDriftYaw = Mathf.Lerp(currentDriftYaw, targetDriftYaw, (isDrifting ? driftEntrySpeed : driftExitSpeed) * dt);
-            Quaternion driftRot = Quaternion.Euler(0, currentDriftYaw, 0);
+            currentDriftYaw = Mathf.Lerp(currentDriftYaw, targetDriftYaw,
+                             (isDrifting ? driftEntrySpeed : driftExitSpeed) * dt);
+
+            /* NOTE: yaw is applied around the *road normal* so the car keeps hugging the slope */
+            Quaternion driftRot = Quaternion.AngleAxis(currentDriftYaw, upDir);
             Quaternion targetRotation = baseRotation * driftRot;
 
             transform.rotation = targetRotation;

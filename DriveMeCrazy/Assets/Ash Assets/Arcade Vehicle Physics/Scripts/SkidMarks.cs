@@ -11,6 +11,13 @@ namespace ArcadeVP
 
         Color originalColor;
 
+        /*  you can tweak these in the Inspector if desired  */
+        [Header("Trail Tuning (optional)")]
+        [Tooltip("How long the skid mark stays in the scene (seconds)")]
+        public float trailLifeTime = 10f;
+        [Tooltip("Minimum distance before a new vertex is added")]
+        public float trailMinVertexDistance = 0.02f;
+
         void Awake()
         {
             skidMark = GetComponent<TrailRenderer>();
@@ -22,12 +29,25 @@ namespace ArcadeVP
                 enabled = false;
                 return;
             }
+            if (!carController)
+                carController = GetComponentInParent<ArcadeVehicleController>();
 
+            /* ---------- one‑time TrailRenderer set‑up ---------------------- */
+            //skidMark.worldSpace = true;
+            skidMark.time = trailLifeTime;
+            skidMark.minVertexDistance = trailMinVertexDistance;
             skidMark.startWidth = skidMark.endWidth = carController.skidWidth;
             originalColor = skidMark.material ? skidMark.material.color : Color.black;
             originalColor.a = 1f;
-
+            skidMark.startColor = skidMark.endColor = originalColor;
+            skidMark.material.color = originalColor;
             skidMark.emitting = false;
+            /* --------------------------------------------------------------- */
+
+            if (smoke)
+            {
+                smoke.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            }
         }
 
         void OnDisable() => StopSkidImmediately();
@@ -37,23 +57,36 @@ namespace ArcadeVP
         {
             if (!carController || !skidMark) return;
 
-            bool shouldEmit = carController.grounded() &&
-                              (carController.IsChangingLane || carController.IsDrifting);
+            bool skidNow = carController.IsGrounded &&
+               (carController.IsChangingLane ||
+                carController.IsDrifting ||
+                carController.IsBrakePressed);
 
-            if (shouldEmit && !skidMark.emitting)
+            if (skidNow)
             {
-                skidMark.Clear();
-                skidMark.material.color = originalColor;
-                skidMark.emitting = true;
-                if (smoke) smoke.Play();
+                if (!skidMark.emitting)
+                {
+                    skidMark.Clear();
+                    skidMark.emitting = true;
+                }
+
+                if (smoke)
+                {
+                    if (!smoke.isPlaying)
+                    {
+                        smoke.Clear();
+                        smoke.Play(true);
+                    }
+                }
             }
-            else if (!shouldEmit && skidMark.emitting)
+            else
             {
-                skidMark.emitting = false;
-                if (smoke) smoke.Stop();
+                if (skidMark.emitting) skidMark.emitting = false;
+                if (smoke && smoke.isPlaying) smoke.Stop();
             }
         }
 
+        /* -------------------------------------------------------------------- */
         void StopSkidImmediately()
         {
             if (skidMark)
@@ -61,7 +94,10 @@ namespace ArcadeVP
                 skidMark.emitting = false;
                 skidMark.Clear();
             }
-            if (smoke) smoke.Stop();
+            if (smoke)
+            {
+                smoke.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            }
         }
     }
 }
