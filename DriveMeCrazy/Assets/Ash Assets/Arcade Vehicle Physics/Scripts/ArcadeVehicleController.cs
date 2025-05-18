@@ -35,7 +35,7 @@ namespace ArcadeVP
         private bool isChangingLane => Mathf.Abs(currentOffset - targetOffset) > laneSnapThreshold;
 
         [Header("Drifting Settings")]
-        public float cornerDetectionLookahead = 10f;
+        public float cornerDetectionLookahead = 2f;
         public float cornerAngleThreshold = 15f;
         public float minDriftYawAngle = 20f;
         public float maxDriftYawAngle = 45f;
@@ -51,6 +51,7 @@ namespace ArcadeVP
         private float currentDriftYaw = 0f;
         private int driftDirection = 0;
         private float detectedCornerAngle = 0f;
+        private float currentCurvature = 0f;
         // --- End Existing Headers ---
 
         [Header("Ground Settings")]
@@ -110,7 +111,7 @@ namespace ArcadeVP
         public float overshootCornerAngle = 10f;
         bool overshootRequiresCorner;
         public SpeedLimitUI speedLimitUI;               // optional UI reference
-
+        public float frictionCoefficient = 200f;
         float activeSpeedLimit = 0f;      // 0 ? none
         float controlLockUntil = -999f;   // time until which player input is frozen
         Sprite currentSign;
@@ -213,8 +214,14 @@ namespace ArcadeVP
 
             bool roadIsCorner = detectedCornerAngle > overshootCornerAngle;
             bool inSpeedZone = activeSpeedLimit > 0f;
-            bool tooFast = activeSpeedLimit > 0f &&
-               Mathf.Abs(speed) > activeSpeedLimit * (1f + speedOvershootTolerance);
+            //bool inSpeedZone = false;
+            //bool tooFast = inSpeedZone &&
+            //   Mathf.Abs(speed) > activeSpeedLimit * (1f + speedOvershootTolerance);
+            bool tooFast = false;
+            if (currentCurvature > 0f) {
+                float maxV = Mathf.Sqrt(frictionCoefficient * 9.81f / currentCurvature);
+                tooFast = (maxV - speed) < 0f;
+            }
 
             if (tooFast && Time.time > controlLockUntil)
             {
@@ -231,7 +238,7 @@ namespace ArcadeVP
                       Quaternion.Euler(0, 0, -dir * 45f);
 
                 speed *= 0.4f;                                   // keep ~40?%
-                verticalVelocity = 4f;                           // hop a bit
+                                                                 //verticalVelocity = 4f;                           // hop a bit
 
                 SendMessage("DoCameraShake", 1.2f, SendMessageOptions.DontRequireReceiver);
                 if (speedLimitUI) speedLimitUI.FlashRed();
@@ -249,7 +256,7 @@ namespace ArcadeVP
                 slowInput = 0f;
 
                 // heavy braking
-                speed = Mathf.MoveTowards(speed, 0f, overshootBrakeDecel * dt);
+                //speed = Mathf.MoveTowards(speed, 0f, overshootBrakeDecel * dt);
             }
 
             // Speed Calculation
@@ -333,7 +340,8 @@ namespace ArcadeVP
             float currentT = traveledDistance / splineLength;
             float futureDistance = traveledDistance
                        + Mathf.Sign(speed) * cornerDetectionLookahead
-                       * Mathf.Lerp(1f, 2.5f, Mathf.Abs(speed) / maxSpeed);
+                       //* Mathf.Lerp(1f, 2.5f, Mathf.Abs(speed) / maxSpeed)
+                       ;
             if (Mathf.Abs(speed) < 0.1f) futureDistance = traveledDistance;
             float futureT = Mathf.Repeat(futureDistance / splineLength, 1f);
             float3 localTangentCurrent = math.normalizesafe(spline.EvaluateTangent(currentT));
@@ -345,6 +353,8 @@ namespace ArcadeVP
             if (tangentCurrentXZ == Vector3.zero || tangentFutureXZ == Vector3.zero || tangentCurrentXZ == tangentFutureXZ) { isDrifting = false; driftDirection = 0; detectedCornerAngle = 0f; return; }
             float angle = Vector3.Angle(tangentCurrentXZ, tangentFutureXZ);
             float crossY = Vector3.Cross(tangentCurrentXZ, tangentFutureXZ).y;
+            //Debug.Log("Angle is:" + angle.ToString());
+            currentCurvature = Mathf.Abs(angle / (futureDistance - traveledDistance));
             if (angle > cornerAngleThreshold) { isDrifting = true; driftDirection = (int)Mathf.Sign(crossY); detectedCornerAngle = angle; }
             else { isDrifting = false; driftDirection = 0; detectedCornerAngle = 0f; }
         }

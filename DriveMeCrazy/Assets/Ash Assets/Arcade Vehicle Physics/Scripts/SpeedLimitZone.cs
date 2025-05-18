@@ -1,4 +1,4 @@
-// SpeedLimitZone.cs  – replace the whole file with this
+// SpeedLimitZone.cs  ï¿½ï¿½replace the whole file with this
 using UnityEngine;
 
 namespace ArcadeVP
@@ -6,7 +6,7 @@ namespace ArcadeVP
     [RequireComponent(typeof(Collider))]
     public class SpeedLimitZone : MonoBehaviour
     {
-        [Tooltip("m/s  (60?km/h  ? 16.7)")]
+        [Tooltip("m/s  (60?km/h  ?ï¿½16.7)")]
         public float speedLimit = 15f;
         public Sprite signSprite;
 
@@ -20,7 +20,7 @@ namespace ArcadeVP
                       other.attachedRigidbody.GetComponent<ArcadeVehicleController>() :
                       other.GetComponent<ArcadeVehicleController>();
 
-            if (car) car.SetSpeedLimit(speedLimit, signSprite);
+            if (car) car.EnterSpeedLimit(speedLimit, signSprite, false);
         }
     }
 }

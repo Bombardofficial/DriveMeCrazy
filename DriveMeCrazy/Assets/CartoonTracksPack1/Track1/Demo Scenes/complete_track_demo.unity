@@ -102527,7 +102527,7 @@ MonoBehaviour:
   laneSnapThreshold: 0.05
   laneChangeCooldown: 0.75
   minSpeedFractionForLaneChange: 0.1
-  cornerDetectionLookahead: 10
+  cornerDetectionLookahead: 2
   cornerAngleThreshold: 15
   minDriftYawAngle: 20
   maxDriftYawAngle: 45
@@ -102566,6 +102566,7 @@ MonoBehaviour:
   overshootLockTime: 1.5
   overshootCornerAngle: 10
   speedLimitUI: {fileID: 0}
+  frictionCoefficient: 200
 --- !u!65 &2111085467219387260
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -103811,6 +103812,7 @@ MonoBehaviour:
   overshootLockTime: 1.5
   overshootCornerAngle: 10
   speedLimitUI: {fileID: 0}
+  frictionCoefficient: 0.9
 --- !u!82 &4051074286637142754
 AudioSource:
   m_ObjectHideFlags: 0
