@@ -20,7 +20,9 @@ public class Damageable : MonoBehaviour
         _health -= (amount > 0 ? amount : damageFactor);
         if (_health > 0 || !_pm) return;
 
-        int target = (_pm.Passengers.Count > 1) ? 1 : 0;
+        int target = Random.Range(0, _pm.Passengers.Count);
+
+        //int target = (_pm.Passengers.Count > 1) ? 1 : 0;
         _pm.SwapWithDriver(target);
 
         _health = maxHealth;
