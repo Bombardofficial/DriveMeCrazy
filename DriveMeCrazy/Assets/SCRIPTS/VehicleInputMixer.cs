@@ -3,7 +3,7 @@ using UnityEngine;
 namespace ArcadeVP
 {
     /// <summary>
-    ///  Collects inputs from the driver *plus* any active sabotages and
+    ///  Collects inputs from the driver plus any active sabotages and
     ///  forwards the final mix to <see cref="ArcadeVehicleController"/>.
     /// </summary>
     [RequireComponent(typeof(ArcadeVehicleController))]
@@ -29,7 +29,16 @@ namespace ArcadeVP
             Instance = this;
             _car = GetComponent<ArcadeVehicleController>();
         }
+        void OnEnable()
+        {
+            PlayerManager.OnDriverChanged += HandleDriverChange;
+        }
 
+        // Unsubscribe when disabled or destroyed to prevent errors.
+        void OnDisable()
+        {
+            PlayerManager.OnDriverChanged -= HandleDriverChange;
+        }
         void LateUpdate()
         {
             // 1. compose
@@ -41,9 +50,17 @@ namespace ArcadeVP
             // 2. feed car
             _car.ProvideInputs(steer, gas, brake, slow);
 
-            // 3. reset additive slots – sabotages must set them every frame
+            // 3. reset additive slots â€“ sabotages must set them every frame
             _addSteer = 0;
             _addSlow = 0;
+        }
+
+        private void HandleDriverChange(Passenger oldDriver, Passenger newDriver)
+        {
+            _steer = 0f;
+            _gas = 0f;
+            _brake = 0f;
+            _slow = 0f;
         }
 
         /* ------------------------------------------------------------------ */

@@ -11,10 +11,15 @@ namespace ArcadeVP
         private PlayerInput _playerInput;
         private InputAction _steeringSabotageAction;
         private InputAction _handbrakeSabotageAction;
+        private Passenger _passenger;
+
+        private bool IsCurrentDriver =>
+            PlayerManager.Instance && PlayerManager.Instance.CurrentDriver == _passenger;
 
         void Awake()
         {
             _playerInput = GetComponent<PlayerInput>();
+            _passenger = GetComponent<Passenger>();
             // Find actions by name from the asset attached to PlayerInput
             _steeringSabotageAction = _playerInput.actions.FindAction("SteeringSabotage", true);
             _handbrakeSabotageAction = _playerInput.actions.FindAction("HandbrakeSabotage", true);
@@ -34,12 +39,14 @@ namespace ArcadeVP
 
         private void FireSteeringSabotage(InputAction.CallbackContext context)
         {
+            if (IsCurrentDriver) return;
             // Call the static method from your existing script
             InputManager_ArcadeVP.FireSteeringSabotage();
         }
 
         private void FireHandbrakeSabotage(InputAction.CallbackContext context)
         {
+            if (IsCurrentDriver) return;
             // Call the static method from your existing script
             InputManager_ArcadeVP.FireHandbrakeSabotage();
         }
