@@ -15,7 +15,7 @@ public class MenuManager : MonoBehaviour
     public GameObject audioMenu;
     public GameObject customizeControlsMenu;
     public GameObject storyMenu;
-
+    public GameObject playerJoinPanel;
     [Header("Quit Confirmation")]
     public GameObject quitConfirmationDialog;  // your new panel
     public Button quitConfirmYesButton;
@@ -184,7 +184,9 @@ public class MenuManager : MonoBehaviour
             {
                 // After transition completes
                 isTransitioning = false;
-                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+                //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+                mainMenu.SetActive(false);
+                playerJoinPanel.SetActive(true);
             }
         );
     }
