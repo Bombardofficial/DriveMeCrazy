@@ -59042,7 +59042,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1282004341
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -64476,7 +64476,7 @@ MonoBehaviour:
     type: 3}
   seatMgr: {fileID: 2111085467219387262}
   car: {fileID: 2111085467219387259}
-  quickStartSingleDriver: 1
+  quickStartSingleDriver: 0
   driverPrefabOverride: {fileID: 5583802586414202164, guid: 5b262494d1427d94f89a6f1fca36eff5,
     type: 3}
   lobbyCountdownSeconds: 10
