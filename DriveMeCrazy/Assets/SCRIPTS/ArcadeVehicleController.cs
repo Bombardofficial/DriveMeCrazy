@@ -159,6 +159,12 @@ namespace ArcadeVP
         [Tooltip("Rate car scrubs speed in corners (m/s?)")]
         public float cornerDecel = 12f;
 
+        private float _lastOvershootRatio = 0f;
+
+        // Add this inside the [Header("Crash Effects")] section in the Inspector
+        [Tooltip("The maximum damage taken from a crash when speeding at max difficulty.")]
+        public int maxCrashDamage = 25;
+
         int activeSignIndex = -1;        // <-- keep track of which sign we asked for
 
         bool balanceActive;
@@ -182,6 +188,9 @@ namespace ArcadeVP
         private bool hasTriggeredMiniGameInThisZone = false;
 
         private CinemachineImpulseSource _impulseSource;
+
+        private Vector3 _currentVelocity;
+        public Vector3 CurrentVelocity => _currentVelocity;
 
         //  ArcadeVehicleController.cs   (inside EnterSpeedLimit)
         public void EnterSpeedLimit(float limitMps, int signIndex)
@@ -360,7 +369,7 @@ namespace ArcadeVP
             float overshoot = Mathf.Max(0f, Mathf.Abs(speed) - activeSpeedLimit);
             float ratio = (activeSpeedLimit <= 0f) ? 0f : overshoot / activeSpeedLimit;
             float diffT = Mathf.Clamp01(ratio / Mathf.Max(0.001f, fullDifficultyAtRatio)); // 0-1
-
+            _lastOvershootRatio = ratio;
             /* --------  DIFFICULTY-SCALED SETTINGS  -------- */
             // pointer auto-drift
             currentRoundDrift = Mathf.Lerp(driftSpeedEasy, driftSpeedHard, diffT);
@@ -408,12 +417,23 @@ namespace ArcadeVP
             if (outside)
             {
                 balanceFailTimer += dt;
+
+                // INSTANT CRASH if the pointer hits the absolute edge of the bar
+                if (Mathf.Abs(balanceVal) >= balanceFailThresh)
+                {
+                    EndBalanceMiniGame(false); // CRASH!
+                    return; // Exit to avoid running the next check
+                }
+
+                // Normal crash after the grace period
                 if (balanceFailTimer >= balanceFailGrace)
-                    EndBalanceMiniGame(false);                // CRASH!
+                {
+                    EndBalanceMiniGame(false); // CRASH!
+                }
             }
             else
             {
-                balanceFailTimer = 0f;                        // back inside ? reset
+                balanceFailTimer = 0f; // Reset timer when back in the safe zone
             }
         }
 
@@ -433,6 +453,13 @@ namespace ArcadeVP
 
         void TriggerSpeedCrash()
         {
+            if (TryGetComponent<Damageable>(out Damageable playerDamage))
+            {
+                // Calculate damage: at least 1, up to maxCrashDamage based on the overshoot ratio.
+                int damage = Mathf.Max(1, Mathf.RoundToInt(_lastOvershootRatio * maxCrashDamage));
+                playerDamage.InflictDamage(damage);
+                Debug.Log($"Crashed while speeding! Dealt {damage} damage.");
+            }
             if (Time.time < controlLockUntil) return;
             var fx = FindObjectOfType<SpeedZoneFeedbackFX>();
             if (fx) fx.CrashPulse();
@@ -591,6 +618,10 @@ namespace ArcadeVP
                 finalPosition = new Vector3(worldPosOnSpline.x, targetY, worldPosOnSpline.z);
             }
 
+            if (dt > 0)
+            {
+                _currentVelocity = (finalPosition - transform.position) / dt;
+            }
             // Apply final calculated position
             transform.position = finalPosition;
 
