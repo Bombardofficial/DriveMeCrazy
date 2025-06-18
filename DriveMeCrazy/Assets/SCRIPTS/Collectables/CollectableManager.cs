@@ -44,6 +44,9 @@ public class CollectableManager : MonoBehaviour
 
     SplineContainer _spline;
 
+    [Header("Audio")]
+    [SerializeField] private AudioSourcePool collectableAudioPool;
+
     // ---- REMOVED ----
     // No longer needed, we will use UnityEngine.Random
     // System.Random _rng = new System.Random(); 
@@ -68,7 +71,11 @@ public class CollectableManager : MonoBehaviour
         {
             var go = Instantiate(collectablePrefab, Vector3.zero, Quaternion.identity, transform);
             go.SetActive(false);
-            if (go.TryGetComponent(out Collectable col)) col.manager = this;
+            if (go.TryGetComponent(out Collectable col))
+            {
+                col.manager = this;
+                col.audioPool = collectableAudioPool;   // <? add this
+            }
             _pool.Add(go);
         }
     }

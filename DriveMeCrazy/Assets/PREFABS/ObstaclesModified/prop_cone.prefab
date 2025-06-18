@@ -151,3 +151,5 @@ MonoBehaviour:
   forceMultiplier: 2
   upwardForceBias: 0.3
   returnToPoolDelay: 6
+  impactClip: {fileID: 8300000, guid: 6edb44b21e797914a881ae141dae3bba, type: 3}
+  audioPool: {fileID: 0}

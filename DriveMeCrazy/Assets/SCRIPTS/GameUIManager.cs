@@ -2,6 +2,7 @@
 using UnityEngine;
 using TMPro; // Required for TextMeshPro UI elements
 using System.Collections.Generic;
+using System.Collections;
 
 public class GameUIManager : MonoBehaviour
 {
@@ -26,6 +27,13 @@ public class GameUIManager : MonoBehaviour
     private readonly Color _dangerColor = Color.red;
     // -------------
 
+    [Header("Driver-Change Announcement")]
+    [SerializeField] private TextMeshProUGUI newDriverText;   // drag a big TMP text here
+    [SerializeField] private float announceDuration = 1.5f;  // total time on-screen
+    [SerializeField] private float shakeMagnitude = 40f;     // pixels
+
+    public AudioSource newDriverAudio;
+    public AudioClip newDriverAudioClip;
     void Start()
     {
         playerManager = PlayerManager.Instance;
@@ -49,7 +57,65 @@ public class GameUIManager : MonoBehaviour
         {
             scoreText.gameObject.SetActive(false);
         }
+
+        PlayerManager.OnDriverChanged += HandleDriverChange;
     }
+
+    void OnDestroy()     // or OnDisable if you prefer
+    {
+        PlayerManager.OnDriverChanged -= HandleDriverChange;
+    }
+
+    void HandleDriverChange(Passenger oldDriver, Passenger newDriver)
+    {
+        if (!PlayerJoinManager.IsRaceStarted)
+            return;
+        if (!newDriverText) return;
+
+        int idx = playerManager.GetSeatIndex(newDriver) + 1;          // 1-based
+        string msg = $"PLAYER {idx}\nTAKES THE WHEEL!";
+        newDriverAudio.PlayOneShot(newDriverAudioClip);
+        StopAllCoroutines();                          // kill previous animation
+        StartCoroutine(DriverAnnounceRoutine(msg));
+    }
+
+    IEnumerator DriverAnnounceRoutine(string message)
+    {
+        // set-up
+        newDriverText.text = message;
+        newDriverText.alpha = 0f;
+        newDriverText.gameObject.SetActive(true);
+
+        float half = announceDuration * 0.5f;
+        float t = 0f;
+
+        // ?? fade-in & shake ??????????????????????????????
+        while (t < half)
+        {
+            t += Time.deltaTime;
+            float a = t / half;                        // 0 ? 1
+            newDriverText.alpha = Mathf.SmoothStep(0f, 1f, a);
+
+            // simple screen-shake by jittering anchored position
+            Vector2 shake = UnityEngine.Random.insideUnitCircle * shakeMagnitude * (1f - a * 0.6f);
+            newDriverText.rectTransform.anchoredPosition = shake;
+
+            yield return null;
+        }
+
+        // ?? fade-out (no shake) ??????????????????????????
+        t = 0f;
+        while (t < half)
+        {
+            t += Time.deltaTime;
+            float a = 1f - (t / half);                 // 1 ? 0
+            newDriverText.alpha = a;
+            yield return null;
+        }
+
+        newDriverText.gameObject.SetActive(false);
+    }
+
 
     void Update()
     {

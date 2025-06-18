@@ -66,6 +66,8 @@ public class ObstacleManager : MonoBehaviour
     private int _currentMaxActive;
     private int _totalSpawnWeight;
 
+    [Header("Audio")]
+    [SerializeField] private AudioSourcePool obstacleAudioPool;
     void Awake()
     {
         if (obstacleTypes == null || obstacleTypes.Length == 0) { Debug.LogError("ObstacleManager: No Obstacle Types defined!"); enabled = false; return; }
@@ -104,6 +106,7 @@ public class ObstacleManager : MonoBehaviour
                 if (go.TryGetComponent(out Obstacle obs))
                 {
                     obs.manager = this;
+                    obs.audioPool = obstacleAudioPool;
                     obs.damageToInflict = type.damage;
                 }
                 subPool.Add(go);

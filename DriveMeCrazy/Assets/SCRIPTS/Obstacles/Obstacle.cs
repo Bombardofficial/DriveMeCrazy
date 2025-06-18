@@ -31,6 +31,10 @@ public class Obstacle : MonoBehaviour
     private Rigidbody _rb;
     private bool _hasBeenHit = false;
 
+    [Header("Audio")]
+    public AudioClip impactClip;            // assign in prefab
+    [HideInInspector] public AudioSourcePool audioPool;   // set by manager
+
     void Awake()
     {
         _rb = GetComponent<Rigidbody>();
@@ -43,6 +47,8 @@ public class Obstacle : MonoBehaviour
         // Ignore collisions if this obstacle has already been hit.
         if (_hasBeenHit) return;
 
+        
+
         // We now check for the car's controller first to handle the collision.
         if (collision.gameObject.TryGetComponent<ArcadeVehicleController>(out ArcadeVehicleController carController))
         {
@@ -52,6 +58,9 @@ public class Obstacle : MonoBehaviour
             Debug.Log($"Obstacle '{name}' hit by car. Applying force.", gameObject);
 
             _hasBeenHit = true;
+
+            if (audioPool && impactClip)
+                audioPool.Play3D(impactClip, transform.position);
 
             // 1. Inflict damage on the player (if the car has the Damageable component).
             if (collision.gameObject.TryGetComponent<Damageable>(out Damageable playerDamage))

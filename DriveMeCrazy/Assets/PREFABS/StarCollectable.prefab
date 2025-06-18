@@ -122,6 +122,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   manager: {fileID: 0}
+  pickupClip: {fileID: 8300000, guid: f50c59438fb48e943b006628613ea233, type: 3}
+  audioPool: {fileID: 0}
 --- !u!65 &8088293194982000257
 BoxCollider:
   m_ObjectHideFlags: 0

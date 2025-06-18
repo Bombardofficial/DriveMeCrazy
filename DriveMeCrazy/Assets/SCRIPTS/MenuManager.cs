@@ -30,7 +30,7 @@ public class MenuManager : MonoBehaviour
     private VehicleControls inputActions;
     // Class-level variable to keep track of the current menu
     private GameObject currentMenu;
-
+    public FlagFadeController flagFadeController;
     void Start()
     {
         // Initialize by showing the main menu
@@ -176,6 +176,9 @@ public class MenuManager : MonoBehaviour
         DisableAllButtons();
 
         fastForwardSound.Play();
+
+        if (flagFadeController != null)
+            flagFadeController.LockFadeIn();
 
         transitionEffect.TriggerTransition(
             null,
