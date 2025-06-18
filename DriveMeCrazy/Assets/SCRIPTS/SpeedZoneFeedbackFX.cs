@@ -53,6 +53,13 @@ namespace ArcadeVP
 
         void Update()
         {
+            if (!PlayerJoinManager.IsRaceStarted)   // ? post-race? turn off
+            {
+                if (activeLastFrame) ResetAllFX();
+                activeLastFrame = false;
+                return;
+            }
+
             bool gaugeActive = gauge && gauge.gameObject.activeSelf;
 
             if (!gaugeActive)

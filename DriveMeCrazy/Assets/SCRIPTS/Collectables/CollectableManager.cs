@@ -94,6 +94,7 @@ public class CollectableManager : MonoBehaviour
         while (true)
         {
             yield return wait;
+            if (!PlayerJoinManager.IsRaceStarted) yield break;   // ? new line
             if (_active.Count < maxActive) TrySpawn();
         }
     }

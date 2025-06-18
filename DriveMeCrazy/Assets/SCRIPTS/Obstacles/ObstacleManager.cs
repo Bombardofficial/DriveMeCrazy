@@ -84,7 +84,7 @@ public class ObstacleManager : MonoBehaviour
     IEnumerator IncreaseDifficultyLoop()
     {
         yield return new WaitForSeconds(increaseInterval);
-        while (_currentMaxActive < maxActiveCap)
+        while (PlayerJoinManager.IsRaceStarted && _currentMaxActive < maxActiveCap)
         {
             _currentMaxActive = Mathf.Min(_currentMaxActive + increaseAmount, maxActiveCap);
             yield return new WaitForSeconds(increaseInterval);
@@ -144,6 +144,7 @@ public class ObstacleManager : MonoBehaviour
         while (true)
         {
             yield return wait;
+            if (!PlayerJoinManager.IsRaceStarted) yield break;   // ? new line
             if (_active.Count < _currentMaxActive) TrySpawn();
         }
     }

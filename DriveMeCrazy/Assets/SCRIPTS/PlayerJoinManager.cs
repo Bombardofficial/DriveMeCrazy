@@ -1,107 +1,165 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 using TMPro;
 using System.Collections;
+using System.Linq;
+using ArcadeVP;
+
 public class PlayerJoinManager : MonoBehaviour
 {
-    /* ??????????????? UI ??????????????? */
-    [Header("UI")]
-    [SerializeField] Image[] seatIcons;     // size 4
-    [SerializeField] TextMeshProUGUI[] seatTexts;     // size 4
+    /* ?????????????????????????? INSPECTOR ?????????????????????????? */
+    [Header("UI (Lobby)")]
+    [SerializeField] Image[] seatIcons;          // size 4
+    [SerializeField] TextMeshProUGUI[] seatTexts;
     [SerializeField] GameObject lobbyPanel;
     [SerializeField] Color freeCol = Color.white;
     [SerializeField] Color takenCol = new(0.2f, 1f, 0.2f);
 
-    /* ????? Lobby visuals & car ????? */
     [Header("Lobby Visuals")]
-    [SerializeField] GameObject[] playerDummies;  // 4
+    [SerializeField] GameObject[] playerDummies; // 4
     [SerializeField] ArcadeVP.ArcadeVehicleController car;
     [SerializeField] CarSeatManager seatMgr;
 
-    /* ????? Prefabs / Options ????? */
     [Header("Prefabs & Options")]
     [SerializeField] GameObject passengerPrefab;
     [SerializeField] bool quickStartSingleDriver = false;
     [SerializeField] GameObject driverPrefabOverride;
 
-    /* ????? Countdown & SFX ????? */
     [Header("Countdown & SFX")]
     [SerializeField] float lobbyCountdownSeconds = 10f;
     [SerializeField] TextMeshProUGUI countdownText;
     [SerializeField] AudioSource countdownAudio;
-    [SerializeField] AudioSource joinAudio;            // plays once per join
+    [SerializeField] AudioSource joinAudio;
 
-    /* ????? Intro camera ????? */
     [Header("Intro Camera Animation")]
-    [SerializeField] Animator cameraAnimator;          // on intro cam
-    [SerializeField] AnimationClip introClip;               // exact clip
+    [SerializeField] Animator cameraAnimator;
+    [SerializeField] AnimationClip introClip;
+    [SerializeField] AnimationClip resultsClip;
     [SerializeField] string cameraAnimTrigger = "Play";
-    [SerializeField] Animator lobbyAnimator;          // on intro cam
+    [SerializeField] string cameraResultsAnimTrigger = "Results";
+    [SerializeField] Animator lobbyAnimator;
     [SerializeField] string lobbyAnimTrigger = "LobbyStart";
-    /* ????? Canvas fades ????? */
+
     [Header("Canvas Fades")]
     [SerializeField] CanvasGroup fadeOutCanvas;
     [SerializeField] CanvasGroup gameplayHUD;
     [SerializeField] float fadeOutDuration = 1.25f;
     [SerializeField] float hudFadeDuration = 2f;
 
-    /* ????? Music duck / rise ????? */
     [Header("Background Music")]
-    [SerializeField] AudioSource carenginesound;                // bgm to fade in
+    [SerializeField] AudioSource carenginesound;
 
-    /* ????? Camera swap ????? */
     [Header("Camera Swap")]
-    [SerializeField] Camera introCamera;                 // physical cam
-    [SerializeField] GameObject gameplayCamera;              // v-cam root or cam
+    [SerializeField] Camera introCamera;         // physical cam
+    [SerializeField] GameObject gameplayCamera;  // virtual cam root
 
-    [SerializeField] private TextMeshProUGUI transitionText;
-    [SerializeField] private TextMeshProUGUI countdownGametext;
-    [SerializeField] private AudioReverbFilter musicReverb;
+    [Header("Runtime Text")]
+    [SerializeField] TextMeshProUGUI transitionText;
+    [SerializeField] TextMeshProUGUI countdownGametext;
 
-    [SerializeField] AudioSource lobbymusic;
+    [Header("Lobby Music Bus")]
+    [SerializeField] AudioReverbFilter musicReverb;
+    [SerializeField] AudioSource lobbyMusic;
     [SerializeField] AudioSource countdownGameAudio;
     [SerializeField] AudioClip gocountdown;
     [SerializeField] AudioClip first3countdown;
 
-    [Header("Gameplay Music")]
-    [SerializeField] private AudioSource gameplayMusic;          // drag your gameplay AudioSource
+    [Header("Gameplay Music Bus")]
+    [SerializeField] AudioSource gameplayMusic;
     private float gameplayMusicTargetVol;
     private AudioLowPassFilter gameplayLPF;
     private AudioReverbFilter gameplayReverb;
 
+    /* ????????????? NEW  Lap / Finish / Result Fields ????????????? */
+    [Header("Lap System")]
+    [SerializeField] private TextMeshProUGUI lapsText;       // “Laps: 0/10”
+    [SerializeField] private int lapsToFinish = 10;          // finish after X
+    [Tooltip("OPTIONAL.  Leave empty if this script is placed ON the LapGate")]
+    [SerializeField] private Collider lapGateTrigger;        // start/finish
+    [Tooltip("Tag on the car root GameObject")]
+    [SerializeField] private string playerCarTag = "PlayerCar";
+
+    [Header("Results & End-Game UI")]
+    [SerializeField] CanvasGroup resultsPanel;       // parent group
+    [SerializeField] TextMeshProUGUI resultsText;    // tall TMP for list
+    [SerializeField] TextMeshProUGUI winnerText;     // big banner
+    [SerializeField] TextMeshProUGUI autoReturnText;   // “Returning in …”
+    [SerializeField] Image blackFadeImage;          // full-screen image
+
+    public AudioSource crowdroar;
+    /* ?????????????????????? STATIC / INTERNALS ??????????????????? */
     public static bool IsRaceStarted { get; private set; }
-
-    /* ??? Internals ??? */
-    int joinCount;
-    bool counting;
-    float timeLeft;
-    bool raceStarted;
+    private int joinCount;
+    private bool counting;
+    private float timeLeft;
+    private bool raceStarted;
+    private float lobbyMusicTargetVol;
     float musicTargetVol;
-    CarDriverInput driverInput;
+    private CarDriverInput driverInput;
 
-    /* ??????????????????????????????????? */
-    #region SETUP
+    private int currentLap = 0;
+    private bool finalising = false;      // prevents multi-trigger
+    private Vector2 startPos;
+    public int CarLayer => car.gameObject.layer;
+
+    /* ????????????????????????????? SETUP ?????????????????????????? */
     void Start()
     {
         if (!seatMgr || playerDummies.Length < 4 || !introClip)
-        {
-            Debug.LogError("[PlayerJoinManager] Missing references."); enabled = false; return;
-        }
-        raceStarted = false;
-        IsRaceStarted = false;
+        { Debug.LogError("[PlayerJoinManager] Missing references."); enabled = false; return; }
 
+        // Cache filters
         gameplayLPF = gameplayMusic.GetComponent<AudioLowPassFilter>();
         gameplayReverb = gameplayMusic.GetComponent<AudioReverbFilter>();
 
-        gameplayMusicTargetVol = gameplayMusic.volume;     // remember designer volume
+        gameplayMusicTargetVol = gameplayMusic.volume;
+        lobbyMusicTargetVol = lobbyMusic ? lobbyMusic.volume : 1f;
+
+        // Hook lap trigger (if this script isn’t placed on the gate)
+        if (lapGateTrigger) lapGateTrigger.isTrigger = true;
+
+        startPos = winnerText.rectTransform.anchoredPosition;
+        PrepareLobbyState();
+    }
+    IEnumerator AutoReturnCountdown(int seconds = 10)
+    {
+        // fade-in
+        autoReturnText.alpha = 0;
+        autoReturnText.gameObject.SetActive(true);
+        for (float f = 0; f < 1f; f += Time.deltaTime)
+        {
+            autoReturnText.alpha = f;     // 1-sec fade
+            yield return null;
+        }
+        autoReturnText.alpha = 1;
+
+        // ticking
+        for (int s = seconds; s >= 0; --s)
+        {
+            autoReturnText.text = $"Going back to main menu in {s}...";
+            yield return new WaitForSeconds(1f);
+        }
+
+        // fade screen to black and load
+        StartCoroutine(FadeAndLoad("MainMenu"));
+    }
+
+    /* ????????????????? LOBBY INITIALISATION BRANCH ????????????????? */
+    void PrepareLobbyState()
+    {
+        IsRaceStarted = raceStarted = false;
+        currentLap = 0;
+        UpdateLapUI();
+
         if (quickStartSingleDriver)
         {
             /* 1.   Spawn driver instantly (enables car & HUD) */
             SpawnDriverImmediately();          // also sets raceStarted = true
 
             /* 2.   Hard-kill anything lobby-related */
-            if (lobbymusic) lobbymusic.Stop();
+            if (lobbyMusic) lobbyMusic.Stop();
             if (countdownAudio) countdownAudio.Stop();
             if (countdownGameAudio) countdownGameAudio.Stop();
 
@@ -112,6 +170,7 @@ public class PlayerJoinManager : MonoBehaviour
             foreach (var d in playerDummies) if (d) d.SetActive(false);
 
             if (fadeOutCanvas) fadeOutCanvas.alpha = 0f;      // no black splash
+            if (resultsPanel) resultsPanel.alpha = 0f;      // no black splash
             if (introCamera) introCamera.gameObject.SetActive(false);  // kill lobby cam
             if (gameplayCamera) gameplayCamera.SetActive(true);
 
@@ -139,88 +198,153 @@ public class PlayerJoinManager : MonoBehaviour
         }
         else
         {
-            foreach (var d in playerDummies) if (d) d.SetActive(false);
-
+            /* hide gameplay HUD & results */
             if (gameplayHUD) gameplayHUD.alpha = 0f;
-            if (fadeOutCanvas) fadeOutCanvas.alpha = 1f;
-
-            if (gameplayCamera) gameplayCamera.SetActive(false);
-            transitionText.gameObject.SetActive(false);
-            countdownGametext.gameObject.SetActive(false);
-            /* store & mute music */
+            if (resultsPanel) resultsPanel.alpha = 0f;
+            if (resultsPanel) resultsPanel.gameObject.SetActive(false);
+            if (winnerText) winnerText.gameObject.SetActive(false);
+            if (transitionText) transitionText.gameObject.SetActive(false);
+            if (countdownGametext) countdownGametext.gameObject.SetActive(false);
             if (carenginesound)
             {
                 musicTargetVol = carenginesound.volume;
                 carenginesound.volume = 0f;
             }
-            if (lobbymusic)
-            {
-                musicTargetVol = lobbymusic.volume;
-                lobbymusic.Play(); // ? Play music here
-            }
-
-            if (gameplayMusic)
-            {
-                gameplayMusic.volume = 0f;                       // start silent
-
-                if (gameplayLPF) gameplayLPF.cutoffFrequency = 2000f;   // muffled
-                if (gameplayReverb) gameplayReverb.dryLevel = -10000f; // fully wet
-            }
-
-            var lobbyLPF = lobbymusic?.GetComponent<AudioLowPassFilter>();
-            if (lobbyLPF) lobbyLPF.cutoffFrequency = 3000;
             lobbyAnimator.ResetTrigger(lobbyAnimTrigger);
             lobbyAnimator.SetTrigger(lobbyAnimTrigger);
+            /* music buses */
+            if (lobbyMusic)
+            {
+                lobbyMusic.volume = lobbyMusicTargetVol;
+                lobbyMusic.Play();
+                var lpf = lobbyMusic.GetComponent<AudioLowPassFilter>(); if (lpf) lpf.cutoffFrequency = 3000;
+                var rev = lobbyMusic.GetComponent<AudioReverbFilter>(); if (rev) rev.dryLevel = 0;
+            }
+            if (gameplayMusic)
+            {
+                gameplayMusic.volume = 0f;
+                if (gameplayLPF) gameplayLPF.cutoffFrequency = 2000;
+                if (gameplayReverb) gameplayReverb.dryLevel = -10000;
+            }
 
-            musicReverb.dryLevel = 0;
-
-
+            if (fadeOutCanvas) fadeOutCanvas.alpha = 1f;
+            if (introCamera) introCamera.gameObject.SetActive(true);
+            if (gameplayCamera) gameplayCamera.SetActive(false);
 
             car.enabled = false;
+            foreach (var d in playerDummies) if (d) d.SetActive(false);
             PlayerInputManager.instance.playerJoinedEvent.AddListener(OnPlayerJoined);
-
             if (countdownText) countdownText.text = "WAITING FOR DRIVER…";
             RefreshUI();
-        }
+        }    
         
     }
-    #endregion
 
+    void SpawnDriverImmediately()
+    {
+        GameObject prefab = driverPrefabOverride
+                          ?? PlayerInputManager.instance?.playerPrefab;
+        if (!prefab) { Debug.LogError("[Quick-Start] No driver prefab set!"); return; }
+
+        /* 1. instantiate at seat 0 ------------------------------------------------*/
+        const int seatIndex = 0;
+        Transform seat = seatMgr.GetSeat(seatIndex);
+
+        PlayerInput pi = PlayerInput.Instantiate(prefab,
+                                                 playerIndex: 0,
+                                                 controlScheme: null,
+                                                 pairWithDevice: null);
+
+        pi.transform.SetPositionAndRotation(seat.position, seat.rotation);
+        pi.transform.SetParent(seat, true);
+
+        /* 2. register with PlayerManager ---------------------------------------- */
+        var passenger = pi.GetComponent<Passenger>();
+        if (PlayerManager.Instance)       // safety in case the root is disabled
+            PlayerManager.Instance.RegisterPassenger(passenger, seatIndex);
+
+        /* 3. wire up driving ----------------------------------------------------- */
+        driverInput = pi.GetComponent<CarDriverInput>();
+        driverInput.SetVehicle(car);
+        driverInput.enabled = true;
+        car.enabled = true;
+
+        /* 4. housekeeping -------------------------------------------------------- */
+        joinCount = 1;
+        raceStarted = true;
+        lobbyPanel.SetActive(false);
+        PlayerInputManager.instance?.DisableJoining();
+        if (gameplayHUD) gameplayHUD.alpha = 1f;
+    }
+
+    void RefreshUI()
+    {
+        int maxSeats = seatMgr ? seatMgr.SeatCount : seatIcons.Length;
+
+        for (int i = 0; i < seatIcons.Length; ++i)
+        {
+            bool taken = i < joinCount;
+            bool exists = i < maxSeats;
+
+            seatIcons[i].gameObject.SetActive(exists);
+            if (!exists) continue;
+
+            seatIcons[i].color = taken ? takenCol : freeCol;
+            seatTexts[i].text = taken ? $"PLAYER {i + 1}" : "PRESS GAS TO JOIN";
+        }
+
+        if (countdownText && !counting)
+            countdownText.text = "WAITING FOR DRIVER...";
+    }
+
+    /* ????????????????????????? UPDATE ????????????????????????????? */
     void Update()
     {
-        if (!counting || raceStarted) return;
-
-        timeLeft -= Time.deltaTime;
-        if (countdownText) countdownText.text = $"RACE STARTS IN: {Mathf.CeilToInt(timeLeft)}";
-
-        if (timeLeft <= 0f)
+        if (finalising) return;
+        if (counting && !raceStarted)
         {
-            counting = false;
-            StartCoroutine(RaceSequence());
+            timeLeft -= Time.deltaTime;
+            if (countdownText)
+                countdownText.text = $"RACE STARTS IN: {Mathf.CeilToInt(timeLeft)}";
+
+            if (timeLeft <= 0f)
+            {
+                counting = false;
+                StartCoroutine(RaceSequence());
+            }
         }
     }
 
-    /* ??????????? Player Joined ??????????? */
+    /* ??????????????????????? LAP TRIGGER ?????????????????????????? */
+    public void LapGateCrossed()
+    {
+        if (!raceStarted || finalising)            // ignore before start / after finish
+            return;
+
+        currentLap++;
+        UpdateLapUI();
+
+        if (currentLap >= lapsToFinish)
+            StartCoroutine(FinishRaceSequence());
+    }
+
+    /* ?????????????? PLAYER JOIN FLOW (unchanged) ??????????????? */
     void OnPlayerJoined(PlayerInput pi)
     {
-        if (lobbymusic)
-        {
-            lobbymusic.Stop(); // ? Play music here
-        }
+        if (lobbyMusic) lobbyMusic.Stop();
+
         int seatIdx = joinCount;
         Transform seat = seatMgr.GetSeat(seatIdx);
-
         pi.transform.SetPositionAndRotation(seat.position, seat.rotation);
         pi.transform.SetParent(seat, true);
 
         var passenger = pi.GetComponent<Passenger>();
         PlayerManager.Instance?.RegisterPassenger(passenger, seatIdx);
 
-        if (seatIdx == 0)
+        if (seatIdx == 0) // driver
         {
             driverInput = pi.GetComponent<CarDriverInput>();
-            driverInput.SetVehicle(car);
-            driverInput.enabled = false;
+            driverInput.SetVehicle(car); driverInput.enabled = false;
             PlayerInputManager.instance.playerPrefab = passengerPrefab;
         }
 
@@ -230,120 +354,222 @@ public class PlayerJoinManager : MonoBehaviour
         joinCount++;
         RefreshUI();
 
-        /* restart countdown & jingle */
         timeLeft = lobbyCountdownSeconds;
         counting = true;
-        if (countdownAudio) { countdownAudio.Stop(); countdownAudio.Play(); }
-
-        /* play join SFX */
-        if (joinAudio) joinAudio.PlayOneShot(joinAudio.clip);
+        countdownAudio?.Play();
+        joinAudio?.PlayOneShot(joinAudio.clip);
     }
 
-    /* ??????????? Race Sequence ??????????? */
-    System.Collections.IEnumerator RaceSequence()
+    /* ??????????????????? RACE START COROUTINE ???????????????????? */
+    IEnumerator RaceSequence()
     {
         countdownText?.gameObject.SetActive(false);
         PlayerInputManager.instance.DisableJoining();
 
-        /* 1) fade out lobby splash */
         yield return FadeCanvas(fadeOutCanvas, 1f, 0f, fadeOutDuration);
 
-        /* 2) trigger intro */
+        /* intro cam anim */
         cameraAnimator.ResetTrigger(cameraAnimTrigger);
         cameraAnimator.SetTrigger(cameraAnimTrigger);
+
         StartCoroutine(ShowTransitionTextDelayed(3f));
         StartCoroutine(ShowCountdownText(introClip.length - 3f));
-        if (lobbymusic)
-        {
-            musicTargetVol = lobbymusic.volume;
-            lobbymusic.Play(); // ? Play music here
-        }
+
         float clipLen = introClip.length / cameraAnimator.speed;
         float hudDelay = Mathf.Max(0f, clipLen - hudFadeDuration);
-
-        if (musicReverb)
-            StartCoroutine(FadeReverbDryLevel(musicReverb, 0f, -10000f, 4f, clipLen - 4f));
-
-        // Fade out music in last 2 seconds
-        if (lobbymusic)
+        
+        // music crossfade
+        if (lobbyMusic)
         {
-            var lpf = lobbymusic.GetComponent<AudioLowPassFilter>();
-            lpf.cutoffFrequency = 22000;
-            StartCoroutine(FadeAudio(lobbymusic, musicTargetVol, 0f, 2f, clipLen - 1f));
-            if (lpf) StartCoroutine(FadeLowpassCutoff(lpf, 22000f, 2000f, 2f, clipLen - 2f));
+            lobbyMusic.Play();
+            var lpf = lobbyMusic.GetComponent<AudioLowPassFilter>();
+            StartCoroutine(FadeAudio(lobbyMusic, lobbyMusicTargetVol, 0f, 2f, clipLen - 1f));
+            if (lpf) StartCoroutine(FadeLowpassCutoff(lpf, 3000, 2000, 2f, clipLen - 2f));
         }
         if (gameplayMusic)
         {
-            gameplayMusic.Stop();
-            gameplayMusic.time = 0f;
-            gameplayMusic.Play();
-            float musicInDelay = Mathf.Max(0f, clipLen - 2f);       // begin 2 s before end
-            StartCoroutine(FadeAudio(gameplayMusic, 0f, gameplayMusicTargetVol, 2f, musicInDelay));
-
-            if (gameplayLPF) StartCoroutine(FadeLowpassCutoff(gameplayLPF, 2000f, 22000f, 2f, musicInDelay));
-            if (gameplayReverb) StartCoroutine(FadeReverbDryLevel(gameplayReverb, -10000f, 0f, 2f, musicInDelay));
+            gameplayMusic.Stop(); gameplayMusic.time = 0f; gameplayMusic.Play();
+            StartCoroutine(FadeAudio(gameplayMusic, 0f, gameplayMusicTargetVol, 2f, clipLen - 2f));
+            if (gameplayLPF) StartCoroutine(FadeLowpassCutoff(gameplayLPF, 2000, 22000, 2f, clipLen - 2f));
+            if (gameplayReverb) StartCoroutine(FadeReverbDryLevel(gameplayReverb, -10000, 0, 2f, clipLen - 2f));
         }
-
-        /* 3) HUD + music fade in sync */
-        StartCoroutine(FadeCanvas(gameplayHUD, 0f, 1f, hudFadeDuration, hudDelay));
         if (carenginesound)
             StartCoroutine(FadeAudio(carenginesound, 0f, musicTargetVol, hudFadeDuration, hudDelay));
+        // HUD fade
+        StartCoroutine(FadeCanvas(gameplayHUD, 0, 1, hudFadeDuration, hudDelay));
 
-        /* 4) wait until the Animator state finishes exactly */
+        // Wait intro anim
         yield return WaitForClipToEnd(cameraAnimator, introClip.name);
 
-        /* 5) clean up & swap cameras */
+        // Swap cameras
         lobbyPanel.SetActive(false);
-        if (gameplayCamera) gameplayCamera.SetActive(true);
-        if (introCamera) introCamera.gameObject.SetActive(false);
+        gameplayCamera.SetActive(true);
+        introCamera.gameObject.SetActive(false);
 
-        /* 6) go! */
+        // Start driving
         car.enabled = true;
-        if (driverInput) driverInput.enabled = true;
-        raceStarted = true;
-        IsRaceStarted = true;
+        driverInput.enabled = true;
+        raceStarted = IsRaceStarted = true;
+
+        
     }
-    IEnumerator FadeLowpassCutoff(AudioLowPassFilter lpf, float from, float to, float dur, float delay = 0f)
+    void DisableGameplaySystems()
+    {
+        /* Spawners */
+        foreach (var om in FindObjectsOfType<ObstacleManager>())
+            om.enabled = false;                 // coroutines stop automatically
+        foreach (var cm in FindObjectsOfType<CollectableManager>())
+            cm.enabled = false;
+
+        /* Speed-zone post-processing */
+        foreach (var fx in FindObjectsOfType<SpeedZoneFeedbackFX>())
+            fx.enabled = false;                 // OnDisable() already resets FOV,
+                                                // vignette, pad-rumble, etc.
+    }
+    /* ???????????????????? FINISH  COROUTINE ?????????????????????? */
+    IEnumerator FinishRaceSequence()
+    {
+        IsRaceStarted = raceStarted = false;   // <- ? master flag
+        DisableGameplaySystems();              // <- ? helper (just below)
+        counting = false;
+        timeLeft = 0f;
+        finalising = true;             // stop counting further
+        driverInput.enabled = false;
+        gameplayHUD.alpha = 0;
+        /* Music – gameplay OUT, lobby IN */
+        if (gameplayReverb) gameplayReverb.enabled = true;          // re-enable
+        StartCoroutine(FadeReverbDryLevel(gameplayReverb, 0, -10000, 3f));
+        StartCoroutine(FadeAudio(gameplayMusic, gameplayMusicTargetVol, 0f, 3f));
+        if (gameplayLPF) StartCoroutine(FadeLowpassCutoff(gameplayLPF, 22000, 2000, 3f));
+
+        if (lobbyMusic)
+        {
+            lobbyMusic.Play();
+            StartCoroutine(FadeAudio(lobbyMusic, 0f, lobbyMusicTargetVol, 3f));
+            var lpf = lobbyMusic.GetComponent<AudioLowPassFilter>();
+            if (lpf) StartCoroutine(FadeLowpassCutoff(lpf, 2000, 22000, 3f));
+            var rev = lobbyMusic.GetComponent<AudioReverbFilter>();
+            if (rev) StartCoroutine(FadeReverbDryLevel(rev, -10000, 0, 3f));
+        }
+
+        /* Cameras */
+        gameplayCamera.SetActive(false);
+        introCamera.gameObject.SetActive(true);
+        cameraAnimator.ResetTrigger(cameraAnimTrigger);
+        cameraAnimator.ResetTrigger(cameraResultsAnimTrigger);
+        cameraAnimator.SetTrigger(cameraResultsAnimTrigger);     // reuse intro anim
+
+        yield return new WaitForSeconds(5f);
+
+        /* Results panel fade-in */
+        resultsPanel.gameObject.SetActive(true);
+        yield return FadeCanvas(resultsPanel, 0f, 1f, 1.5f);
+
+        /* Build results list bottom-up */
+        var passengers = PlayerManager.Instance.Passengers
+                          .OrderBy(p => p.Points).ToList(); // lowest first
+        resultsText.text = "";
+        for (int i = 0; i < passengers.Count; ++i)
+        {
+            var p = passengers[i];
+            string line = $"Player {PlayerManager.Instance.GetSeatIndex(p) + 1}  -  {p.Points} pts";
+            resultsText.text = line + "\n" + resultsText.text;      // prepend
+            yield return new WaitForSeconds(0.3f);
+        }
+
+        /* Winner banner shake */
+        var winner = passengers.Last();
+        winnerText.text = $"Player {PlayerManager.Instance.GetSeatIndex(winner) + 1} WINS!";
+        winnerText.alpha = 0;
+        
+        winnerText.rectTransform.anchoredPosition = startPos;
+        winnerText.gameObject.SetActive(true);
+        crowdroar.Play();
+        // fade-in & shake
+        float t = 0, dur = 1f, shakeMag = 40f;
+        while (t < dur)
+        {
+            t += Time.deltaTime;
+            float a = t / dur;
+            winnerText.alpha = a;
+
+            Vector2 shake = Random.insideUnitCircle * shakeMag * (1f - a * .7f);
+            winnerText.rectTransform.anchoredPosition = startPos + shake; // ? offset!
+            yield return null;
+        }
+        winnerText.alpha = 1f;
+        winnerText.rectTransform.anchoredPosition = startPos;            // restore
+
+
+        /* Buttons fade-in after 1 s */
+        yield return new WaitForSeconds(1f);
+        StartCoroutine(AutoReturnCountdown(10));
+
+        // Finished – now idling on results screen
+    }
+
+    IEnumerator FadeAndLoad(string scene)
+    {
+        blackFadeImage.gameObject.SetActive(true);
+        Color c = blackFadeImage.color; c.a = 0; blackFadeImage.color = c;
+
+        float t = 0, dur = 1.2f;
+        while (t < dur)
+        {
+            t += Time.deltaTime;
+            c.a = Mathf.Lerp(0, 1, t / dur);
+            blackFadeImage.color = c;
+            yield return null;
+        }
+        SceneManager.LoadScene(scene);
+    }
+
+    /* ???????????????????? LAP UI UPDATE ????????????????????????? */
+    void UpdateLapUI()
+    {
+        if (lapsText)
+            lapsText.text = $"Laps: {currentLap}/{lapsToFinish}";
+    }
+
+    /* ?????????????? HELPERS – Fades & Waiters ?????????????? */
+    IEnumerator FadeCanvas(CanvasGroup cg, float from, float to, float dur, float delay = 0)
+    {
+        if (!cg) yield break;
+        if (delay > 0) yield return new WaitForSeconds(delay);
+        float t = 0; cg.alpha = from;
+        while (t < dur) { t += Time.deltaTime; cg.alpha = Mathf.Lerp(from, to, t / dur); yield return null; }
+        cg.alpha = to;
+    }
+    IEnumerator FadeAudio(AudioSource src, float from, float to, float dur, float delay = 0)
+    {
+        if (!src) yield break;
+        if (delay > 0) yield return new WaitForSeconds(delay);
+        float t = 0; src.volume = from;
+        while (t < dur) { t += Time.deltaTime; src.volume = Mathf.Lerp(from, to, t / dur); yield return null; }
+        src.volume = to;
+    }
+    IEnumerator FadeLowpassCutoff(AudioLowPassFilter lpf, float from, float to, float dur, float delay = 0)
     {
         if (!lpf) yield break;
-        if (delay > 0f) yield return new WaitForSeconds(delay);
-
-        float t = 0f;
-        lpf.cutoffFrequency = from;
-
-        while (t < dur)
-        {
-            t += Time.deltaTime;
-            lpf.cutoffFrequency = Mathf.Lerp(from, to, t / dur);
-            yield return null;
-        }
-
+        if (delay > 0) yield return new WaitForSeconds(delay);
+        float t = 0; lpf.cutoffFrequency = from;
+        while (t < dur) { t += Time.deltaTime; lpf.cutoffFrequency = Mathf.Lerp(from, to, t / dur); yield return null; }
         lpf.cutoffFrequency = to;
     }
-
-    IEnumerator FadeReverbDryLevel(AudioReverbFilter reverb, float from, float to, float dur, float delay = 0f)
+    IEnumerator FadeReverbDryLevel(AudioReverbFilter rev, float from, float to, float dur, float delay = 0)
     {
-        if (!reverb) yield break;
-        if (delay > 0f) yield return new WaitForSeconds(delay);
-
-        float t = 0f;
-        reverb.dryLevel = from;
-
-        while (t < dur)
-        {
-            t += Time.deltaTime;
-            reverb.dryLevel = Mathf.Lerp(from, to, t / dur);
-            yield return null;
-        }
-
-        reverb.dryLevel = to;
-        if (reverb == gameplayReverb && Mathf.Approximately(to, 0f))
-        {
-            reverb.enabled = false;
-        }
+        if (!rev) yield break;
+        if (delay > 0) yield return new WaitForSeconds(delay);
+        float t = 0; rev.dryLevel = from;
+        while (t < dur) { t += Time.deltaTime; rev.dryLevel = Mathf.Lerp(from, to, t / dur); yield return null; }
+        rev.dryLevel = to;
+        if (rev == gameplayReverb && Mathf.Approximately(to, 0)) rev.enabled = false;
     }
-
-
+    static IEnumerator WaitForClipToEnd(Animator anim, string state)
+    {
+        while (!anim.GetCurrentAnimatorStateInfo(0).IsName(state)) yield return null;
+        while (anim.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f || anim.IsInTransition(0)) yield return null;
+    }
     IEnumerator ShowTransitionTextDelayed(float delay)
     {
         if (!transitionText) yield break;
@@ -379,42 +605,6 @@ public class PlayerJoinManager : MonoBehaviour
 
         transitionText.gameObject.SetActive(false);
     }
-
-    /* ????????? Helpers ????????? */
-    static System.Collections.IEnumerator WaitForClipToEnd(Animator anim, string stateName)
-    {
-        /* wait until we actually enter the desired state */
-        while (!anim.GetCurrentAnimatorStateInfo(0).IsName(stateName))
-            yield return null;
-
-        /* then wait until it reaches the end (normalizedTime ? 1) */
-        while (anim.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f ||
-               anim.IsInTransition(0))
-            yield return null;
-    }
-
-    System.Collections.IEnumerator FadeCanvas(CanvasGroup cg, float from, float to,
-                                              float dur, float delay = 0f)
-    {
-        if (!cg) yield break;
-        if (delay > 0f) yield return new WaitForSeconds(delay);
-
-        float t = 0f; cg.alpha = from;
-        while (t < dur) { t += Time.deltaTime; cg.alpha = Mathf.Lerp(from, to, t / dur); yield return null; }
-        cg.alpha = to;
-    }
-
-    System.Collections.IEnumerator FadeAudio(AudioSource src, float from,
-                                             float to, float dur, float delay = 0f)
-    {
-        if (!src) yield break;
-        if (delay > 0f) yield return new WaitForSeconds(delay);
-
-        float t = 0f; src.volume = from;
-        while (t < dur) { t += Time.deltaTime; src.volume = Mathf.Lerp(from, to, t / dur); yield return null; }
-        src.volume = to;
-    }
-
     IEnumerator ShowCountdownText(float startDelay)
     {
         yield return new WaitForSeconds(startDelay);
@@ -477,84 +667,10 @@ public class PlayerJoinManager : MonoBehaviour
         }
     }
 
-
-
-
-    void SpawnDriverImmediately()
-    {
-        GameObject prefab = driverPrefabOverride
-                          ?? PlayerInputManager.instance?.playerPrefab;
-        if (!prefab) { Debug.LogError("[Quick-Start] No driver prefab set!"); return; }
-
-        /* 1. instantiate at seat 0 ------------------------------------------------*/
-        const int seatIndex = 0;
-        Transform seat = seatMgr.GetSeat(seatIndex);
-
-        PlayerInput pi = PlayerInput.Instantiate(prefab,
-                                                 playerIndex: 0,
-                                                 controlScheme: null,
-                                                 pairWithDevice: null);
-
-        pi.transform.SetPositionAndRotation(seat.position, seat.rotation);
-        pi.transform.SetParent(seat, true);
-
-        /* 2. register with PlayerManager ---------------------------------------- */
-        var passenger = pi.GetComponent<Passenger>();
-        if (PlayerManager.Instance)       // safety in case the root is disabled
-            PlayerManager.Instance.RegisterPassenger(passenger, seatIndex);
-
-        /* 3. wire up driving ----------------------------------------------------- */
-        driverInput = pi.GetComponent<CarDriverInput>();
-        driverInput.SetVehicle(car);
-        driverInput.enabled = true;
-        car.enabled = true;
-
-        /* 4. housekeeping -------------------------------------------------------- */
-        joinCount = 1;
-        raceStarted = true;
-        lobbyPanel.SetActive(false);
-        PlayerInputManager.instance?.DisableJoining();
-        if (gameplayHUD) gameplayHUD.alpha = 1f;
-    }
-
+    /* ??????????????? CLEAN-UP ??????????????? */
     void OnDestroy()
-    {
-        var pim = PlayerInputManager.instance;
-        if (pim) pim.playerJoinedEvent.RemoveListener(OnPlayerJoined);
-    }
+    { PlayerInputManager.instance?.playerJoinedEvent.RemoveListener(OnPlayerJoined); }
 
-
-    void RefreshUI()
-    {
-        int maxSeats = seatMgr ? seatMgr.SeatCount : seatIcons.Length;
-
-        for (int i = 0; i < seatIcons.Length; ++i)
-        {
-            bool taken = i < joinCount;
-            bool exists = i < maxSeats;
-
-            seatIcons[i].gameObject.SetActive(exists);
-            if (!exists) continue;
-
-            seatIcons[i].color = taken ? takenCol : freeCol;
-            seatTexts[i].text = taken ? $"PLAYER {i + 1}" : "PRESS GAS TO JOIN";
-        }
-
-        if (countdownText && !counting)
-            countdownText.text = "WAITING FOR DRIVER...";
-    }
-
-    /* ????????????? called by the Start-Race button ????????????? */
-    public void StartRace()
-    {
-        if (raceStarted || joinCount == 0) return;
-        raceStarted = true;
-
-        lobbyPanel.SetActive(false);
-        countdownText.gameObject.SetActive(false);   // hide timer
-        PlayerInputManager.instance.DisableJoining();
-
-        car.enabled = true;
-        if (driverInput) driverInput.enabled = true;
-    }
+    /* ????????????????????????????????????????????????????????????? */
 }
+
