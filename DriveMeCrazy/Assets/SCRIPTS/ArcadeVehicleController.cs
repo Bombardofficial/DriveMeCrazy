@@ -144,14 +144,26 @@ namespace ArcadeVP
         [Header("Dynamic difficulty")]
         [Tooltip("Overshoot % where the game reaches MAX difficulty")]
         public float fullDifficultyAtRatio = 1.0f;   // 100 % over
-        [Range(0f, 1f)] public float minZoneFracEasy = 0.50f;
-        [Range(0f, 1f)] public float minZoneFracHard = 0.12f;
-        public float driftSpeedEasy = 0.40f;
-        public float driftSpeedHard = 1.20f;
-        public float shrinkEasy = 0.08f;
-        public float shrinkHard = 0.35f;
-        public float oscAmpEasy = 0.20f;
-        public float oscAmpHard = 0.45f;
+                                                     // ??  MINI-GAME TUNING -------------------------------------------------
+        [Header("Mini-game – trigger threshold")]
+        [Tooltip("Overshoot ratio (0.15 = 15 % past the sign) below which the mini-game never triggers")]
+        public float minOvershootRatioToTrigger = 0.15f;
+
+        [Header("Mini-game – difficulty curves")]
+        public float driftSpeedEasy = 0.15f;   // pointer auto-drift (units/s)
+        public float driftSpeedHard = 0.60f;
+        public float shrinkEasy = 0.02f;   // green-zone shrink (frac/s)
+        public float shrinkHard = 0.15f;
+        public float oscAmpEasy = 0.15f;   // zone oscillation amplitude
+        public float oscAmpHard = 0.40f;
+        public float zoneFracEasy = 0.60f;   // initial green-zone width (bar-frac)
+        public float zoneFracHard = 0.18f;
+
+        [Header("Mini-game – timing")]
+        public float overspeedTriggerTime = 0.40f;  // sustain time before start
+        public float extraGraceAfterSwap = 1.0f;   // in addition to driverChangeGrace
+                                                   // ---------------------------------------------------------------------
+
 
         [Header("Corner Slow-Down")]
         [Tooltip("Speed kept in a 90-degree hair-pin (0.0-1.0)")]
@@ -185,19 +197,26 @@ namespace ArcadeVP
 
         public bool IsBrakePressed => driftInput > 0.1f;   // NEW
 
-        private bool hasTriggeredMiniGameInThisZone = false;
 
         private CinemachineImpulseSource _impulseSource;
 
         private Vector3 _currentVelocity;
         public Vector3 CurrentVelocity => _currentVelocity;
 
+        bool miniGamePlayedThisZone = false;   // replaces hasTriggered...
+        float overspeedTimer = 0f;
+
+        [Header("Driver-change grace (s)")]
+       public float driverChangeGrace = 3f;      // inspector-tweakable
+
+       float ignoreOverspeedUntil = 0f;          // runtime timer
+
         //  ArcadeVehicleController.cs   (inside EnterSpeedLimit)
         public void EnterSpeedLimit(float limitMps, int signIndex)
         {
             activeSpeedLimit = limitMps;
             activeSignIndex = signIndex;
-            hasTriggeredMiniGameInThisZone = false; // Reset this!
+            miniGamePlayedThisZone = false;
 
             if (speedLimitUI)
             {
@@ -213,7 +232,8 @@ namespace ArcadeVP
         {
             if (activeSpeedLimit <= 0) return;
 
-            bool over = speed > activeSpeedLimit * 1.01f;
+            float tol = 1f + speedOvershootTolerance;
+            bool over = speed > activeSpeedLimit * tol;
             if (debugLogs) Debug.Log($"[Car]  immediate overspeed? {over}");
 
             if (over && !balanceActive) StartBalanceMiniGame();
@@ -223,12 +243,27 @@ namespace ArcadeVP
         {
             activeSpeedLimit = 0f;
             activeSignIndex = -1;
-            hasTriggeredMiniGameInThisZone = false;
+            miniGamePlayedThisZone = false;
 
             if (speedLimitUI) speedLimitUI.Show(-1);
             if (balanceActive) EndBalanceMiniGame(true);
         }
+        void OnDestroy()
+        {
+            PlayerManager.OnDriverChanged -= HandleDriverChanged;
+        }
 
+        void HandleDriverChanged(Passenger oldP, Passenger newP)
+        {
+            // 1. cancel any running mini-game (that would feel unfair)
+            if (balanceActive) EndBalanceMiniGame(true);
+            // 2. start a grace timer so the NEXT overspeed isn’t checked too soon
+            ignoreOverspeedUntil = Time.time + driverChangeGrace;
+
+            // 3. reset per-zone trackers (otherwise a half-played zone might resume)
+            miniGamePlayedThisZone = false;
+            overspeedTimer         = 0f;
+        }
         // Start remains the same
         void Start()
         {
@@ -238,7 +273,7 @@ namespace ArcadeVP
                 enabled = false;
                 return;
             }
-
+            PlayerManager.OnDriverChanged += HandleDriverChanged;
             spline = splineContainer.Spline;
             splineLength = spline.GetLength();
 
@@ -291,17 +326,21 @@ namespace ArcadeVP
 
             /* 1 ? mini-game gate (instant tolerance check) */
             bool inZone = activeSpeedLimit > 0f;
-            bool tooFastNow = inZone && speed > activeSpeedLimit * 1.01f;   // 1 % tolerance
-
-            if (tooFastNow && !balanceActive && !hasTriggeredMiniGameInThisZone)
+            float tolFactor = 1f + speedOvershootTolerance;
+            bool overspeed = inZone
+               && Time.time >= ignoreOverspeedUntil + extraGraceAfterSwap
+               && speed > activeSpeedLimit * tolFactor;
+            if (!miniGamePlayedThisZone)                 // we have not played one here yet
             {
-                StartBalanceMiniGame();
-                hasTriggeredMiniGameInThisZone = true;
+                overspeedTimer = overspeed ? overspeedTimer + dt : 0f;
+
+                if (overspeedTimer >= overspeedTriggerTime)
+                    StartBalanceMiniGame();              // ? sets miniGamePlayedThisZone
             }
             if (balanceActive)
             {
-                UpdateBalanceMiniGame(dt);
-                speed = frozenSpeed;            // lock straight-line speed
+                UpdateBalanceMiniGame(dt);         // moves pointer, shrinks / oscillates zone
+                speed = frozenSpeed;               // lock straight-line speed while playing
             }
             ApplyCornerDrag(dt);
             /*???????????????? 3. normal driving logic continues ???????*/
@@ -360,22 +399,36 @@ namespace ArcadeVP
         /*?????????????????? MINI-GAME ??????????????????*/
         void StartBalanceMiniGame()
         {
+            /* --------  HOW MUCH DID WE SPEED?  -------- */
+            float overshoot = Mathf.Max(0f, Mathf.Abs(speed) - activeSpeedLimit);
+            float ratio = (activeSpeedLimit <= 0f) ? 0f : overshoot / activeSpeedLimit;
+            _lastOvershootRatio = ratio; // Store the current ratio
+
+            // Now, check if the ratio is high enough to trigger the minigame
+            if (ratio < minOvershootRatioToTrigger)
+            {
+                miniGamePlayedThisZone = true;  // Mark as played so it doesn't try again
+                return;                         // Exit the function
+            }
+
+            miniGamePlayedThisZone = true;
+            overspeedTimer = 0f;
             balanceActive = true;
             frozenSpeed = speed;
             balanceVal = 0f;
             balanceFailTimer = 0f;
 
-            /* --------  HOW MUCH DID WE SPEED?  -------- */
-            float overshoot = Mathf.Max(0f, Mathf.Abs(speed) - activeSpeedLimit);
-            float ratio = (activeSpeedLimit <= 0f) ? 0f : overshoot / activeSpeedLimit;
+            /* --------  DIFFICULTY-SCALED SETTINGS  -------- */
             float diffT = Mathf.Clamp01(ratio / Mathf.Max(0.001f, fullDifficultyAtRatio)); // 0-1
+
+
             _lastOvershootRatio = ratio;
             /* --------  DIFFICULTY-SCALED SETTINGS  -------- */
             // pointer auto-drift
             currentRoundDrift = Mathf.Lerp(driftSpeedEasy, driftSpeedHard, diffT);
 
             // green-zone initial width
-            float zoneFrac = Mathf.Lerp(minZoneFracEasy, minZoneFracHard, diffT);
+            float zoneFrac = Mathf.Lerp(zoneFracEasy, zoneFracHard, diffT);
             float green = Mathf.Clamp(zoneFrac, greenMinWidth, greenMaxWidth);
 
             /* push params into the gauge */
@@ -398,12 +451,10 @@ namespace ArcadeVP
         void UpdateBalanceMiniGame(float dt)
         {
             /* ---------- pointer movement ---------- */
-            float pressureDelta =
-                  (accelerationInput > 0.01f ? 1f : 0f) +
-                  (slowInput > 0.01f ? -1f : 0f);
+            float pressureDelta = accelerationInput - slowInput;
 
             balanceVal = Mathf.Clamp(
-                balanceVal + (pressureDelta * balanceInputPower +   // player input
+                balanceVal + (pressureDelta * balanceInputPower + // player input
                               currentRoundDrift * Mathf.Sign(balanceVal)) * dt,
                 -1f, 1f);
 
@@ -442,11 +493,12 @@ namespace ArcadeVP
         void EndBalanceMiniGame(bool success)
         {
             if (!balanceActive) return;
+            miniGamePlayedThisZone = false;
             balanceActive = false;
             balanceUI?.End();
             isDrifting = false;
             if (debugLogs) Debug.Log($"[Car]  MINI-GAME END  success={success}");
-
+            
             if (!success) TriggerSpeedCrash();
         }
 

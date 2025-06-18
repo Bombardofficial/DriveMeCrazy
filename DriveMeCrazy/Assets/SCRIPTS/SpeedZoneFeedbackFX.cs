@@ -60,7 +60,7 @@ namespace ArcadeVP
                 return;
             }
 
-            bool gaugeActive = gauge && gauge.gameObject.activeSelf;
+            bool gaugeActive = gauge && gauge.IsVisible;
 
             if (!gaugeActive)
             {

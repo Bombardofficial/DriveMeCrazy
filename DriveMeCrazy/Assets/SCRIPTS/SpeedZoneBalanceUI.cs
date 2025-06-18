@@ -20,11 +20,11 @@ namespace ArcadeVP
         public RectTransform bar;          // background (600×100)
         public RectTransform greenZone;    // green block (child of bar)
         public RectTransform pointer;      // thin red bar (child of bar)
-
+        public bool IsVisible => cg && cg.alpha > 0.01f;
         [Header("Dynamic Zone Behaviour")]
         [Tooltip("Peak fraction of bar half?width used for oscillation")] public float oscillationAmplitude = 0.30f;
         [Tooltip("Oscillation frequency in Hz")] public float oscillationFreq = 0.45f;
-        [Tooltip("Zone shrink rate in frac/sec")] public float shrinkRate = 0.15f;
+        [Tooltip("Zone shrink rate in frac/sec")] public float shrinkRate = 0.08f;
         [Tooltip("Absolute minimum green?zone width in px")] public float minZoneWidthPx = 40f;
 
         /* runtime */

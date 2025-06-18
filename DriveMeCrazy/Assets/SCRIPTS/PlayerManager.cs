@@ -10,6 +10,8 @@ public class PlayerManager : MonoBehaviour
 
     /* -------- public read-only -------- */
     public IReadOnlyList<Passenger> Passengers => _passengers;
+
+    int _nextPlayerNumber = 1;
     public Passenger CurrentDriver { get; private set; }
 
     [Tooltip("Points awarded when you call AwardDriver().")]
@@ -34,7 +36,7 @@ public class PlayerManager : MonoBehaviour
     public void RegisterPassenger(Passenger p, int seatIdx = -1)
     {
         if (!p || _passengers.Contains(p)) return;
-
+        p.PlayerNumber = _nextPlayerNumber++;
         /* decide where in the list he goes -------------------- */
         seatIdx = (seatIdx < 0) ? _passengers.Count :          // append
                   Mathf.Clamp(seatIdx, 0, _passengers.Count);  // insert

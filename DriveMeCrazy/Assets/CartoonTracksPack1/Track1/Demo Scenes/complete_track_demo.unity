@@ -26,7 +26,7 @@ RenderSettings:
   m_AmbientIntensity: 1
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
+  m_SkyboxMaterial: {fileID: 2100000, guid: f4bdfff532b80254f804211ef4e09d8c, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -1391,7 +1391,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 492}
+  m_AnchoredPosition: {x: 0, y: 147}
   m_SizeDelta: {x: -4500, y: -4900}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &51446652
@@ -1414,7 +1414,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Pause
+  m_text: Paused
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 0161d805a3764c089bef00bfe00793f5, type: 2}
   m_sharedMaterial: {fileID: 2147374, guid: 0161d805a3764c089bef00bfe00793f5, type: 2}
@@ -62773,7 +62773,7 @@ MonoBehaviour:
   pointer: {fileID: 864607628}
   oscillationAmplitude: 0.3
   oscillationFreq: 0.45
-  shrinkRate: 0.15
+  shrinkRate: 0.08
   minZoneWidthPx: 40
 --- !u!225 &1308516885
 CanvasGroup:
@@ -67527,7 +67527,7 @@ MonoBehaviour:
   seatMgr: {fileID: 2111085467219387262}
   passengerPrefab: {fileID: 1174060323843766397, guid: 1affddbe7cc426c459549db87f7e1926,
     type: 3}
-  quickStartSingleDriver: 1
+  quickStartSingleDriver: 0
   driverPrefabOverride: {fileID: 5583802586414202164, guid: 5b262494d1427d94f89a6f1fca36eff5,
     type: 3}
   lobbyCountdownSeconds: 10
@@ -67557,7 +67557,7 @@ MonoBehaviour:
   first3countdown: {fileID: 8300000, guid: f00e5b6101a0e0c448b500ff0d123b50, type: 3}
   gameplayMusic: {fileID: 1818848822}
   lapsText: {fileID: 970682514}
-  lapsToFinish: 1
+  lapsToFinish: 8
   lapGateTrigger: {fileID: 1838805999}
   playerCarTag: Driver
   resultsPanel: {fileID: 64447773}
@@ -70378,7 +70378,6 @@ RectTransform:
   m_Children:
   - {fileID: 1602038737}
   - {fileID: 1308516880}
-  - {fileID: 1265955426}
   - {fileID: 91933623}
   - {fileID: 881201981}
   - {fileID: 1366443793}
@@ -73680,8 +73679,13 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 1471499326}
+    m_TransformParent: {fileID: 1761381989}
     m_Modifications:
+    - target: {fileID: 109329575522607041, guid: 3aa5f5ad1935d794c820b21d795d2937,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 447841974484451422, guid: 3aa5f5ad1935d794c820b21d795d2937,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
@@ -73941,6 +73945,11 @@ PrefabInstance:
       propertyPath: m_hasFontAssetChanged
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6259366222205243182, guid: 3aa5f5ad1935d794c820b21d795d2937,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6769421114954662030, guid: 3aa5f5ad1935d794c820b21d795d2937,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
@@ -73954,7 +73963,7 @@ PrefabInstance:
     - target: {fileID: 6991229999888908895, guid: 3aa5f5ad1935d794c820b21d795d2937,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7333943248268618201, guid: 3aa5f5ad1935d794c820b21d795d2937,
         type: 3}
@@ -85473,6 +85482,108 @@ Mesh:
     offset: 0
     size: 0
     path: 
+--- !u!1 &1761381985
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1761381989}
+  - component: {fileID: 1761381988}
+  - component: {fileID: 1761381987}
+  - component: {fileID: 1761381986}
+  m_Layer: 0
+  m_Name: PauseMenuCanvas
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1761381986
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1761381985}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreReversedGraphics: 1
+  m_BlockingObjects: 0
+  m_BlockingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+--- !u!114 &1761381987
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1761381985}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_UiScaleMode: 0
+  m_ReferencePixelsPerUnit: 100
+  m_ScaleFactor: 1
+  m_ReferenceResolution: {x: 800, y: 600}
+  m_ScreenMatchMode: 0
+  m_MatchWidthOrHeight: 0
+  m_PhysicalUnit: 3
+  m_FallbackScreenDPI: 96
+  m_DefaultSpriteDPI: 96
+  m_DynamicPixelsPerUnit: 1
+  m_PresetInfoIsWorld: 0
+--- !u!223 &1761381988
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1761381985}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 0
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 0
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
+  m_AdditionalShaderChannelsFlag: 25
+  m_UpdateRectTransformForStandalone: 0
+  m_SortingLayerID: 0
+  m_SortingOrder: 5
+  m_TargetDisplay: 0
+--- !u!224 &1761381989
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1761381985}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0, y: 0, z: 0}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1265955426}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0, y: 0}
 --- !u!43 &1761990888
 Mesh:
   m_ObjectHideFlags: 0
@@ -88442,13 +88553,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1838805997}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: 0.017681576, z: -0, w: -0.9998437}
-  m_LocalPosition: {x: -21.13, y: 4.41, z: 0.16}
+  m_LocalRotation: {x: -0, y: -0.00005003391, z: -0, w: -1}
+  m_LocalPosition: {x: 0.46, y: 4.41, z: 0.94}
   m_LocalScale: {x: 1, y: 1, z: 1.3422999}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1386248076}
-  m_LocalEulerAnglesHint: {x: 0, y: -362.026, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: -359.994, z: 0}
 --- !u!65 &1838805999
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -114068,18 +114179,22 @@ MonoBehaviour:
   crashSpeedPenalty: 0.4
   crashShakeIntensity: 1.2
   fullDifficultyAtRatio: 1
-  minZoneFracEasy: 0.5
-  minZoneFracHard: 0.12
-  driftSpeedEasy: 0.4
+  minOvershootRatioToTrigger: 0.15
+  driftSpeedEasy: 0.15
   driftSpeedHard: 1.2
-  shrinkEasy: 0.08
-  shrinkHard: 0.35
-  oscAmpEasy: 0.2
-  oscAmpHard: 0.45
+  shrinkEasy: 0.02
+  shrinkHard: 0.1
+  oscAmpEasy: 0.15
+  oscAmpHard: 0.3
+  zoneFracEasy: 0.6
+  zoneFracHard: 0.25
+  overspeedTriggerTime: 0.4
+  extraGraceAfterSwap: 1
   cornerSlowFactor: 0
   cornerDecel: 0
   maxCrashDamage: 25
   debugLogs: 1
+  driverChangeGrace: 3
 --- !u!65 &2111085467219387260
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -115489,18 +115604,22 @@ MonoBehaviour:
   crashSpeedPenalty: 0.4
   crashShakeIntensity: 1.2
   fullDifficultyAtRatio: 1
-  minZoneFracEasy: 0.5
-  minZoneFracHard: 0.12
+  minOvershootRatioToTrigger: 0.15
   driftSpeedEasy: 0.4
   driftSpeedHard: 1.2
   shrinkEasy: 0.08
   shrinkHard: 0.35
   oscAmpEasy: 0.2
   oscAmpHard: 0.45
+  zoneFracEasy: 0.6
+  zoneFracHard: 0.18
+  overspeedTriggerTime: 0.4
+  extraGraceAfterSwap: 1
   cornerSlowFactor: 0
   cornerDecel: 0
   maxCrashDamage: 25
   debugLogs: 1
+  driverChangeGrace: 3
 --- !u!82 &4051074286637142754
 AudioSource:
   m_ObjectHideFlags: 0
@@ -119445,6 +119564,7 @@ SceneRoots:
   - {fileID: 1471499326}
   - {fileID: 1282004344}
   - {fileID: 64447772}
+  - {fileID: 1761381989}
   - {fileID: 1358783320}
   - {fileID: 1653586959}
   - {fileID: 359069911}

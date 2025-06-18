@@ -4,6 +4,7 @@ using UnityEngine;
 /// *No* seat bookkeeping lives here – that’s the manager’s job.
 public class Passenger : MonoBehaviour
 {
+    public int PlayerNumber { get; internal set; }
     int _points;
     public int Points => _points;
 

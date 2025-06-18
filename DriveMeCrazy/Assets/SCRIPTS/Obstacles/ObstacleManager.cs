@@ -141,11 +141,21 @@ public class ObstacleManager : MonoBehaviour
     IEnumerator SpawnLoop()
     {
         var wait = new WaitForSeconds(spawnInterval);
-        while (true)
-        {
+        // 1) Hold fire until the countdown is over
+        while (!PlayerJoinManager.IsRaceStarted)
             yield return wait;
-            if (!PlayerJoinManager.IsRaceStarted) yield break;   // ? new line
-            if (_active.Count < _currentMaxActive) TrySpawn();
+
+        // 2) Main loop – keep running as long as the component is enabled
+        while (enabled)
+        {
+            if (_active.Count < _currentMaxActive)
+                TrySpawn();
+
+            yield return wait;      // throttle spawn rate
+
+            // optional: stop automatically when the race ends
+            if (!PlayerJoinManager.IsRaceStarted)       // finish line reached
+                yield break;
         }
     }
 

@@ -72,8 +72,7 @@ public class GameUIManager : MonoBehaviour
             return;
         if (!newDriverText) return;
 
-        int idx = playerManager.GetSeatIndex(newDriver) + 1;          // 1-based
-        string msg = $"PLAYER {idx}\nTAKES THE WHEEL!";
+        string msg = $"PLAYER {newDriver.PlayerNumber}\nTAKES THE WHEEL!";
         newDriverAudio.PlayOneShot(newDriverAudioClip);
         StopAllCoroutines();                          // kill previous animation
         StartCoroutine(DriverAnnounceRoutine(msg));
@@ -84,6 +83,7 @@ public class GameUIManager : MonoBehaviour
         // set-up
         newDriverText.text = message;
         newDriverText.alpha = 0f;
+        newDriverText.rectTransform.anchoredPosition = Vector2.zero;
         newDriverText.gameObject.SetActive(true);
 
         float half = announceDuration * 0.5f;
@@ -114,6 +114,7 @@ public class GameUIManager : MonoBehaviour
         }
 
         newDriverText.gameObject.SetActive(false);
+        newDriverText.rectTransform.anchoredPosition = Vector2.zero;
     }
 
 
@@ -162,18 +163,20 @@ public class GameUIManager : MonoBehaviour
     {
         IReadOnlyList<Passenger> passengers = playerManager.Passengers;
 
-        for (int i = 0; i < playerScoreTexts.Count; i++)
+        // 1. hide everything first
+        foreach (var tx in playerScoreTexts) tx.gameObject.SetActive(false);
+
+        // 2. (re)populate by permanent id ? slot index = PlayerNumber-1
+        foreach (var p in passengers)
         {
-            if (i < passengers.Count)
-            {
-                playerScoreTexts[i].gameObject.SetActive(true);
-                string driverTag = (passengers[i] == playerManager.CurrentDriver) ? " (Driver)" : "";
-                playerScoreTexts[i].text = $"Player {i + 1}{driverTag}: {passengers[i].Points} Points";
-            }
-            else
-            {
-                playerScoreTexts[i].gameObject.SetActive(false);
-            }
+            int slot = p.PlayerNumber - 1;
+            if (slot < 0 || slot >= playerScoreTexts.Count) continue;
+
+            var tx = playerScoreTexts[slot];
+            tx.gameObject.SetActive(true);
+
+            string driverTag = (p == playerManager.CurrentDriver) ? " (Driver)" : "";
+            tx.text = $"Player {p.PlayerNumber}{driverTag}: {p.Points} Points";
         }
     }
 }

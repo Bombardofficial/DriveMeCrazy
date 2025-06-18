@@ -29,9 +29,13 @@ public class Damageable : MonoBehaviour
 
         if (_health > 0 || !_pm) return;
 
-        // Logic for when health runs out.
-        int target = Random.Range(0, _pm.Passengers.Count);
-        _pm.SwapWithDriver(target);
+        // pick the NEXT passenger in list order, wrap-around at the end
+        int curIdx = _pm.GetSeatIndex(_pm.CurrentDriver);
+        int nextIdx = (curIdx + 1) % _pm.Passengers.Count;
+
+        // only swap if we actually have another passenger
+        if (nextIdx != curIdx)
+            _pm.SwapWithDriver(nextIdx);
         _health = maxHealth;
     }
 }
