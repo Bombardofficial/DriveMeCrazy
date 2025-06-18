@@ -88,6 +88,8 @@ public class PlayerJoinManager : MonoBehaviour
     [SerializeField] TextMeshProUGUI autoReturnText;   // “Returning in …”
     [SerializeField] Image blackFadeImage;          // full-screen image
 
+    public CanvasGroup fadeintoLobby;
+
     public AudioSource crowdroar;
     /* ?????????????????????? STATIC / INTERNALS ??????????????????? */
     public static bool IsRaceStarted { get; private set; }
@@ -121,6 +123,7 @@ public class PlayerJoinManager : MonoBehaviour
         if (lapGateTrigger) lapGateTrigger.isTrigger = true;
 
         startPos = winnerText.rectTransform.anchoredPosition;
+
         PrepareLobbyState();
     }
     IEnumerator AutoReturnCountdown(int seconds = 10)
@@ -145,7 +148,14 @@ public class PlayerJoinManager : MonoBehaviour
         // fade screen to black and load
         StartCoroutine(FadeAndLoad("MainMenu"));
     }
+    IEnumerator DelayedLobbyTrigger()
+    {
 
+        yield return null; // wait 1 frame
+        yield return StartCoroutine(FadeCanvas(fadeintoLobby, 1f, 0f, 2f));
+        lobbyAnimator.ResetTrigger(lobbyAnimTrigger);
+        lobbyAnimator.SetTrigger(lobbyAnimTrigger);
+    }
     /* ????????????????? LOBBY INITIALISATION BRANCH ????????????????? */
     void PrepareLobbyState()
     {
@@ -198,6 +208,7 @@ public class PlayerJoinManager : MonoBehaviour
         }
         else
         {
+            StartCoroutine(DelayedLobbyTrigger());
             /* hide gameplay HUD & results */
             if (gameplayHUD) gameplayHUD.alpha = 0f;
             if (resultsPanel) resultsPanel.alpha = 0f;
@@ -210,8 +221,6 @@ public class PlayerJoinManager : MonoBehaviour
                 musicTargetVol = carenginesound.volume;
                 carenginesound.volume = 0f;
             }
-            lobbyAnimator.ResetTrigger(lobbyAnimTrigger);
-            lobbyAnimator.SetTrigger(lobbyAnimTrigger);
             /* music buses */
             if (lobbyMusic)
             {
