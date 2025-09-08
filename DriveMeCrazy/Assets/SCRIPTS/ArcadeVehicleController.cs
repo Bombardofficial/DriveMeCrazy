@@ -164,6 +164,22 @@ namespace ArcadeVP
         public float extraGraceAfterSwap = 1.0f;   // in addition to driverChangeGrace
                                                    // ---------------------------------------------------------------------
 
+        [Header("Mini-game – UX & Pre-cue")]
+        [Tooltip("Pre-cue window before the gauge appears (seconds)")]
+        public Vector2 preCueRange = new Vector2(0.25f, 0.40f); // NEW
+        [Tooltip("Optional UI SFX source for mini-game beeps")]
+        public AudioSource uiAudio; // NEW
+
+        [Header("Mini-game – outcomes")]
+        [Tooltip("Stay within this NormalizedError to count as centred")]
+        [Range(0.05f, 0.5f)] public float perfectCenterThreshold = 0.20f; // NEW
+        [Tooltip("Seconds being centred to earn PERFECT")]
+        public float perfectHoldTime = 1.25f; // NEW
+        [Tooltip("Seconds without going red to PASS")]
+        public float passDuration = 2.0f; // NEW
+        [Tooltip("Bonus points on PERFECT (uses PlayerManager if present)")]
+        public int perfectBonusPoints = 100; // NEW
+
 
         [Header("Corner Slow-Down")]
         [Tooltip("Speed kept in a 90-degree hair-pin (0.0-1.0)")]
@@ -184,6 +200,10 @@ namespace ArcadeVP
         float balanceFailTimer;
         float frozenSpeed;
         float currentRoundDrift;          // per-round sensitivity
+        float insideStreakTimer;   // NEW
+        float centreStreakTimer;   // NEW
+        bool readyPulseShown;      // NEW
+        Coroutine armCR;           // NEW
 
         [SerializeField] bool debugLogs = true;   // toggle in Inspector
 
@@ -210,10 +230,29 @@ namespace ArcadeVP
        public float driverChangeGrace = 3f;      // inspector-tweakable
 
        float ignoreOverspeedUntil = 0f;          // runtime timer
+        void AbortAllSpeedZoneStuff()
+        {
+            // stop pending "arm" (pre-cue) so it can’t fire
+            if (armCR != null) { StopCoroutine(armCR); armCR = null; }
 
-        //  ArcadeVehicleController.cs   (inside EnterSpeedLimit)
+            // cut any pre-cue beep immediately
+            if (speedLimitUI && speedLimitUI.sfx) speedLimitUI.sfx.Stop();
+
+            // hide UIs silently
+            if (speedLimitUI) speedLimitUI.Show(-1);
+            if (balanceUI && (balanceActive || balanceUI.IsVisible)) balanceUI.End();
+
+            // clear flags so nothing re-triggers
+            balanceActive = false;
+            miniGamePlayedThisZone = false;
+            readyPulseShown = false;
+            overspeedTimer = 0f;
+        }
+
         public void EnterSpeedLimit(float limitMps, int signIndex)
         {
+            if (!PlayerJoinManager.IsRaceStarted) return; // NEW
+
             activeSpeedLimit = limitMps;
             activeSignIndex = signIndex;
 
@@ -284,15 +323,30 @@ namespace ArcadeVP
 
         void HandleDriverChanged(Passenger oldP, Passenger newP)
         {
-            // 1. cancel any running mini-game (that would feel unfair)
-            if (balanceActive) EndBalanceMiniGame(true);
-            // 2. start a grace timer so the NEXT overspeed isn’t checked too soon
+            // Cancel any pending "arm" coroutine (pre-cue) so it doesn't pop after swap
+            if (armCR != null) { StopCoroutine(armCR); armCR = null; }
+
+            // If a round is running, end it as a neutral PASS (no penalty, no crash)
+            if (balanceActive)
+            {
+                EndBalanceMiniGame(MiniGameOutcome.Pass, false);
+            }
+            else if (balanceUI && balanceUI.IsVisible)
+            {
+                // If UI was up but not 'active', hide it cleanly
+                balanceUI.End();
+            }
+
+            // Start grace so the next driver isn't insta-punished
             ignoreOverspeedUntil = Time.time + driverChangeGrace;
 
-            // 3. reset per-zone trackers (otherwise a half-played zone might resume)
+            // Clear per-zone trackers
             miniGamePlayedThisZone = false;
-            overspeedTimer         = 0f;
+            overspeedTimer = 0f;
+            readyPulseShown = false;
+            isDrifting = false;
         }
+
         // Start remains the same
         void Start()
         {
@@ -351,52 +405,55 @@ namespace ArcadeVP
 
         void Update()
         {
-            /* 1 – mini-game gate (sustained overspeed only) */
-            bool inZone = activeSpeedLimit > 0f;
+            if (!PlayerJoinManager.IsRaceStarted)
+            {
+                if (activeSpeedLimit > 0f || balanceActive || armCR != null || (balanceUI && balanceUI.IsVisible))
+                    AbortAllSpeedZoneStuff();
 
-            // If we’re not in a zone but the gauge somehow shows, kill it.
+                activeSpeedLimit = 0f; // ensures inZone == false below
+            }
+
+            bool inZone = activeSpeedLimit > 0f;
             if (!inZone) { EnsureGaugeHiddenWhenNotActive(); }
+
             float dt = Time.deltaTime;
 
             float tolFactor = 1f + speedOvershootTolerance;
             bool overspeedEligible = inZone && (Time.time >= (ignoreOverspeedUntil + extraGraceAfterSwap));
             bool isOverspeeding = overspeedEligible && (Mathf.Abs(speed) > activeSpeedLimit * tolFactor);
 
-            // Only allow one mini-game per zone
             if (overspeedEligible && !miniGamePlayedThisZone)
             {
-                // require sustained overspeed to trigger
                 overspeedTimer = isOverspeeding ? overspeedTimer + dt : 0f;
-
                 if (overspeedTimer >= overspeedTriggerTime)
-                    StartBalanceMiniGame(); // sets miniGamePlayedThisZone = true
+                    StartBalanceMiniGame(); // schedules pre-cue + begin
             }
 
-            // If the mini-game is NOT active, make sure the gauge can’t linger
-            if (!balanceActive) EnsureGaugeHiddenWhenNotActive();
-
-            // If the mini-game IS active, run it and keep straight-line speed frozen
+            // If the mini-game is active, wait for readability then run
             if (balanceActive)
             {
-                // Fairness: only start “for real” after the UI is fully visible
                 bool uiReady = (balanceUI == null) || balanceUI.IsFullyVisible;
+
                 if (uiReady)
                 {
-                    // enable drift & audio once, right when UI becomes readable
+                    if (!readyPulseShown && balanceUI)
+                    {
+                        readyPulseShown = true;
+                        balanceUI.PlayReadyPulse(); // NEW: one-beat READY
+                    }
+
                     if (!isDrifting)
                     {
                         isDrifting = true;
                         if (skidSound && !skidSound.isPlaying) skidSound.Play();
                     }
+
                     UpdateBalanceMiniGame(dt);
-                    speed = frozenSpeed; // freeze during active round
+                    speed = frozenSpeed; // lock straight-line speed while playing
                 }
-                else
-                {
-                    // During fade-in: do nothing gameplay-wise (no freeze, no tick)
-                    // The UI handles its own fade; we just wait.
-                }
+                // else: do nothing gameplay-wise during fade-in
             }
+
             ApplyCornerDrag(dt);
             /*???????????????? 3. normal driving logic continues ???????*/
             bool controlsLocked = Time.time < controlLockUntil;
@@ -454,111 +511,194 @@ namespace ArcadeVP
         /*?????????????????? MINI-GAME ??????????????????*/
         void StartBalanceMiniGame()
         {
-            /* --------  HOW MUCH DID WE SPEED?  -------- */
+            if (!PlayerJoinManager.IsRaceStarted) return; // NEW
+            // Compute difficulty snapshot
             float overshoot = Mathf.Max(0f, Mathf.Abs(speed) - activeSpeedLimit);
             float ratio = (activeSpeedLimit <= 0f) ? 0f : overshoot / activeSpeedLimit;
-            _lastOvershootRatio = ratio; // Store the current ratio
+            _lastOvershootRatio = ratio;
 
-            // Now, check if the ratio is high enough to trigger the minigame
             if (ratio < minOvershootRatioToTrigger)
             {
-                miniGamePlayedThisZone = true;  // Mark as played so it doesn't try again
-                return;                         // Exit the function
+                miniGamePlayedThisZone = true;
+                return;
             }
 
+            // mark this zone
             miniGamePlayedThisZone = true;
             overspeedTimer = 0f;
-            balanceActive = true;
+
+            // freeze snapshot during round
             frozenSpeed = speed;
             balanceVal = 0f;
             balanceFailTimer = 0f;
+            insideStreakTimer = 0f;  // NEW
+            centreStreakTimer = 0f;  // NEW
+            readyPulseShown = false; // NEW
 
-            /* --------  DIFFICULTY-SCALED SETTINGS  -------- */
-            float diffT = Mathf.Clamp01(ratio / Mathf.Max(0.001f, fullDifficultyAtRatio)); // 0-1
-
-
-            _lastOvershootRatio = ratio;
-            /* --------  DIFFICULTY-SCALED SETTINGS  -------- */
-            // pointer auto-drift
+            // Difficulty scaling
+            float diffT = Mathf.Clamp01(ratio / Mathf.Max(0.001f, fullDifficultyAtRatio));
             currentRoundDrift = Mathf.Lerp(driftSpeedEasy, driftSpeedHard, diffT);
 
-            // green-zone initial width
             float zoneFrac = Mathf.Lerp(zoneFracEasy, zoneFracHard, diffT);
             float green = Mathf.Clamp(zoneFrac, greenMinWidth, greenMaxWidth);
 
-            /* push params into the gauge */
+            // Arm with a pre-cue BEFORE the gauge appears
+            if (armCR != null) StopCoroutine(armCR);
+            armCR = StartCoroutine(ArmMiniGameThenBegin(green)); // NEW
+        }
+
+        System.Collections.IEnumerator ArmMiniGameThenBegin(float green)
+        {
+            if (!PlayerJoinManager.IsRaceStarted) yield break; // NEW
+            // pre-cue: sign pop + beep
+            float pre = UnityEngine.Random.Range(preCueRange.x, preCueRange.y);
+            if (speedLimitUI) speedLimitUI.PlayPreCue(pre);
+
+            // small wait (unscaled to feel consistent under hitches)
+            float t = 0f;
+            while (t < pre) { t += Time.unscaledDeltaTime; yield return null; }
+
+            if (!PlayerJoinManager.IsRaceStarted) yield break; // NEW
+
+            // actually show the gauge (will fade in)
             if (balanceUI)
             {
-                balanceUI.oscillationAmplitude = Mathf.Lerp(oscAmpEasy, oscAmpHard, diffT);
-                balanceUI.shrinkRate = Mathf.Lerp(shrinkEasy, shrinkHard, diffT);
                 balanceUI.Begin(green);
             }
 
-            isDrifting = false;                     // not yet
-            driftDirection = (steeringInput < 0f ? -1 : 1);
-
-            if (debugLogs)
-                Debug.Log($"[MiniGame] overshoot {overshoot:0.0} m/s  ratio {ratio:P0}  diff {diffT:0.00}");
+            balanceActive = true;      // gameplay starts once IsFullyVisible in Update
+            isDrifting = false;        // we’ll enable it only when readable
+            armCR = null;
         }
 
 
         void UpdateBalanceMiniGame(float dt)
         {
-            /* ---------- pointer movement ---------- */
+            // pointer movement
             float pressureDelta = accelerationInput - slowInput;
-
             balanceVal = Mathf.Clamp(
-                balanceVal + (pressureDelta * balanceInputPower + // player input
-                              currentRoundDrift * Mathf.Sign(balanceVal)) * dt,
+                balanceVal + (pressureDelta * balanceInputPower
+                              + currentRoundDrift * Mathf.Sign(balanceVal)) * dt,
                 -1f, 1f);
 
-            /* ---------- UI calls ---------- */
-            balanceUI.Tick(dt);            // move zone & shrink
+            // UI calls
+            balanceUI.Tick(dt);
             balanceUI.SetPointer(balanceVal);
 
-            /* ---------- fail logic ---------- */
-            bool outside = balanceUI.IsOutside(balanceVal);   //  reliable
-
+            // Fail checks
+            bool outside = balanceUI.IsOutside(balanceVal);
             if (outside)
             {
+                insideStreakTimer = 0f; // NEW: reset pass streak
+                centreStreakTimer = 0f; // NEW: reset perfect streak
                 balanceFailTimer += dt;
 
-                // INSTANT CRASH if the pointer hits the absolute edge of the bar
+                // Edge slam = full crash
                 if (Mathf.Abs(balanceVal) >= balanceFailThresh)
                 {
-                    EndBalanceMiniGame(false); // CRASH!
-                    return; // Exit to avoid running the next check
+                    EndBalanceMiniGame(MiniGameOutcome.Fail, fullCrash: true); // NEW
+                    return;
                 }
 
-                // Normal crash after the grace period
                 if (balanceFailTimer >= balanceFailGrace)
                 {
-                    EndBalanceMiniGame(false); // CRASH!
+                    EndBalanceMiniGame(MiniGameOutcome.Fail, fullCrash: false); // NEW (stumble)
+                    return;
                 }
             }
             else
             {
-                balanceFailTimer = 0f; // Reset timer when back in the safe zone
+                balanceFailTimer = 0f;
+
+                // Track pass / perfect streaks
+                insideStreakTimer += dt; // no red
+                if (balanceUI.NormalizedError <= perfectCenterThreshold)
+                    centreStreakTimer += dt;
+                else
+                    centreStreakTimer = 0f;
+
+                // PERFECT first (higher bar)
+                if (centreStreakTimer >= perfectHoldTime)
+                {
+                    EndBalanceMiniGame(MiniGameOutcome.Perfect, fullCrash: false);
+                    return;
+                }
+
+                // PASS (survive without red long enough)
+                if (insideStreakTimer >= passDuration)
+                {
+                    EndBalanceMiniGame(MiniGameOutcome.Pass, fullCrash: false);
+                    return;
+                }
             }
         }
 
-
-
-        void EndBalanceMiniGame(bool success)
+        void EndBalanceMiniGame(MiniGameOutcome outcome, bool fullCrash)
         {
             if (!balanceActive) return;
-            miniGamePlayedThisZone = false;
+
             balanceActive = false;
-            balanceUI?.End();
+            //miniGamePlayedThisZone = false;
             isDrifting = false;
-            if (debugLogs) Debug.Log($"[Car]  MINI-GAME END  success={success}");
-            
-            if (!success) TriggerSpeedCrash();
+
+            // party feedback
+            if (balanceUI) balanceUI.PlayOutcome(outcome);
+            balanceUI?.End();
+
+            // scoring / penalties
+            switch (outcome)
+            {
+                case MiniGameOutcome.Perfect:
+                    // small score plus
+                    var pm = PlayerManager.Instance;
+                    if (pm != null)
+                    {
+                        pm.CurrentDriver?.IncrementPoints(perfectBonusPoints);
+                    }
+                    // feel-good micro impulse (optional)
+                    if (_impulseSource != null)
+                        _impulseSource.GenerateImpulseWithForce(Mathf.Max(0.2f, crashShakeIntensity * 0.25f));
+                    break;
+
+                case MiniGameOutcome.Pass:
+                    // no penalty, no crash
+                    break;
+
+                case MiniGameOutcome.Fail:
+                    if (fullCrash) TriggerSpeedCrash();   // edge slam
+                    else TriggerSpeedStumble(); // mild spin/slow
+                    break;
+            }
+
+            if (debugLogs) Debug.Log($"[Car] MINI-GAME END ? {outcome}");
         }
 
+        void TriggerSpeedStumble()
+        {
+            if (!PlayerJoinManager.IsRaceStarted) return; // NEW
+            // tiny time loss
+            controlLockUntil = Time.time + 0.7f;
+
+            int dir = UnityEngine.Random.value > .5f ? 1 : -1;
+
+            // gentle lane nudge (don’t swap lanes)
+            currentDriftYaw = dir * 35f;
+            if (bodyMesh) bodyMesh.localRotation = Quaternion.Euler(0, 0, -dir * 15f);
+
+            // speed scrub (much softer than crash)
+            speed = frozenSpeed * 0.85f;
+
+            if (_impulseSource != null)
+                _impulseSource.GenerateImpulseWithForce(crashShakeIntensity * 0.35f);
+
+            // fun little blink so spectators notice
+            speedLimitUI?.FlashRed();
+            skidSound?.Play();
+        }
 
         void TriggerSpeedCrash()
         {
+            if (!PlayerJoinManager.IsRaceStarted) return; 
             if (TryGetComponent<Damageable>(out Damageable playerDamage))
             {
                 // Calculate damage: at least 1, up to maxCrashDamage based on the overshoot ratio.
