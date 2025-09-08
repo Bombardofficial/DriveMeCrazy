@@ -216,8 +216,16 @@ namespace ArcadeVP
         {
             activeSpeedLimit = limitMps;
             activeSignIndex = signIndex;
-            miniGamePlayedThisZone = false;
 
+            // Reset per-zone state
+            miniGamePlayedThisZone = false;
+            overspeedTimer = 0f;
+
+            // Kill any stray gauge if it was left visible for any reason
+            if (balanceUI && balanceUI.IsVisible) balanceUI.End();
+            balanceActive = false;
+
+            // Speed-limit sign
             if (speedLimitUI)
             {
                 speedLimitUI.gameObject.SetActive(true);
@@ -225,7 +233,8 @@ namespace ArcadeVP
             }
 
             Debug.Log($"ENTER zone  limit={limitMps:0.00}  speed={speed:0.0}");
-            CheckOverspeedImmediate();
+
+            // We require a sustained overspeed check inside Update() only.
         }
 
         void CheckOverspeedImmediate()
@@ -241,13 +250,33 @@ namespace ArcadeVP
 
         public void ExitSpeedLimit()
         {
+            if (activeSpeedLimit <= 0f) return; // guard double-calls
+
+            // Clear zone state
             activeSpeedLimit = 0f;
             activeSignIndex = -1;
+            overspeedTimer = 0f;
+            // do NOT reset miniGamePlayedThisZone here? we’re leaving the zone anyway
+            // but safe to clear:
             miniGamePlayedThisZone = false;
+            ignoreOverspeedUntil = 0f;
 
+            // Always hide both UIs
             if (speedLimitUI) speedLimitUI.Show(-1);
-            if (balanceActive) EndBalanceMiniGame(true);
+            if (balanceUI && balanceUI.IsVisible) balanceUI.End();
+
+            // Ensure flag is off
+            balanceActive = false;
+
+            Debug.Log("[SpeedZone]  EXIT (forced UI fade-out)");
         }
+
+        void EnsureGaugeHiddenWhenNotActive()
+        {
+            if (balanceUI && !balanceActive && balanceUI.IsVisible)
+                balanceUI.End();
+        }
+
         void OnDestroy()
         {
             PlayerManager.OnDriverChanged -= HandleDriverChanged;
@@ -322,25 +351,51 @@ namespace ArcadeVP
 
         void Update()
         {
+            /* 1 – mini-game gate (sustained overspeed only) */
+            bool inZone = activeSpeedLimit > 0f;
+
+            // If we’re not in a zone but the gauge somehow shows, kill it.
+            if (!inZone) { EnsureGaugeHiddenWhenNotActive(); }
             float dt = Time.deltaTime;
 
-            /* 1 ? mini-game gate (instant tolerance check) */
-            bool inZone = activeSpeedLimit > 0f;
             float tolFactor = 1f + speedOvershootTolerance;
-            bool overspeed = inZone
-               && Time.time >= ignoreOverspeedUntil + extraGraceAfterSwap
-               && speed > activeSpeedLimit * tolFactor;
-            if (!miniGamePlayedThisZone)                 // we have not played one here yet
+            bool overspeedEligible = inZone && (Time.time >= (ignoreOverspeedUntil + extraGraceAfterSwap));
+            bool isOverspeeding = overspeedEligible && (Mathf.Abs(speed) > activeSpeedLimit * tolFactor);
+
+            // Only allow one mini-game per zone
+            if (overspeedEligible && !miniGamePlayedThisZone)
             {
-                overspeedTimer = overspeed ? overspeedTimer + dt : 0f;
+                // require sustained overspeed to trigger
+                overspeedTimer = isOverspeeding ? overspeedTimer + dt : 0f;
 
                 if (overspeedTimer >= overspeedTriggerTime)
-                    StartBalanceMiniGame();              // ? sets miniGamePlayedThisZone
+                    StartBalanceMiniGame(); // sets miniGamePlayedThisZone = true
             }
+
+            // If the mini-game is NOT active, make sure the gauge can’t linger
+            if (!balanceActive) EnsureGaugeHiddenWhenNotActive();
+
+            // If the mini-game IS active, run it and keep straight-line speed frozen
             if (balanceActive)
             {
-                UpdateBalanceMiniGame(dt);         // moves pointer, shrinks / oscillates zone
-                speed = frozenSpeed;               // lock straight-line speed while playing
+                // Fairness: only start “for real” after the UI is fully visible
+                bool uiReady = (balanceUI == null) || balanceUI.IsFullyVisible;
+                if (uiReady)
+                {
+                    // enable drift & audio once, right when UI becomes readable
+                    if (!isDrifting)
+                    {
+                        isDrifting = true;
+                        if (skidSound && !skidSound.isPlaying) skidSound.Play();
+                    }
+                    UpdateBalanceMiniGame(dt);
+                    speed = frozenSpeed; // freeze during active round
+                }
+                else
+                {
+                    // During fade-in: do nothing gameplay-wise (no freeze, no tick)
+                    // The UI handles its own fade; we just wait.
+                }
             }
             ApplyCornerDrag(dt);
             /*???????????????? 3. normal driving logic continues ???????*/
@@ -439,9 +494,8 @@ namespace ArcadeVP
                 balanceUI.Begin(green);
             }
 
-            isDrifting = true;
+            isDrifting = false;                     // not yet
             driftDirection = (steeringInput < 0f ? -1 : 1);
-            skidSound?.Play();
 
             if (debugLogs)
                 Debug.Log($"[MiniGame] overshoot {overshoot:0.0} m/s  ratio {ratio:P0}  diff {diffT:0.00}");

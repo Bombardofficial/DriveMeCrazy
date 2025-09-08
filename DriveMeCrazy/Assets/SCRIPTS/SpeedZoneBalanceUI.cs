@@ -2,53 +2,53 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 
-/* ==================================================================================================
-   SPEED?ZONE MINI?GAME  –  "Dynamic Pressure Gauge"
-   -----------------------------------------------------------------------------------------------
-   ? Pointer slides horizontally (?1 .. +1).
-   ? Green safe?zone SHRINKS gradually and OSCILLATES left?right.
-   ? Driver throttles (accel) / brakes (slow) to nudge the pointer.
-   ? Fail if pointer leaves safe?zone for longer than grace time (checked by controller).
-   ? Fade?in / Fade?out behaviour unchanged so existing Begin()/End() calls still work.
-   ==================================================================================================*/
-
 namespace ArcadeVP
 {
     public class SpeedZoneBalanceUI : MonoBehaviour
     {
         [Header("References")]
-        public RectTransform bar;          // background (600×100)
-        public RectTransform greenZone;    // green block (child of bar)
-        public RectTransform pointer;      // thin red bar (child of bar)
+        public RectTransform bar;
+        public RectTransform greenZone;
+        public RectTransform pointer;
+
         public bool IsVisible => cg && cg.alpha > 0.01f;
+        public bool IsFullyVisible => cg && gameObject.activeInHierarchy && cg.alpha >= 0.99f;
+
         [Header("Dynamic Zone Behaviour")]
-        [Tooltip("Peak fraction of bar half?width used for oscillation")] public float oscillationAmplitude = 0.30f;
+        [Tooltip("Peak fraction of bar half-width used for oscillation")] public float oscillationAmplitude = 0.30f;
         [Tooltip("Oscillation frequency in Hz")] public float oscillationFreq = 0.45f;
         [Tooltip("Zone shrink rate in frac/sec")] public float shrinkRate = 0.08f;
-        [Tooltip("Absolute minimum green?zone width in px")] public float minZoneWidthPx = 40f;
+        [Tooltip("Absolute minimum green-zone width in px")] public float minZoneWidthPx = 40f;
 
-        /* runtime */
+        [Header("Fade")]
+        [Tooltip("UI fade-in speed (alpha units per second)")]
+        public float fadeInSpeed = 12f;
+        [Tooltip("UI fade-out speed (alpha units per second)")]
+        public float fadeOutSpeed = 12f;
+
         float barHalfWidth;
-        float zoneHalfWidth;            // current half?width (px)
-        float zoneCentre;               // centre X (px, ±barHalfWidth)
+        float zoneHalfWidth;    // px
+        float zoneCentre;       // px (±barHalfWidth)
         float elapsed;
 
         CanvasGroup cg;
 
-        /* ------------- public readouts ------------- */
-        public float NormalizedError { get; private set; }  // 0 = perfect centre, 1 = at/over edge
+        public float NormalizedError { get; private set; }  // 0=center, 1=edge
 
         void Awake()
         {
             cg = GetComponent<CanvasGroup>() ?? gameObject.AddComponent<CanvasGroup>();
-            gameObject.SetActive(false);
-            LayoutRebuilder.ForceRebuildLayoutImmediate(bar);
+
+            // Prevent first-time “showcase” when parent canvas is enabled:
+            cg.alpha = 0f;
+            // It’s fine for this GO to be enabled/disabled by your parent,
+            // but we ensure it starts invisible.
         }
 
         /* ================== API ================== */
         public void Begin(float greenFrac)
         {
-            StopAllCoroutines();
+            StopAllCoroutines();                 // idempotent
             LayoutRebuilder.ForceRebuildLayoutImmediate(bar);
 
             barHalfWidth = bar.rect.width * 0.5f;
@@ -60,10 +60,28 @@ namespace ArcadeVP
 
             ApplyZoneVisual();
             SetPointer(0f);
+
+            // Ensure visible object + start from 0 alpha (fast, fair fade)
+            if (!gameObject.activeSelf) gameObject.SetActive(true);
+            cg.alpha = 0f;
             StartCoroutine(FadeIn());
         }
 
-        public void End() { StopAllCoroutines(); StartCoroutine(FadeOut()); }
+        public void End()
+        {
+            StopAllCoroutines();
+
+            // If inactive in hierarchy, don’t try to fade — just force hidden state.
+            if (!gameObject.activeInHierarchy)
+            {
+                if (cg == null) cg = GetComponent<CanvasGroup>() ?? gameObject.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                // keep inactive as is
+                return;
+            }
+
+            StartCoroutine(FadeOut());
+        }
 
         public void Tick(float dt)
         {
@@ -103,14 +121,25 @@ namespace ArcadeVP
 
         IEnumerator FadeIn()
         {
-            cg.alpha = 0f; gameObject.SetActive(true);
-            while (cg.alpha < 1f) { cg.alpha += Time.deltaTime * 4f; yield return null; }
+            while (cg.alpha < 1f)
+            {
+                cg.alpha = Mathf.MoveTowards(cg.alpha, 1f, fadeInSpeed * Time.deltaTime);
+                yield return null;
+            }
             cg.alpha = 1f;
         }
+
         IEnumerator FadeOut()
         {
-            while (cg.alpha > 0f) { cg.alpha -= Time.deltaTime * 4f; yield return null; }
-            cg.alpha = 0f; gameObject.SetActive(false);
+            while (cg.alpha > 0f)
+            {
+                cg.alpha = Mathf.MoveTowards(cg.alpha, 0f, fadeOutSpeed * Time.deltaTime);
+                yield return null;
+            }
+            cg.alpha = 0f;
+
+            // Optional: disable after fade to keep hierarchy clean
+            gameObject.SetActive(false);
         }
     }
 }
