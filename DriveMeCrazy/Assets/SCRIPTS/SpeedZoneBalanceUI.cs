@@ -268,6 +268,24 @@ namespace ArcadeVP
             }
             rt.localScale = start;
         }
+        public void PopBackIn(float speed = 24f)
+        {
+            if (cg == null) cg = GetComponent<CanvasGroup>() ?? gameObject.AddComponent<CanvasGroup>();
+            StopAllCoroutines();
+            if (!gameObject.activeSelf) gameObject.SetActive(true);
+            StartCoroutine(FadeToAlpha(1f, speed));
+        }
+
+        IEnumerator FadeToAlpha(float target, float speed)
+        {
+            // no visual reset here, we keep the current round visuals/state
+            while (!Mathf.Approximately(cg.alpha, target))
+            {
+                cg.alpha = Mathf.MoveTowards(cg.alpha, target, speed * Time.unscaledDeltaTime);
+                yield return null;
+            }
+            cg.alpha = target;
+        }
 
         IEnumerator ZoneTint(Color c, float time)
         {

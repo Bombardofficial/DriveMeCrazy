@@ -126,6 +126,7 @@ public class PlayerJoinManager : MonoBehaviour
 
         PrepareLobbyState();
     }
+
     IEnumerator AutoReturnCountdown(int seconds = 10)
     {
         // fade-in
@@ -148,14 +149,15 @@ public class PlayerJoinManager : MonoBehaviour
         // fade screen to black and load
         StartCoroutine(FadeAndLoad("MainMenu"));
     }
+
     IEnumerator DelayedLobbyTrigger()
     {
-
         yield return null; // wait 1 frame
         yield return StartCoroutine(FadeCanvas(fadeintoLobby, 1f, 0f, 2f));
         lobbyAnimator.ResetTrigger(lobbyAnimTrigger);
         lobbyAnimator.SetTrigger(lobbyAnimTrigger);
     }
+
     /* ????????????????? LOBBY INITIALISATION BRANCH ????????????????? */
     void PrepareLobbyState()
     {
@@ -166,7 +168,7 @@ public class PlayerJoinManager : MonoBehaviour
         if (quickStartSingleDriver)
         {
             /* 1.   Spawn driver instantly (enables car & HUD) */
-            SpawnDriverImmediately();          // also sets raceStarted = true
+            SpawnDriverImmediately();          // now also sets IsRaceStarted
 
             /* 2.   Hard-kill anything lobby-related */
             if (lobbyMusic) lobbyMusic.Stop();
@@ -179,18 +181,17 @@ public class PlayerJoinManager : MonoBehaviour
             if (lobbyPanel) lobbyPanel.SetActive(false);
             foreach (var d in playerDummies) if (d) d.SetActive(false);
 
-            if (fadeOutCanvas) fadeOutCanvas.alpha = 0f;      // no black splash
-            if (resultsPanel) resultsPanel.alpha = 0f;      // no black splash
-            if (introCamera) introCamera.gameObject.SetActive(false);  // kill lobby cam
+            if (fadeOutCanvas) fadeOutCanvas.alpha = 0f;
+            if (resultsPanel) resultsPanel.alpha = 0f;
+            if (introCamera) introCamera.gameObject.SetActive(false);
             if (gameplayCamera) gameplayCamera.SetActive(true);
 
-            /* 3.   Make sure engine sound is up and running */
+            /* 3.   Make sure engine/gameplay audio is up */
             if (carenginesound)
             {
                 if (!carenginesound.isPlaying) carenginesound.Play();
-                carenginesound.volume = 1f;     // or any “normal” value you prefer
+                carenginesound.volume = 1f;
             }
-
             if (gameplayMusic)
             {
                 if (!gameplayMusic.isPlaying) gameplayMusic.Play();
@@ -203,7 +204,10 @@ public class PlayerJoinManager : MonoBehaviour
                 }
             }
 
-            /* 4.   Skip rest of setup completely */
+            /* 4.   Bring gameplay systems online (spawners, speed-zone FX) */
+            EnableGameplaySystems(); // <-- NEW
+
+            /* 5.   Skip rest of setup completely */
             return;
         }
         else
@@ -245,8 +249,7 @@ public class PlayerJoinManager : MonoBehaviour
             PlayerInputManager.instance.playerJoinedEvent.AddListener(OnPlayerJoined);
             if (countdownText) countdownText.text = "WAITING FOR DRIVER…";
             RefreshUI();
-        }    
-        
+        }
     }
 
     void SpawnDriverImmediately()
@@ -269,7 +272,7 @@ public class PlayerJoinManager : MonoBehaviour
 
         /* 2. register with PlayerManager ---------------------------------------- */
         var passenger = pi.GetComponent<Passenger>();
-        if (PlayerManager.Instance)       // safety in case the root is disabled
+        if (PlayerManager.Instance)
             PlayerManager.Instance.RegisterPassenger(passenger, seatIndex);
 
         /* 3. wire up driving ----------------------------------------------------- */
@@ -281,7 +284,9 @@ public class PlayerJoinManager : MonoBehaviour
         /* 4. housekeeping -------------------------------------------------------- */
         joinCount = 1;
         raceStarted = true;
-        lobbyPanel.SetActive(false);
+        IsRaceStarted = true;                // <-- NEW: static flag for other systems
+        counting = false; timeLeft = 0f;
+        if (lobbyPanel) lobbyPanel.SetActive(false);
         PlayerInputManager.instance?.DisableJoining();
         if (gameplayHUD) gameplayHUD.alpha = 1f;
     }
@@ -327,7 +332,7 @@ public class PlayerJoinManager : MonoBehaviour
     /* ??????????????????????? LAP TRIGGER ?????????????????????????? */
     public void LapGateCrossed()
     {
-        if (!raceStarted || finalising)            // ignore before start / after finish
+        if (!raceStarted || finalising)
             return;
 
         currentLap++;
@@ -386,7 +391,7 @@ public class PlayerJoinManager : MonoBehaviour
 
         float clipLen = introClip.length / cameraAnimator.speed;
         float hudDelay = Mathf.Max(0f, clipLen - hudFadeDuration);
-        
+
         // music crossfade
         if (lobbyMusic)
         {
@@ -420,8 +425,10 @@ public class PlayerJoinManager : MonoBehaviour
         driverInput.enabled = true;
         raceStarted = IsRaceStarted = true;
 
-        
+        // Ensure systems are on in case they were off
+        EnableGameplaySystems(); // <-- NEW safeguard
     }
+
     void DisableGameplaySystems()
     {
         /* Spawners */
@@ -432,21 +439,35 @@ public class PlayerJoinManager : MonoBehaviour
 
         /* Speed-zone post-processing */
         foreach (var fx in FindObjectsOfType<SpeedZoneFeedbackFX>())
-            fx.enabled = false;                 // OnDisable() already resets FOV,
-                                                // vignette, pad-rumble, etc.
+            fx.enabled = false;                 // OnDisable resets effects
     }
+
+    // ---------- NEW ----------
+    void EnableGameplaySystems()
+    {
+        // Re-enable anything the finish sequence might have turned off
+        foreach (var om in FindObjectsOfType<ObstacleManager>())
+            om.enabled = true;
+        foreach (var cm in FindObjectsOfType<CollectableManager>())
+            cm.enabled = true;
+        foreach (var fx in FindObjectsOfType<SpeedZoneFeedbackFX>())
+            fx.enabled = true;
+    }
+    // -------------------------
+
     /* ???????????????????? FINISH  COROUTINE ?????????????????????? */
     IEnumerator FinishRaceSequence()
     {
-        IsRaceStarted = raceStarted = false;   // <- ? master flag
-        DisableGameplaySystems();              // <- ? helper (just below)
+        IsRaceStarted = raceStarted = false;   // master flag
+        DisableGameplaySystems();
         counting = false;
         timeLeft = 0f;
-        finalising = true;             // stop counting further
+        finalising = true;
         driverInput.enabled = false;
         gameplayHUD.alpha = 0;
+
         /* Music – gameplay OUT, lobby IN */
-        if (gameplayReverb) gameplayReverb.enabled = true;          // re-enable
+        if (gameplayReverb) gameplayReverb.enabled = true;
         StartCoroutine(FadeReverbDryLevel(gameplayReverb, 0, -10000, 3f));
         StartCoroutine(FadeAudio(gameplayMusic, gameplayMusicTargetVol, 0f, 3f));
         if (gameplayLPF) StartCoroutine(FadeLowpassCutoff(gameplayLPF, 22000, 2000, 3f));
@@ -490,7 +511,7 @@ public class PlayerJoinManager : MonoBehaviour
         var winner = passengers.Last();
         winnerText.text = $"Player {PlayerManager.Instance.GetSeatIndex(winner) + 1} WINS!";
         winnerText.alpha = 0;
-        
+
         winnerText.rectTransform.anchoredPosition = startPos;
         winnerText.gameObject.SetActive(true);
         crowdroar.Play();
@@ -503,12 +524,11 @@ public class PlayerJoinManager : MonoBehaviour
             winnerText.alpha = a;
 
             Vector2 shake = Random.insideUnitCircle * shakeMag * (1f - a * .7f);
-            winnerText.rectTransform.anchoredPosition = startPos + shake; // ? offset!
+            winnerText.rectTransform.anchoredPosition = startPos + shake;
             yield return null;
         }
         winnerText.alpha = 1f;
-        winnerText.rectTransform.anchoredPosition = startPos;            // restore
-
+        winnerText.rectTransform.anchoredPosition = startPos;
 
         /* Buttons fade-in after 1 s */
         yield return new WaitForSeconds(1f);
@@ -637,7 +657,6 @@ public class PlayerJoinManager : MonoBehaviour
             countdownGametext.transform.localScale = Vector3.one * 0.5f;
             countdownGametext.gameObject.SetActive(true);
 
-            // Play correct sound
             if (countdownGameAudio)
             {
                 if (i < 3)
@@ -646,7 +665,6 @@ public class PlayerJoinManager : MonoBehaviour
                     countdownGameAudio.PlayOneShot(gocountdown);
             }
 
-            // Pulse animation
             float elapsed = 0f;
             Vector3 targetScale = Vector3.one;
             while (elapsed < pulseDuration)
@@ -657,10 +675,8 @@ public class PlayerJoinManager : MonoBehaviour
                 yield return null;
             }
 
-            // Hold
             yield return new WaitForSeconds(pauseBetween);
 
-            // Fade out
             float fadeTime = 0.3f;
             elapsed = 0f;
             Color color = countdownGametext.color;
@@ -682,4 +698,3 @@ public class PlayerJoinManager : MonoBehaviour
 
     /* ????????????????????????????????????????????????????????????? */
 }
-

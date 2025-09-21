@@ -64376,6 +64376,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c678af36123cf2e40b56ce4d23c7e257, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  autoMissAfterSeconds: 12
   collectablePrefab: {fileID: 7260588083317533168, guid: 6b936ddf8587928478ec042578ba7da0,
     type: 3}
   maxActive: 10
@@ -64390,6 +64391,79 @@ MonoBehaviour:
     m_Bits: 64
   drawAttemptGizmos: 0
   collectableAudioPool: {fileID: 774053334}
+  useDirector: 1
+  maxActiveByDiff:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 16
+      inSlope: 0
+      outSlope: -8
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 8
+      inSlope: -8
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  intervalByDiff:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1.2
+      inSlope: 0
+      outSlope: 2.3
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 3.5
+      inSlope: 2.3
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  separationByDiff:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 6
+      inSlope: 0
+      outSlope: -2.5
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 3.5
+      inSlope: -2.5
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!114 &1311200376
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -64434,6 +64508,155 @@ MonoBehaviour:
     m_Bits: 64
   drawAttemptGizmos: 0
   obstacleAudioPool: {fileID: 562399265}
+  useDirector: 1
+  maxActiveByDiff:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 6
+      inSlope: 0
+      outSlope: 26
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 32
+      inSlope: 26
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  intervalByDiff:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 2.8
+      inSlope: 0
+      outSlope: -2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0.8
+      inSlope: -2
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  separationByDiff:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 14
+      inSlope: 0
+      outSlope: -6
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 8
+      inSlope: -6
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  dangerBiasByDiff:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 1
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 1
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  collectableMgr: {fileID: 1311200375}
+  guardProbByDiff:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.15
+      inSlope: 0
+      outSlope: 0.6
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0.75
+      inSlope: 0.6
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  guardOffsetRangeMeters: {x: 2.5, y: 6}
+  sameLaneProbByDiff:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.45
+      inSlope: 0
+      outSlope: 0.35000002
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0.8
+      inSlope: 0.35000002
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  maxGuardAge: 8
+  fallbackToRandomIfBlocked: 1
 --- !u!1001 &1311608583
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -67910,7 +68133,7 @@ MonoBehaviour:
   seatMgr: {fileID: 2111085467219387262}
   passengerPrefab: {fileID: 1174060323843766397, guid: 1affddbe7cc426c459549db87f7e1926,
     type: 3}
-  quickStartSingleDriver: 0
+  quickStartSingleDriver: 1
   driverPrefabOverride: {fileID: 5583802586414202164, guid: 5b262494d1427d94f89a6f1fca36eff5,
     type: 3}
   lobbyCountdownSeconds: 10
@@ -67940,7 +68163,7 @@ MonoBehaviour:
   first3countdown: {fileID: 8300000, guid: f00e5b6101a0e0c448b500ff0d123b50, type: 3}
   gameplayMusic: {fileID: 1818848822}
   lapsText: {fileID: 970682514}
-  lapsToFinish: 3
+  lapsToFinish: 1
   lapGateTrigger: {fileID: 1838805999}
   playerCarTag: Driver
   resultsPanel: {fileID: 64447773}
@@ -85121,6 +85344,93 @@ MonoBehaviour:
   carController: {fileID: 235637573}
   trailLifeTime: 10
   trailMinVertexDistance: 0.02
+--- !u!1 &1740066730
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1740066733}
+  - component: {fileID: 1740066732}
+  - component: {fileID: 1740066731}
+  - component: {fileID: 1740066734}
+  m_Layer: 0
+  m_Name: AI_GameDirector
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1740066731
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1740066730}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fa11ba66e25da5340b260c392a3deefc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  windowCollect: 12
+  windowObstacle: 12
+  wCollect: 1
+  wMiss: 0.7
+  wHit: 1.3
+  slope: 2.2
+  bias: 0
+  writeTotals: 1
+--- !u!114 &1740066732
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1740066730}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38629425d0c1ce74b891f7718d7f91c3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  source: 1
+  tickInterval: 0.25
+  rampPerSecond: 0.75
+  manualDifficulty: 0.5
+  gamma: 1
+--- !u!4 &1740066733
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1740066730}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -50.32742, y: 18.989128, z: -237.84245}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1740066734
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1740066730}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2428c0e1a26ebc64a97825a200a50e87, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  visible: 1
+  margin: {x: 14, y: 14}
+  uiScale: 1.8
+  percentDigits: 0
 --- !u!1001 &1743084693
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -114807,6 +115117,11 @@ MonoBehaviour:
   maxCrashDamage: 25
   debugLogs: 1
   driverChangeGrace: 3
+  stickyExitSeconds: 0.75
+  minRoundVisible: 1
+  instantStartShortWindow: 0.5
+  forceOutcomeOnExit: 1
+  forceFailEdgeThresh: 0.85
 --- !u!65 &2111085467219387260
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -116238,6 +116553,11 @@ MonoBehaviour:
   maxCrashDamage: 25
   debugLogs: 1
   driverChangeGrace: 3
+  stickyExitSeconds: 0.75
+  minRoundVisible: 1
+  instantStartShortWindow: 0.5
+  forceOutcomeOnExit: 1
+  forceFailEdgeThresh: 0.85
 --- !u!82 &4051074286637142754
 AudioSource:
   m_ObjectHideFlags: 0
@@ -120199,3 +120519,4 @@ SceneRoots:
   - {fileID: 1814685874}
   - {fileID: 1662294342}
   - {fileID: 1386248076}
+  - {fileID: 1740066733}

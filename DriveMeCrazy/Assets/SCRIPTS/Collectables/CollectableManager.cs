@@ -4,30 +4,31 @@ using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Splines;
 
-/// <summary>
-/// A "pick?up rain" spawner that ensures collectibles are randomly placed along the spline.
-/// <list type="bullet">
-///    <item>Works with any spline length / lane layout.</item>
-///    <item>No pre?allocation, no extra GameObjects, zero GC at runtime (object pool).</item>
-///    <item>Insanely simple to reason about and debug – toggle the “drawAttemptGizmos” flag and you
-///          can watch every attempted placement in real time.</item>
-/// </list>
-/// </summary>
+
 [RequireComponent(typeof(SplineContainer))]
 public class CollectableManager : MonoBehaviour
 {
-    /* ????????????????????????????? Inspector ????????????????????????????? */
+    [System.Serializable]
+    public struct CollectableMeta
+    {
+        public GameObject go;
+        public float t;         // 0..1 position on spline
+        public int lane;        // lane index
+        public float spawnTime;
+    }
+    public IReadOnlyList<CollectableMeta> ActiveMetas => _activeMeta;
+    readonly List<CollectableMeta> _activeMeta = new();
+    [Header("Fairness / expiry")]
+    public float autoMissAfterSeconds = 12f; // treat as missed opportunity
+
     [Header("Prefabs & Limits")]
     [SerializeField] GameObject collectablePrefab;
     [Min(1)][SerializeField] int maxActive = 10;
     [Min(.1f)][SerializeField] float spawnInterval = 5f;
 
     [Header("Lane & Distance Settings")]
-    [Tooltip("Reference to the lane?visualiser so we know the lane offsets.")]
-    [SerializeField] LaneLinesVisualizer laneVis;
-    [Tooltip("Minimum world?space distance allowed between two collectables.")]
+    [SerializeField] public LaneLinesVisualizer laneVis;
     [Min(.1f)] public float minSeparation = 4f;
-    [Tooltip("How many random points we’ll try per spawn tick before giving up.")]
     [Range(1, 50)] public int maxPlacementAttempts = 15;
 
     [Header("Vertical placement")]
@@ -35,24 +36,32 @@ public class CollectableManager : MonoBehaviour
     public float floatHeight = 0.5f;
     public LayerMask groundMask;
 
-    [Header("Debug ? Scene view")]
+    [Header("Debug • Scene view")]
     public bool drawAttemptGizmos = false;
 
-    /* ????????????????????????????? Private ????????????????????????????? */
     readonly List<GameObject> _pool = new();
     readonly List<GameObject> _active = new();
-
     SplineContainer _spline;
 
     [Header("Audio")]
     [SerializeField] private AudioSourcePool collectableAudioPool;
 
-    // ---- REMOVED ----
-    // No longer needed, we will use UnityEngine.Random
-    // System.Random _rng = new System.Random(); 
-    // -----------------
+    // !!! DIFFICULTY — live driving knobs
+    [Header("Dynamic Difficulty (Director)")]
+    public bool useDirector = true;
 
-    /* ???????????????? Unity lifecycle ???????????????? */
+    [Tooltip("Max collectibles active by difficulty (easier ? higher)")]
+    public AnimationCurve maxActiveByDiff = AnimationCurve.Linear(0, 16, 1, 8);
+
+    [Tooltip("Seconds between spawn attempts (easier ? spawn faster)")]
+    public AnimationCurve intervalByDiff = AnimationCurve.Linear(0, 1.2f, 1, 3.5f);
+
+    [Tooltip("Minimum spacing (easier ? spread out more)")]
+    public AnimationCurve separationByDiff = AnimationCurve.Linear(0, 6f, 1, 3.5f);
+
+    // smoothers
+    float _curInterval, _curSeparation, _curMaxActive;
+
     void Awake()
     {
         if (!collectablePrefab) { Debug.LogError("CollectableManager: Prefab missing"); enabled = false; return; }
@@ -64,7 +73,6 @@ public class CollectableManager : MonoBehaviour
         StartCoroutine(SpawnLoop());
     }
 
-    /* ???????????????? Pool ???????????????? */
     void BuildPool()
     {
         for (int i = 0; i < maxActive; ++i)
@@ -74,7 +82,7 @@ public class CollectableManager : MonoBehaviour
             if (go.TryGetComponent(out Collectable col))
             {
                 col.manager = this;
-                col.audioPool = collectableAudioPool;   // <? add this
+                col.audioPool = collectableAudioPool;
             }
             _pool.Add(go);
         }
@@ -82,30 +90,67 @@ public class CollectableManager : MonoBehaviour
 
     GameObject NextPooled()
     {
-        foreach (var g in _pool)
-            if (!g.activeInHierarchy) return g;
+        foreach (var g in _pool) if (!g.activeInHierarchy) return g;
         return null;
     }
 
-    /* ???????????????? Spawn loop ???????????????? */
+    // !!! DIFFICULTY — apply curves & smoothing
+    void ApplyDifficulty(float diff, float dt)
+    {
+        if (!useDirector) return;
+
+        float targetMax = Mathf.Clamp(maxActiveByDiff.Evaluate(diff), 1f, 999f);
+        float targetInt = Mathf.Max(0.15f, intervalByDiff.Evaluate(diff));
+        float targetSep = Mathf.Max(0.5f, separationByDiff.Evaluate(diff));
+
+        float k = 1f - Mathf.Exp(-5f * dt);   // smoothing factor (0..1)
+
+        _curMaxActive = Mathf.Lerp(_curMaxActive <= 0 ? maxActive : _curMaxActive, targetMax, k);
+        _curInterval = Mathf.Lerp(_curInterval <= 0 ? spawnInterval : _curInterval, targetInt, k);
+        _curSeparation = Mathf.Lerp(_curSeparation <= 0 ? minSeparation : _curSeparation, targetSep, k);
+
+        maxActive = Mathf.RoundToInt(_curMaxActive);
+        spawnInterval = _curInterval;
+        minSeparation = _curSeparation;
+    }
+
 
     IEnumerator SpawnLoop()
     {
-        var wait = new WaitForSeconds(spawnInterval);
-        // 1) Hold fire until the countdown is over
-        while (!PlayerJoinManager.IsRaceStarted)
-            yield return wait;
+        while (!PlayerJoinManager.IsRaceStarted) yield return null;
 
-        // 2) Main loop – keep running as long as the component is enabled
         while (enabled)
         {
+            float diff = DifficultyDirector.Instance ? DifficultyDirector.Instance.Current.target : 0.5f;
+            ApplyDifficulty(diff, Time.deltaTime);
+
             if (_active.Count < maxActive)
                 TrySpawn();
 
-            yield return wait;      // throttle spawn rate
+            if (autoMissAfterSeconds > 0f)
+            {
+                for (int i = _activeMeta.Count - 1; i >= 0; --i)
+                {
+                    if (Time.time - _activeMeta[i].spawnTime > autoMissAfterSeconds)
+                    {
+                        // treat as missed; despawn
+                        var go = _activeMeta[i].go;
+                        if (go && go.activeInHierarchy)
+                        {
+                            go.SetActive(false);
+                            _active.Remove(go);
+                        }
+                        _activeMeta.RemoveAt(i);
+                        if (SkillEstimator.Instance) SkillEstimator.Instance.OnCollectibleMissed();
+                    }
+                }
+            }
+            // per-iteration wait (runtime changes take effect)
+            float wait = Mathf.Max(0.05f, spawnInterval);
+            float t = 0f;
+            while (t < wait) { t += Time.deltaTime; yield return null; }
 
-            // optional: stop automatically when the race ends
-            if (!PlayerJoinManager.IsRaceStarted)       // finish line reached
+            if (!PlayerJoinManager.IsRaceStarted)
                 yield break;
         }
     }
@@ -113,7 +158,7 @@ public class CollectableManager : MonoBehaviour
     void TrySpawn()
     {
         var go = NextPooled();
-        if (!go) return; // shouldn’t happen
+        if (!go) return;
 
         Spline spline = _spline.Spline;
         float len = spline.GetLength();
@@ -121,20 +166,13 @@ public class CollectableManager : MonoBehaviour
 
         for (int attempt = 0; attempt < maxPlacementAttempts; ++attempt)
         {
-            // ---- MODIFIED ----
-            // pick random point along spline using Unity's Random class
-            float t = UnityEngine.Random.value; // Random.value is a float between 0.0 and 1.0
-                                    // ------------------
-
+            float t = UnityEngine.Random.value;
             SplineUtility.Evaluate(spline, t, out float3 lp, out float3 lt, out _);
             Vector3 wp = transform.TransformPoint(lp);
             Vector3 wt = transform.TransformDirection(math.normalize(lt));
             Vector3 right = Vector3.Cross(Vector3.up, wt).normalized;
 
-            // ---- MODIFIED ----
-            // pick random lane using Unity's Random class
             int laneIdx = UnityEngine.Random.Range(0, laneVis.laneOffsets.Length);
-            // ------------------
             float offset = laneVis.laneOffsets[laneIdx];
 
             Vector3 candidate = wp + right * offset + Vector3.up * rayHeight;
@@ -145,19 +183,18 @@ public class CollectableManager : MonoBehaviour
 
             if (IsFarEnough(candidate))
             {
-                // success !
                 go.transform.SetPositionAndRotation(candidate, Quaternion.LookRotation(wt, Vector3.up));
                 go.SetActive(true);
                 _active.Add(go);
+                _activeMeta.Add(new CollectableMeta { go = go, t = t, lane = laneIdx, spawnTime = Time.time });
 
-                if (drawAttemptGizmos)
-                    DebugDraw(candidate, Color.green);
+                // NEW: telemetry
+                if (SkillEstimator.Instance) SkillEstimator.Instance.OnCollectibleSpawned();
+                if (drawAttemptGizmos) DebugDraw(candidate, Color.green);
                 return;
             }
-            else if (drawAttemptGizmos)
-                DebugDraw(candidate, Color.red);
+            else if (drawAttemptGizmos) DebugDraw(candidate, Color.red);
         }
-        // failed after N attempts – just wait for next frame.
     }
 
     bool IsFarEnough(Vector3 p)
@@ -172,15 +209,22 @@ public class CollectableManager : MonoBehaviour
     void DebugDraw(Vector3 p, Color c)
     {
 #if UNITY_EDITOR
-        UnityEngine.Debug.DrawLine(p, p + Vector3.up * 3f, c, spawnInterval * 0.9f);
+        Debug.DrawLine(p, p + Vector3.up * 3f, c, 0.9f);
 #endif
     }
 
-    /* ???????????????? Called by Collectable.cs ???????????????? */
     public void ReturnCollectableToPool(GameObject g)
     {
         if (!g) return;
         g.SetActive(false);
         _active.Remove(g);
+
+        // remove meta
+        for (int i = _activeMeta.Count - 1; i >= 0; --i)
+            if (_activeMeta[i].go == g) { _activeMeta.RemoveAt(i); break; }
+
+        // telemetry: treat this path as "collected"
+        if (SkillEstimator.Instance) SkillEstimator.Instance.OnCollectibleCollected();
     }
+
 }

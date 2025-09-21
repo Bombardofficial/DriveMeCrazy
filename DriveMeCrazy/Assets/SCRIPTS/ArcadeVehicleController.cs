@@ -230,6 +230,36 @@ namespace ArcadeVP
        public float driverChangeGrace = 3f;      // inspector-tweakable
 
        float ignoreOverspeedUntil = 0f;          // runtime timer
+
+        [Header("Mini-game – corner/zone robustness")]
+        [Tooltip("Keep the zone logically active this long after leaving the trigger.")]
+        public float stickyExitSeconds = 0.75f;
+
+        [Tooltip("Once the round begins, guarantee at least this much visible time.")]
+        public float minRoundVisible = 1.0f;
+
+        [Tooltip("If the remaining window is shorter than this, skip pre-cue & pop instantly.")]
+        public float instantStartShortWindow = 0.50f;
+
+        [Tooltip("When sticky time ends, auto decide: PASS if inside, FAIL if near edge.")]
+        public bool forceOutcomeOnExit = true;
+
+        [Range(0.6f, 1f), Tooltip("Edge threshold for forced FAIL at sticky end.")]
+        public float forceFailEdgeThresh = 0.85f;
+
+        // zone timing
+        float zoneEnterTime = -1f;
+        bool zoneExiting = false;
+        float zoneStickyUntil = -1f;
+
+        // round timing
+        float roundStartTime = -1f;
+
+        // temp UI tuning for instant pop
+        float _origFadeInSpeed = -1f;
+
+        public float TrackTNormalized => (splineLength > 0f) ? (traveledDistance / splineLength) : 0f;
+
         void AbortAllSpeedZoneStuff()
         {
             // stop pending "arm" (pre-cue) so it can’t fire
@@ -251,20 +281,43 @@ namespace ArcadeVP
 
         public void EnterSpeedLimit(float limitMps, int signIndex)
         {
-            if (!PlayerJoinManager.IsRaceStarted) return; // NEW
+            if (!PlayerJoinManager.IsRaceStarted) return;
 
+            // Always update current zone metadata
             activeSpeedLimit = limitMps;
             activeSignIndex = signIndex;
 
-            // Reset per-zone state
+            // Mark zone entry and cancel any pending exit
+            zoneEnterTime = Time.time;
+            zoneExiting = false;
+            zoneStickyUntil = -1f;
+
+            // CARRY-OVER: if a round is active OR the gauge is still visible,
+            // we DO NOT reset / re-arm — we just pop the current UI back in and continue.
+            bool gaugeIsVisible = balanceUI && balanceUI.IsVisible;
+            if (balanceActive || gaugeIsVisible)
+            {
+                // Keep the ongoing round and UI state (pointer, zone, difficulty).
+                if (balanceUI) balanceUI.PopBackIn(); // quick fade-in if it was fading out
+                if (speedLimitUI)
+                {
+                    // Still OK to update the sign visuals if you want (no harm)
+                    speedLimitUI.gameObject.SetActive(true);
+                    speedLimitUI.Show(signIndex);
+                }
+
+                // Nothing else — DO NOT call StartBalanceMiniGame here.
+                Debug.Log("[SpeedZone] ENTER (carry-over) — continuing same mini-game round");
+                return;
+            }
+
+            // Otherwise: normal fresh-entry housekeeping (as before)
             miniGamePlayedThisZone = false;
             overspeedTimer = 0f;
 
-            // Kill any stray gauge if it was left visible for any reason
             if (balanceUI && balanceUI.IsVisible) balanceUI.End();
             balanceActive = false;
 
-            // Speed-limit sign
             if (speedLimitUI)
             {
                 speedLimitUI.gameObject.SetActive(true);
@@ -273,8 +326,10 @@ namespace ArcadeVP
 
             Debug.Log($"ENTER zone  limit={limitMps:0.00}  speed={speed:0.0}");
 
-            // We require a sustained overspeed check inside Update() only.
+            // We still rely on Update() overspeed sustain to trigger StartBalanceMiniGame
         }
+
+
 
         void CheckOverspeedImmediate()
         {
@@ -289,26 +344,17 @@ namespace ArcadeVP
 
         public void ExitSpeedLimit()
         {
-            if (activeSpeedLimit <= 0f) return; // guard double-calls
+            if (activeSpeedLimit <= 0f && !zoneExiting) return; // guard
 
-            // Clear zone state
-            activeSpeedLimit = 0f;
-            activeSignIndex = -1;
-            overspeedTimer = 0f;
-            // do NOT reset miniGamePlayedThisZone here? we’re leaving the zone anyway
-            // but safe to clear:
-            miniGamePlayedThisZone = false;
-            ignoreOverspeedUntil = 0f;
+            // Start sticky window so the mini-game can still matter briefly
+            zoneExiting = true;
+            zoneStickyUntil = Time.time + stickyExitSeconds;
 
-            // Always hide both UIs
-            if (speedLimitUI) speedLimitUI.Show(-1);
-            if (balanceUI && balanceUI.IsVisible) balanceUI.End();
-
-            // Ensure flag is off
-            balanceActive = false;
-
-            Debug.Log("[SpeedZone]  EXIT (forced UI fade-out)");
+            // DO NOT immediately zero activeSpeedLimit or hide UI;
+            // let Update() finalize when sticky ends, or when the round ends.
+            Debug.Log("[SpeedZone] EXIT -> sticky active for " + stickyExitSeconds + "s");
         }
+
 
         void EnsureGaugeHiddenWhenNotActive()
         {
@@ -413,13 +459,17 @@ namespace ArcadeVP
                 activeSpeedLimit = 0f; // ensures inZone == false below
             }
 
-            bool inZone = activeSpeedLimit > 0f;
+            bool inZone = (activeSpeedLimit > 0f)
+           || (zoneExiting && Time.time < zoneStickyUntil)
+           || balanceActive; // keep logic alive during an active round
             if (!inZone) { EnsureGaugeHiddenWhenNotActive(); }
 
             float dt = Time.deltaTime;
 
             float tolFactor = 1f + speedOvershootTolerance;
-            bool overspeedEligible = inZone && (Time.time >= (ignoreOverspeedUntil + extraGraceAfterSwap));
+            bool overspeedEligible = (activeSpeedLimit > 0f)
+                      && inZone
+                      && (Time.time >= (ignoreOverspeedUntil + extraGraceAfterSwap));
             bool isOverspeeding = overspeedEligible && (Mathf.Abs(speed) > activeSpeedLimit * tolFactor);
 
             if (overspeedEligible && !miniGamePlayedThisZone)
@@ -453,6 +503,61 @@ namespace ArcadeVP
                 }
                 // else: do nothing gameplay-wise during fade-in
             }
+
+            // --- Robust end-of-zone handling ---
+            if (balanceActive)
+            {
+                // If sticky window is ending, but round hasn’t been visible long enough, extend sticky
+                float visibleSoFar = Mathf.Max(0f, Time.time - roundStartTime);
+                if (zoneExiting && Time.time >= zoneStickyUntil && visibleSoFar < minRoundVisible)
+                {
+                    zoneStickyUntil = Time.time + (minRoundVisible - visibleSoFar);
+                }
+
+                // If sticky truly ended now, force a clean outcome
+                if (zoneExiting && Time.time >= zoneStickyUntil)
+                {
+                    if (forceOutcomeOnExit)
+                    {
+                        bool outsideNow = balanceUI ? balanceUI.IsOutside(balanceVal) : false;
+                        bool edgeFail = Mathf.Abs(balanceVal) >= forceFailEdgeThresh;
+                        if (edgeFail) { EndBalanceMiniGame(MiniGameOutcome.Fail, fullCrash: true); }
+                        else if (outsideNow) { EndBalanceMiniGame(MiniGameOutcome.Fail, fullCrash: false); }
+                        else
+                        {
+                            // reward good control
+                            if (centreStreakTimer >= perfectHoldTime)
+                                EndBalanceMiniGame(MiniGameOutcome.Perfect, fullCrash: false);
+                            else
+                                EndBalanceMiniGame(MiniGameOutcome.Pass, fullCrash: false);
+                        }
+                    }
+                    else
+                    {
+                        EndBalanceMiniGame(MiniGameOutcome.Pass, fullCrash: false);
+                    }
+                }
+            }
+            else
+            {
+                // If no round is active and sticky elapsed, finalize true exit now
+                if (zoneExiting && Time.time >= zoneStickyUntil)
+                {
+                    // Now we truly leave the zone
+                    activeSpeedLimit = 0f;
+                    activeSignIndex = -1;
+                    overspeedTimer = 0f;
+                    miniGamePlayedThisZone = false;
+                    ignoreOverspeedUntil = 0f;
+                    zoneExiting = false;
+
+                    if (speedLimitUI) speedLimitUI.Show(-1);
+                    if (balanceUI && balanceUI.IsVisible) balanceUI.End();
+
+                    Debug.Log("[SpeedZone] sticky ended -> EXIT finalized");
+                }
+            }
+
 
             ApplyCornerDrag(dt);
             /*???????????????? 3. normal driving logic continues ???????*/
@@ -552,7 +657,20 @@ namespace ArcadeVP
             if (!PlayerJoinManager.IsRaceStarted) yield break; // NEW
             // pre-cue: sign pop + beep
             float pre = UnityEngine.Random.Range(preCueRange.x, preCueRange.y);
-            if (speedLimitUI) speedLimitUI.PlayPreCue(pre);
+
+            // If we’re already exiting and the pre-cue wouldn’t fit, skip it
+            if (zoneExiting && (Time.time + pre > zoneStickyUntil))
+                pre = 0f;
+
+            // Also: if the remaining window is tiny, pop instantly (no pre-cue, fast fade)
+            float remainingWindow = (zoneExiting ? Mathf.Max(0f, zoneStickyUntil - Time.time) : 999f);
+            bool instant = remainingWindow <= instantStartShortWindow;
+            if (instant) pre = 0f;
+
+            if (speedLimitUI && pre > 0f) speedLimitUI.PlayPreCue(pre);
+
+            if (zoneExiting)
+                zoneStickyUntil = Mathf.Max(zoneStickyUntil, Time.time + pre + minRoundVisible);
 
             // small wait (unscaled to feel consistent under hitches)
             float t = 0f;
@@ -560,12 +678,17 @@ namespace ArcadeVP
 
             if (!PlayerJoinManager.IsRaceStarted) yield break; // NEW
 
+            if (instant && balanceUI)
+            {
+                if (_origFadeInSpeed < 0f) _origFadeInSpeed = balanceUI.fadeInSpeed;
+                balanceUI.fadeInSpeed = 99f; // pop in
+            }
             // actually show the gauge (will fade in)
             if (balanceUI)
             {
                 balanceUI.Begin(green);
             }
-
+            roundStartTime = Time.time;
             balanceActive = true;      // gameplay starts once IsFullyVisible in Update
             isDrifting = false;        // we’ll enable it only when readable
             armCR = null;
@@ -669,7 +792,11 @@ namespace ArcadeVP
                     else TriggerSpeedStumble(); // mild spin/slow
                     break;
             }
-
+            if (_origFadeInSpeed > 0f && balanceUI)
+            {
+                balanceUI.fadeInSpeed = _origFadeInSpeed;
+                _origFadeInSpeed = -1f;
+            }
             if (debugLogs) Debug.Log($"[Car] MINI-GAME END ? {outcome}");
         }
 

@@ -67,7 +67,7 @@ public class Obstacle : MonoBehaviour
             {
                 playerDamage.InflictDamage(damageToInflict);
             }
-
+            if (SkillEstimator.Instance) SkillEstimator.Instance.OnObstacleHit();
             // 2. --- REVISED AND CORRECTED FORCE CALCULATION ---
             Vector3 carVelocity = carController.CurrentVelocity;
 

@@ -9,76 +9,174 @@ using UnityEngine.Splines;
 public class ObstacleType
 {
     public GameObject prefab;
-    [Tooltip("How much damage this obstacle inflicts on the player.")]
     [Range(1, 100)] public int damage = 10;
-    [Tooltip("A higher number means a higher chance of spawning. E.g., a weight of 75 is 3x more likely to spawn than a weight of 25.")]
     [Range(1, 100)] public int spawnWeight = 50;
 }
 
-/// <summary>
-/// Spawns and manages a variety of physics-based obstacles on the spline track.
-/// It uses a weighted random system to spawn different types of obstacles and
-/// includes logic for progressively increasing difficulty over time.
-/// </summary>
 [RequireComponent(typeof(SplineContainer))]
 public class ObstacleManager : MonoBehaviour
 {
-    /* ????????????????????????????? Inspector ????????????????????????????? */
     [Header("Obstacle Configuration")]
-    [Tooltip("Define the different types of obstacles that can spawn.")]
     [SerializeField] private ObstacleType[] obstacleTypes;
 
     [Header("Prefabs & Limits")]
-    [Tooltip("The total number of obstacles this spawner will ever create for the pool across all types.")]
     [Min(1)][SerializeField] int poolSize = 50;
     [Min(.1f)][SerializeField] float spawnInterval = 2f;
 
     [Header("Lane & Distance Settings")]
-    [Tooltip("Reference to the lane-visualiser so we know the lane offsets.")]
     [SerializeField] private LaneLinesVisualizer laneVis;
-    [Tooltip("Minimum world-space distance allowed between two obstacles when spawning.")]
     [Min(1f)] public float minSeparation = 10f;
-    [Tooltip("How many random points we’ll try per spawn tick before giving up.")]
     [Range(1, 50)] public int maxPlacementAttempts = 15;
 
-    [Header("Difficulty Scaling")]
-    [Tooltip("The number of obstacles allowed on screen at the start.")]
+    [Header("Difficulty Scaling (legacy auto)")]
     [SerializeField] private int initialMaxActive = 5;
-    [Tooltip("The absolute maximum number of obstacles allowed on screen at peak difficulty.")]
     [SerializeField] private int maxActiveCap = 40;
-    [Tooltip("How often (in seconds) to increase the difficulty.")]
     [SerializeField] private float increaseInterval = 20f;
-    [Tooltip("How many more obstacles to allow each time the difficulty increases.")]
     [SerializeField] private int increaseAmount = 2;
 
     [Header("Vertical placement")]
-    [Tooltip("How high above the spline we start the raycast to find the ground.")]
-    public float raycastHeight = 10f; // Increased for safety
+    public float raycastHeight = 10f;
     public LayerMask groundMask;
 
-    [Header("Debug ? Scene view")]
+    [Header("Debug • Scene view")]
     public bool drawAttemptGizmos = false;
 
-    /* ????????????????????????????? Private ????????????????????????????? */
-    private Dictionary<GameObject, List<GameObject>> _pool = new Dictionary<GameObject, List<GameObject>>();
+    private Dictionary<GameObject, List<GameObject>> _pool = new();
     private readonly List<GameObject> _active = new();
     private SplineContainer _spline;
     private int _currentMaxActive;
-    private int _totalSpawnWeight;
+    private int _totalBaseWeight;
 
     [Header("Audio")]
     [SerializeField] private AudioSourcePool obstacleAudioPool;
+
+    // !!! DIFFICULTY — live driving knobs
+    [Header("Dynamic Difficulty (Director)")]
+    public bool useDirector = true;
+
+    [Tooltip("Active obstacles allowed by difficulty. x=0?min, x=1?max")]
+    public AnimationCurve maxActiveByDiff = AnimationCurve.Linear(0, 6, 1, 32);
+
+    [Tooltip("Seconds between spawn attempts by difficulty (smaller is harder)")]
+    public AnimationCurve intervalByDiff = AnimationCurve.Linear(0, 2.8f, 1, 0.8f);
+
+    [Tooltip("Minimum distance between obstacles by difficulty (smaller is harder)")]
+    public AnimationCurve separationByDiff = AnimationCurve.Linear(0, 14f, 1, 8f);
+
+    [Tooltip("Bias toward dangerous obstacles (by damage). 0=no bias, 1=max bias.")]
+    public AnimationCurve dangerBiasByDiff = AnimationCurve.Linear(0, 0f, 1, 1f);
+
+
+    // Strategic placement
+    [Header("Strategic Placement (uses CollectableManager metadata)")]
+    public CollectableManager collectableMgr;
+    [Tooltip("0=never strategic, 1=always strategic spawn when possible")]
+    public AnimationCurve guardProbByDiff = AnimationCurve.Linear(0, 0.15f, 1, 0.75f);
+
+    [Tooltip("Meters before (+) / after (-) collectible to place obstacle (random within range)")]
+    public Vector2 guardOffsetRangeMeters = new Vector2(2.5f, 6.0f);
+
+    [Range(0f, 1f), Tooltip("Probability to use the SAME lane as the collectible (else neighbor)")]
+    public AnimationCurve sameLaneProbByDiff = AnimationCurve.Linear(0, 0.45f, 1, 0.8f);
+
+    [Tooltip("Max collectible age (s) to consider for guarding (prevents guarding fossils).")]
+    public float maxGuardAge = 8f;
+
+    [Tooltip("If true, treat strategic spawn failure as a regular random spawn fallback.")]
+    public bool fallbackToRandomIfBlocked = true;
+
+    float DtFromMeters(Spline spline, float meters)
+    {
+        float len = spline.GetLength();
+        if (len <= 0.001f) return 0f;
+        return meters / len;
+    }
+    // cache of live weights (per type)
+    float[] _liveWeights;
+
+    // smoothers
+    float _curInterval;
+    float _curSeparation;
+    float _curMaxActive;
+
     void Awake()
     {
         if (obstacleTypes == null || obstacleTypes.Length == 0) { Debug.LogError("ObstacleManager: No Obstacle Types defined!"); enabled = false; return; }
         _spline = GetComponent<SplineContainer>();
         if (!laneVis) laneVis = GetComponent<LaneLinesVisualizer>();
         if (!laneVis) { Debug.LogError("ObstacleManager: LaneLinesVisualizer ref missing"); enabled = false; return; }
+
         _currentMaxActive = initialMaxActive;
-        _totalSpawnWeight = obstacleTypes.Sum(t => t.spawnWeight);
+        _totalBaseWeight = obstacleTypes.Sum(t => t.spawnWeight);
+        _liveWeights = obstacleTypes.Select(t => (float)t.spawnWeight).ToArray();
+
         BuildPool();
         StartCoroutine(SpawnLoop());
-        StartCoroutine(IncreaseDifficultyLoop());
+
+        // legacy auto-increase can be left ON if !useDirector
+        if (!useDirector)
+            StartCoroutine(IncreaseDifficultyLoop());
+    }
+
+
+    bool TrySpawnStrategic(float diff)
+    {
+        if (!collectableMgr) return false;
+        var metas = collectableMgr.ActiveMetas;
+        if (metas == null || metas.Count == 0) return false;
+
+        // choose a fresh collectible to guard
+        int start = UnityEngine.Random.Range(0, metas.Count);
+        Spline spline = _spline.Spline;
+
+        for (int step = 0; step < metas.Count; ++step)
+        {
+            var m = metas[(start + step) % metas.Count];
+            if (!m.go || !m.go.activeInHierarchy) continue;
+            if (Time.time - m.spawnTime > maxGuardAge) continue;
+
+            // pick offset (before or after)
+            float meters = UnityEngine.Random.Range(guardOffsetRangeMeters.x, guardOffsetRangeMeters.y);
+            bool before = UnityEngine.Random.value < 0.65f;       // bias to “before” collectible
+            float dt = DtFromMeters(spline, meters) * (before ? -1f : +1f);
+            float t2 = Mathf.Repeat(m.t + dt, 1f);
+
+            // Evaluate world pos/orientation
+            SplineUtility.Evaluate(spline, t2, out float3 lp2, out float3 lt2, out _);
+            Vector3 wp2 = transform.TransformPoint(lp2);
+            Vector3 wt2 = transform.TransformDirection(math.normalize(lt2));
+            Vector3 right2 = Vector3.Cross(Vector3.up, wt2).normalized;
+
+            // choose lane
+            float pSame = Mathf.Clamp01(sameLaneProbByDiff.Evaluate(diff));
+            int lane = (UnityEngine.Random.value < pSame) ? m.lane :
+                       Mathf.Clamp(m.lane + (UnityEngine.Random.value < 0.5f ? -1 : +1), 0, collectableMgr.laneVis.laneOffsets.Length - 1);
+            float offset = collectableMgr.laneVis.laneOffsets[lane];
+
+            // vertical ray to ground
+            Vector3 rayStart = wp2 + right2 * offset + Vector3.up * raycastHeight;
+            if (!Physics.Raycast(rayStart, Vector3.down, out var hit, raycastHeight * 2f, groundMask))
+                continue;
+
+            Vector3 finalPos = hit.point + Vector3.up * 0.5f;
+
+            if (!IsFarEnough(finalPos)) continue;
+
+            // choose type with live weights
+            ObstacleType type = GetRandomObstacleType(diff);
+            var go = NextPooled(type.prefab);
+            if (!go) return false;
+
+            go.transform.SetPositionAndRotation(finalPos, Quaternion.LookRotation(wt2, Vector3.up));
+            go.SetActive(true);
+            _active.Add(go);
+            // telemetry
+            if (SkillEstimator.Instance) SkillEstimator.Instance.OnObstacleSpawned();
+
+            if (drawAttemptGizmos) DebugDraw(finalPos, Color.yellow);
+            return true;
+        }
+        return false;
     }
 
     IEnumerator IncreaseDifficultyLoop()
@@ -96,7 +194,7 @@ public class ObstacleManager : MonoBehaviour
         float totalWeight = obstacleTypes.Sum(t => t.spawnWeight);
         foreach (var type in obstacleTypes)
         {
-            List<GameObject> subPool = new List<GameObject>();
+            List<GameObject> subPool = new();
             _pool.Add(type.prefab, subPool);
             int amountToCreate = Mathf.RoundToInt((type.spawnWeight / totalWeight) * poolSize);
             for (int i = 0; i < amountToCreate; ++i)
@@ -119,49 +217,98 @@ public class ObstacleManager : MonoBehaviour
         if (_pool.TryGetValue(prefab, out var subPool))
         {
             foreach (var go in subPool)
-            {
                 if (!go.activeInHierarchy) return go;
-            }
         }
         return null;
     }
 
-    ObstacleType GetRandomObstacleType()
+    // !!! DIFFICULTY — compute live weights (bias toward higher-damage prefabs)
+    void RefreshLiveWeights(float diff)
     {
-        int randomWeight = UnityEngine.Random.Range(0, _totalSpawnWeight);
-        foreach (var type in obstacleTypes)
+        float bias = Mathf.Clamp01(dangerBiasByDiff.Evaluate(diff));
+        float maxDamage = Mathf.Max(1, obstacleTypes.Max(t => t.damage));
+        for (int i = 0; i < obstacleTypes.Length; i++)
         {
-            if (randomWeight < type.spawnWeight)
-                return type;
-            randomWeight -= type.spawnWeight;
+            float baseW = Mathf.Max(1, obstacleTypes[i].spawnWeight);
+            float danger01 = obstacleTypes[i].damage / maxDamage;
+            // Lerp: base weight ? emphasize more dangerous ones as diff grows
+            _liveWeights[i] = baseW * Mathf.Lerp(1f, Mathf.Lerp(0.6f, 2.0f, danger01), bias);
+        }
+    }
+
+    // !!! DIFFICULTY — weighted pick using _liveWeights
+    ObstacleType GetRandomObstacleType(float diff)
+    {
+        if (useDirector) RefreshLiveWeights(diff);
+
+        float total = useDirector ? _liveWeights.Sum() : _totalBaseWeight;
+        float pick = UnityEngine.Random.Range(0f, total);
+        float acc = 0f;
+
+        for (int i = 0; i < obstacleTypes.Length; i++)
+        {
+            float w = useDirector ? _liveWeights[i] : obstacleTypes[i].spawnWeight;
+            acc += w;
+            if (pick <= acc) return obstacleTypes[i];
         }
         return obstacleTypes[obstacleTypes.Length - 1];
     }
 
+    // !!! DIFFICULTY — apply curves & smoothing
+    void ApplyDifficulty(float diff, float dt)
+    {
+        if (!useDirector) return;
+
+        float targetMax = Mathf.Clamp(maxActiveByDiff.Evaluate(diff), 1f, maxActiveCap);
+        float targetInt = Mathf.Max(0.15f, intervalByDiff.Evaluate(diff));
+        float targetSep = Mathf.Max(2f, separationByDiff.Evaluate(diff));
+
+        float k = 1f - Mathf.Exp(-5f * dt);   // smoothing factor (0..1)
+
+        _curMaxActive = Mathf.Lerp(_curMaxActive <= 0 ? initialMaxActive : _curMaxActive, targetMax, k);
+        _curInterval = Mathf.Lerp(_curInterval <= 0 ? spawnInterval : _curInterval, targetInt, k);
+        _curSeparation = Mathf.Lerp(_curSeparation <= 0 ? minSeparation : _curSeparation, targetSep, k);
+
+        _currentMaxActive = Mathf.RoundToInt(_curMaxActive);
+        spawnInterval = _curInterval;
+        minSeparation = _curSeparation;
+    }
+
+
     IEnumerator SpawnLoop()
     {
-        var wait = new WaitForSeconds(spawnInterval);
-        // 1) Hold fire until the countdown is over
-        while (!PlayerJoinManager.IsRaceStarted)
-            yield return wait;
+        // Wait for race start
+        while (!PlayerJoinManager.IsRaceStarted) yield return null;
 
-        // 2) Main loop – keep running as long as the component is enabled
+        // Main loop
         while (enabled)
         {
+            float diff = DifficultyDirector.Instance ? DifficultyDirector.Instance.Current.target : 0.5f;
+            ApplyDifficulty(diff, Time.deltaTime);
+
             if (_active.Count < _currentMaxActive)
-                TrySpawn();
+            {
+                // strategic decision
+                float guardP = Mathf.Clamp01(guardProbByDiff.Evaluate(diff));
+                bool didStrategic = false;
+                if (UnityEngine.Random.value < guardP)
+                    didStrategic = TrySpawnStrategic(diff);
 
-            yield return wait;      // throttle spawn rate
+                if (!didStrategic) TrySpawn(diff);
+            }
 
-            // optional: stop automatically when the race ends
-            if (!PlayerJoinManager.IsRaceStarted)       // finish line reached
-                yield break;
+            // !!! DIFFICULTY — per-iteration wait so runtime changes take effect
+            float wait = Mathf.Max(0.05f, spawnInterval);
+            float t = 0f;
+            while (t < wait) { t += Time.deltaTime; yield return null; }
+
+            if (!PlayerJoinManager.IsRaceStarted) yield break;
         }
     }
 
-    void TrySpawn()
+    void TrySpawn(float diff)
     {
-        ObstacleType typeToSpawn = GetRandomObstacleType();
+        ObstacleType typeToSpawn = GetRandomObstacleType(diff);
         var go = NextPooled(typeToSpawn.prefab);
         if (!go) return;
 
@@ -179,34 +326,28 @@ public class ObstacleManager : MonoBehaviour
             int laneIdx = UnityEngine.Random.Range(0, laneVis.laneOffsets.Length);
             float offset = laneVis.laneOffsets[laneIdx];
 
-            // ---- MODIFIED SPAWN LOGIC ----
-            // 1. Define the starting point of our raycast, high above the track.
-            Vector3 raycastStartPoint = wp + right * offset + Vector3.up * raycastHeight;
-            Vector3 finalSpawnPosition;
+            Vector3 rayStart = wp + right * offset + Vector3.up * raycastHeight;
+            Vector3 finalPos;
 
-            // 2. Raycast down to find the ground.
-            if (Physics.Raycast(raycastStartPoint, Vector3.down, out var hit, raycastHeight * 2f, groundMask))
+            if (Physics.Raycast(rayStart, Vector3.down, out var hit, raycastHeight * 2f, groundMask))
             {
-                // 3. Set the final position 0.5 units ABOVE the point of impact.
-                finalSpawnPosition = hit.point + Vector3.up * 0.5f;
+                finalPos = hit.point + Vector3.up * 0.5f;
             }
             else
             {
-                // If we don't hit the ground (unlikely on a closed track), skip this attempt.
                 continue;
             }
-            // ------------------------------
 
-            if (IsFarEnough(finalSpawnPosition))
+            if (IsFarEnough(finalPos))
             {
-                go.transform.SetPositionAndRotation(finalSpawnPosition, Quaternion.LookRotation(wt, Vector3.up));
+                go.transform.SetPositionAndRotation(finalPos, Quaternion.LookRotation(wt, Vector3.up));
                 go.SetActive(true);
                 _active.Add(go);
-                if (drawAttemptGizmos) DebugDraw(finalSpawnPosition, Color.magenta);
+                if (drawAttemptGizmos) DebugDraw(finalPos, Color.magenta);
                 return;
             }
             else if (drawAttemptGizmos)
-                DebugDraw(finalSpawnPosition, Color.red);
+                DebugDraw(finalPos, Color.red);
         }
     }
 
@@ -229,7 +370,7 @@ public class ObstacleManager : MonoBehaviour
     void DebugDraw(Vector3 p, Color c)
     {
 #if UNITY_EDITOR
-        Debug.DrawLine(p, p + Vector3.up * 3f, c, spawnInterval * 0.9f);
+        Debug.DrawLine(p, p + Vector3.up * 3f, c, 0.9f);
 #endif
     }
 }
