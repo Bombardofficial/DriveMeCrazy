@@ -62,6 +62,67 @@ public class CollectableManager : MonoBehaviour
     // smoothers
     float _curInterval, _curSeparation, _curMaxActive;
 
+    [Header("Fairness")]
+    [Tooltip("Meters ahead of the car where collectibles will not spawn.")]
+    public float playerSafeAheadMeters = 14f;
+    [Tooltip("Meters behind the car where collectibles will not spawn.")]
+    public float playerSafeBehindMeters = 5f;
+    [Tooltip("Minimum meters between a collectible and any obstacle.")]
+    public float minCrossSeparationMeters = 3.0f;
+
+    public ArcadeVP.ArcadeVehicleController player;  // assign in inspector
+    public ObstacleManager obstacleMgr;               // assign in inspector
+
+    [Header("Fairness • track-relative expiry")]
+    [Tooltip("Meters behind the player at which a collectible is considered missed and despawned.")]
+    public float despawnBehindMeters = 10f;
+
+    [Tooltip("While the item is within this many meters AHEAD of the player, never expire it due to age.")]
+    public float protectAheadMeters = 45f;
+
+    [Tooltip("Hard cleanup: if older than this AND far away (ahead or behind), despawn without counting a miss.")]
+    public float hardMaxLifetimeSeconds = 30f;
+
+
+    float ArcLen() => _spline.Spline.GetLength();
+
+    /// <summary> +meters if b is ahead of a on the spline, -meters if behind </summary>
+    float AheadMeters(float aT, float bT)
+    {
+        float len = ArcLen();
+        if (len <= 0.001f) return 0f;
+        float dT = bT - aT;
+        // wrap shortest forward arc
+        if (dT < -0.5f) dT += 1f;
+        else if (dT > 0.5f) dT -= 1f;
+        return dT * len;
+    }
+
+    float DtFromMeters(float meters) => (ArcLen() <= 0.001f) ? 0f : meters / ArcLen();
+
+    bool IsClearOfPlayer(float candidateT)
+    {
+        if (!player) return true;
+        float tCar = Mathf.Repeat(player.TrackTNormalized, 1f);
+        float wrap(float d) => (d < 0f) ? d + 1f : d;
+        float dt = wrap(candidateT - tCar);
+        float ahead = dt * ArcLen();
+        float behind = (1f - dt) * ArcLen();
+        if (ahead >= 0f && ahead < playerSafeAheadMeters) return false;
+        if (behind >= 0f && behind < playerSafeBehindMeters) return false;
+        return true;
+    }
+
+    bool IsFarFromObstacles(Vector3 p)
+    {
+        if (!obstacleMgr) return true;
+        float minSq = minCrossSeparationMeters * minCrossSeparationMeters;
+        var list = obstacleMgr.GetActiveWorldPositions(); // add method below
+        for (int i = 0; i < list.Count; i++)
+            if ((list[i] - p).sqrMagnitude < minSq) return false;
+        return true;
+    }
+
     void Awake()
     {
         if (!collectablePrefab) { Debug.LogError("CollectableManager: Prefab missing"); enabled = false; return; }
@@ -121,29 +182,50 @@ public class CollectableManager : MonoBehaviour
 
         while (enabled)
         {
-            float diff = DifficultyDirector.Instance ? DifficultyDirector.Instance.Current.target : 0.5f;
+            float diff = 0.5f;
+            if (DifficultyDirector.Instance)
+            {
+                float rewardBias = Mathf.Clamp01(DifficultyDirector.Instance.Current.rewardBias);
+                diff = 1f - rewardBias;
+            }
             ApplyDifficulty(diff, Time.deltaTime);
 
             if (_active.Count < maxActive)
                 TrySpawn();
 
-            if (autoMissAfterSeconds > 0f)
+            for (int i = _activeMeta.Count - 1; i >= 0; --i)
             {
-                for (int i = _activeMeta.Count - 1; i >= 0; --i)
+                var meta = _activeMeta[i];
+                if (!meta.go || !meta.go.activeInHierarchy) { _activeMeta.RemoveAt(i); continue; }
+
+                float age = Time.time - meta.spawnTime;
+                float playerT = player ? Mathf.Repeat(player.TrackTNormalized, 1f) : 0f;
+                float aheadMeters = player ? AheadMeters(playerT, meta.t) : float.PositiveInfinity;
+
+                bool isAhead = aheadMeters >= 0f;
+                bool withinProtectAhead = isAhead && aheadMeters <= protectAheadMeters;
+
+                // 1) Miss only when clearly behind by threshold
+                if (!isAhead && Mathf.Abs(aheadMeters) >= despawnBehindMeters)
                 {
-                    if (Time.time - _activeMeta[i].spawnTime > autoMissAfterSeconds)
-                    {
-                        // treat as missed; despawn
-                        var go = _activeMeta[i].go;
-                        if (go && go.activeInHierarchy)
-                        {
-                            go.SetActive(false);
-                            _active.Remove(go);
-                        }
-                        _activeMeta.RemoveAt(i);
-                        if (SkillEstimator.Instance) SkillEstimator.Instance.OnCollectibleMissed();
-                    }
+                    meta.go.SetActive(false);
+                    _active.Remove(meta.go);
+                    _activeMeta.RemoveAt(i);
+                    if (SkillEstimator.Instance) SkillEstimator.Instance.OnCollectibleMissed();
+                    continue;
                 }
+
+                // 2) Hard cleanup: very old AND far (don’t count as miss)
+                if (hardMaxLifetimeSeconds > 0f && age > hardMaxLifetimeSeconds && !withinProtectAhead)
+                {
+                    meta.go.SetActive(false);
+                    _active.Remove(meta.go);
+                    _activeMeta.RemoveAt(i);
+                    // no telemetry here — we didn’t fairly pass it
+                    continue;
+                }
+
+                // Otherwise: keep it
             }
             // per-iteration wait (runtime changes take effect)
             float wait = Mathf.Max(0.05f, spawnInterval);
@@ -180,6 +262,10 @@ public class CollectableManager : MonoBehaviour
                 candidate = hit.point + Vector3.up * floatHeight;
             else
                 candidate = wp + right * offset + Vector3.up * floatHeight;
+
+            if (!IsClearOfPlayer(t)) continue;
+            if (!IsFarEnough(candidate)) { if (drawAttemptGizmos) DebugDraw(candidate, Color.red); continue; }
+            if (!IsFarFromObstacles(candidate)) { if (drawAttemptGizmos) DebugDraw(candidate, Color.red); continue; }
 
             if (IsFarEnough(candidate))
             {

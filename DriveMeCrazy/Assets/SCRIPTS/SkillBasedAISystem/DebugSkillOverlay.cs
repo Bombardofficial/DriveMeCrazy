@@ -80,8 +80,11 @@ public class DebugSkillOverlay : MonoBehaviour
             GUILayout.Label($"Current Driver: {who}", _line);
 
             float skill = active?.Skill01 ?? 0.5f;
-            float diff = dir ? dir.Current.target : 0.5f;
-            GUILayout.Label($"Skill: {Pct(skill)}   |   Difficulty: {Pct(diff)}", _line);
+            float dOverall = dir ? dir.Current.overall : 0.5f;
+            float dPrecision = dir ? dir.Current.precision : 0.5f;
+            float dSpawn = dir ? dir.Current.spawnPressure : 0.5f;
+            GUILayout.Label($"Skill: {Pct(skill)}  |  Diff overall: {Pct(dOverall)}  |  precision: {Pct(dPrecision)}  |  spawn: {Pct(dSpawn)}", _line);
+
 
             GUILayout.Label($"Collect Success: {Pct(active?.CollectSuccessRate ?? 0)}   " +
                             $"Miss: {Pct(active?.CollectMissRate ?? 0)}   " +

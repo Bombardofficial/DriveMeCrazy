@@ -1,4 +1,4 @@
-// SkillEstimator.cs  (drop-in replacement)
+// SkillEstimator.cs  — REPLACE WHOLE FILE WITH THIS
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,47 +10,84 @@ public class SkillEstimator : MonoBehaviour
     [Header("EMA windows (seconds)")]
     public float windowCollect = 12f;
     public float windowObstacle = 12f;
+    public float windowMiniGame = 16f;   // NEW: mini-game learning window
 
     [Header("Weights -> skill score (before logistic)")]
-    [Range(0f, 3f)] public float wCollect = 1.0f; // higher is better
-    [Range(0f, 3f)] public float wMiss = 0.7f; // subtracts
-    [Range(0f, 3f)] public float wHit = 1.3f; // subtracts
+    [Range(0f, 3f)] public float wCollect = 1.0f;   // higher is better
+    [Range(0f, 3f)] public float wMiss = 0.7f;   // subtracts
+    [Range(0f, 3f)] public float wHit = 1.3f;   // subtracts
+
+    [Header("Mini-game weights")]
+    [Range(0f, 3f)] public float wMgPass = 1.0f; // good
+    [Range(0f, 3f)] public float wMgPerfect = 1.5f; // very good
+    [Range(0f, 3f)] public float wMgFail = 1.2f; // bad
+
+    [Header("Mini-game fail severity multipliers")]
+    [Tooltip("How much a full crash counts compared to a simple stumble.")]
+    public float mgFailWeightStumble = 0.6f;
+    public float mgFailWeightCrash = 1.0f;
 
     [Header("Logistic squashing to 0..1")]
     [Range(0.5f, 4f)] public float slope = 2.2f;
     [Range(-1f, 1f)] public float bias = 0.0f;
 
     [Header("Debug / Export")]
-    public bool writeTotals = true; // keep simple totals as well
+    public bool writeTotals = true;
 
+    [Header("Confidence")]
+    [Tooltip("Effective sample mass (EMA) where confidence ~= 1.0")]
+    public float confidenceMassForFull = 40f;
     // ===== Per-player profile =====
     public sealed class Profile
     {
-        // EMAs
+        // EMAs: collectibles & obstacles
         public float colOppEMA, colGotEMA, colMissEMA;
         public float obsOppEMA, obsHitEMA;
 
-        // Totals (optional: nice for sanity checks)
+        // EMAs: mini-game (NEW)
+        public float mgOppEMA, mgPassEMA, mgPerfectEMA, mgFailEMA;
+
+        // Totals (optional)
         public int colOppTotal, colGotTotal, colMissTotal;
         public int obsOppTotal, obsHitTotal;
+        public int mgOppTotal, mgPassTotal, mgPerfectTotal, mgFailTotal;
 
-        // Derived
+        // Derived (existing)
         public float CollectSuccessRate => SafeRatio(colGotEMA, colOppEMA);
         public float CollectMissRate => SafeRatio(colMissEMA, colOppEMA);
         public float ObstacleHitRate => SafeRatio(obsHitEMA, obsOppEMA);
 
+        // Derived (mini-game, NEW)
+        public float MiniGamePassRate => SafeRatio(mgPassEMA, mgOppEMA);
+        public float MiniGamePerfectRate => SafeRatio(mgPerfectEMA, mgOppEMA);
+        public float MiniGameFailRate => SafeRatio(mgFailEMA, mgOppEMA);
+
         public float Skill01 { get; private set; } = 0.5f;
 
         readonly SkillEstimator _root;
-        public Profile(SkillEstimator root) { _root = root; }
 
+
+        public Profile(SkillEstimator root) { _root = root; }
+        public float Confidence
+        {
+            get
+            {
+                float mass = colOppEMA + obsOppEMA + mgOppEMA;
+                return Mathf.Clamp01(mass / Mathf.Max(1f, _root.confidenceMassForFull));
+            }
+        }
         public void Tick(float dt)
         {
-            // score = +collects - misses - hits
             float score = 0f;
+            // collectibles & obstacles
             score += _root.wCollect * CollectSuccessRate;
             score -= _root.wMiss * CollectMissRate;
             score -= _root.wHit * ObstacleHitRate;
+
+            // mini-game (NEW)
+            score += _root.wMgPass * MiniGamePassRate;
+            score += _root.wMgPerfect * MiniGamePerfectRate;
+            score -= _root.wMgFail * MiniGameFailRate;
 
             float x = _root.slope * (score + _root.bias);
             Skill01 = 1f / (1f + Mathf.Exp(-x));
@@ -59,7 +96,7 @@ public class SkillEstimator : MonoBehaviour
         float Alpha(float window, float dt)
             => 1f - Mathf.Exp(-dt / Mathf.Max(0.001f, window));
 
-        // --- event sinks (all attributed to whoever is "active" when they occur) ---
+        // ---------- Collectibles ----------
         public void OnCollectibleSpawned(float window, float dt)
         {
             float a = Alpha(window, dt);
@@ -78,6 +115,8 @@ public class SkillEstimator : MonoBehaviour
             colMissEMA = Mathf.Lerp(colMissEMA, colMissEMA + 1f, a);
             if (_root.writeTotals) colMissTotal++;
         }
+
+        // ---------- Obstacles ----------
         public void OnObstacleSpawned(float window, float dt)
         {
             float a = Alpha(window, dt);
@@ -91,50 +130,63 @@ public class SkillEstimator : MonoBehaviour
             if (_root.writeTotals) obsHitTotal++;
         }
 
+        // ---------- Mini-game (NEW) ----------
+        public void OnMiniGameStarted(float window, float dt)
+        {
+            float a = Alpha(window, dt);
+            mgOppEMA = Mathf.Lerp(mgOppEMA, mgOppEMA + 1f, a);
+            if (_root.writeTotals) mgOppTotal++;
+        }
+        public void OnMiniGamePass(float window, float dt)
+        {
+            float a = Alpha(window, dt);
+            mgPassEMA = Mathf.Lerp(mgPassEMA, mgPassEMA + 1f, a);
+            if (_root.writeTotals) mgPassTotal++;
+        }
+        public void OnMiniGamePerfect(float window, float dt)
+        {
+            float a = Alpha(window, dt);
+            mgPerfectEMA = Mathf.Lerp(mgPerfectEMA, mgPerfectEMA + 1f, a);
+            if (_root.writeTotals) mgPerfectTotal++;
+        }
+        public void OnMiniGameFail(float window, float dt, bool fullCrash, float stumbleMult, float crashMult)
+        {
+            float a = Alpha(window, dt);
+            float w = fullCrash ? crashMult : stumbleMult;   // severity
+            mgFailEMA = Mathf.Lerp(mgFailEMA, mgFailEMA + w, a);
+            if (_root.writeTotals) mgFailTotal++;
+        }
+
         static float SafeRatio(float num, float den)
             => (den <= 1e-4f) ? 0f : Mathf.Clamp01(num / den);
     }
 
     // ===== Runtime state =====
-    // Per-passenger profiles (stable identity per player)
     readonly Dictionary<Passenger, Profile> _profiles = new();
-    Profile _active;  // current driver
+    Profile _active;
     Passenger _activePassenger;
 
-    // A convenience "global" profile that aggregates everything (optional)
     public Profile Global { get; private set; }
-
-    // Expose the active profile safely
     public Profile Active => _active ?? Global;
-
-    // For overlay convenience
     public IReadOnlyDictionary<Passenger, Profile> Profiles => _profiles;
+    public Passenger ActivePassenger => _activePassenger;
 
     void Awake()
     {
         if (Instance && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
-
         Global = new Profile(this);
     }
 
     void OnEnable()
     {
         PlayerManager.OnDriverChanged += HandleDriverChanged;
-        // set initial, if driver already exists
         if (PlayerManager.Instance && PlayerManager.Instance.CurrentDriver)
             SetActiveDriver(PlayerManager.Instance.CurrentDriver);
     }
+    void OnDisable() => PlayerManager.OnDriverChanged -= HandleDriverChanged;
 
-    void OnDisable()
-    {
-        PlayerManager.OnDriverChanged -= HandleDriverChanged;
-    }
-
-    void HandleDriverChanged(Passenger oldP, Passenger newP)
-    {
-        SetActiveDriver(newP);
-    }
+    void HandleDriverChanged(Passenger oldP, Passenger newP) => SetActiveDriver(newP);
 
     void SetActiveDriver(Passenger p)
     {
@@ -151,15 +203,11 @@ public class SkillEstimator : MonoBehaviour
     void Update()
     {
         float dt = Time.deltaTime;
-
-        // tick all profiles so Skill01 is up to date
         Global?.Tick(dt);
         foreach (var kv in _profiles) kv.Value.Tick(dt);
     }
 
-    // ===== Public API (unchanged call sites) =====
-    // These attribute the event to the *current driver* if present,
-    // and always also update the Global aggregate.
+    // ===== Public API (existing) =====
     public void OnCollectibleSpawned()
     {
         float dt = Time.deltaTime;
@@ -191,6 +239,29 @@ public class SkillEstimator : MonoBehaviour
         Active?.OnObstacleHit(windowObstacle, dt);
     }
 
-    // Handy accessors for overlay (current driver identity)
-    public Passenger ActivePassenger => _activePassenger;
+    // ===== Public API (NEW: mini-game) =====
+    public void OnMiniGameStarted()
+    {
+        float dt = Time.deltaTime;
+        Global.OnMiniGameStarted(windowMiniGame, dt);
+        Active?.OnMiniGameStarted(windowMiniGame, dt);
+    }
+    public void OnMiniGamePass()
+    {
+        float dt = Time.deltaTime;
+        Global.OnMiniGamePass(windowMiniGame, dt);
+        Active?.OnMiniGamePass(windowMiniGame, dt);
+    }
+    public void OnMiniGamePerfect()
+    {
+        float dt = Time.deltaTime;
+        Global.OnMiniGamePerfect(windowMiniGame, dt);
+        Active?.OnMiniGamePerfect(windowMiniGame, dt);
+    }
+    public void OnMiniGameFail(bool fullCrash)
+    {
+        float dt = Time.deltaTime;
+        Global.OnMiniGameFail(windowMiniGame, dt, fullCrash, mgFailWeightStumble, mgFailWeightCrash);
+        Active?.OnMiniGameFail(windowMiniGame, dt, fullCrash, mgFailWeightStumble, mgFailWeightCrash);
+    }
 }

@@ -150,14 +150,10 @@ namespace ArcadeVP
         public float minOvershootRatioToTrigger = 0.15f;
 
         [Header("Mini-game – difficulty curves")]
-        public float driftSpeedEasy = 0.15f;   // pointer auto-drift (units/s)
-        public float driftSpeedHard = 0.60f;
         public float shrinkEasy = 0.02f;   // green-zone shrink (frac/s)
         public float shrinkHard = 0.15f;
         public float oscAmpEasy = 0.15f;   // zone oscillation amplitude
         public float oscAmpHard = 0.40f;
-        public float zoneFracEasy = 0.60f;   // initial green-zone width (bar-frac)
-        public float zoneFracHard = 0.18f;
 
         [Header("Mini-game – timing")]
         public float overspeedTriggerTime = 0.40f;  // sustain time before start
@@ -259,6 +255,84 @@ namespace ArcadeVP
         float _origFadeInSpeed = -1f;
 
         public float TrackTNormalized => (splineLength > 0f) ? (traveledDistance / splineLength) : 0f;
+
+        [Header("Mini-game – AI adaptive mapping")]
+        [Tooltip("Blend 0=overspeed-only  1=director-only")]
+        [Range(0f, 1f)] public float directorInfluence = 0.6f;
+
+        [Tooltip("Scale the driver’s pedal effect on the pointer.")]
+        public Vector2 inputPowerRange = new Vector2(1.10f, 1.60f);   // easy .. hard
+
+        [Tooltip("How ‘sticky’ the pointer’s self-drift is.")]
+        public float driftSpeedEasy = 0.15f;     // (already existed above – keep values)
+        public float driftSpeedHard = 0.60f;
+
+        [Tooltip("Initial green-zone width as a fraction of the bar.")]
+        public float zoneFracEasy = 0.60f;       // (already existed above – keep)
+        public float zoneFracHard = 0.18f;
+
+        [Tooltip("Seconds allowed in red before a stumble/crash.")]
+        public Vector2 failGraceRange = new Vector2(1.20f, 0.60f);
+
+        [Tooltip("Edge clamp that force-crashes when |val| ? thresh.")]
+        public Vector2 failEdgeRange = new Vector2(0.95f, 0.85f);
+
+        [Tooltip("Seconds without red to PASS.")]
+        public Vector2 passDurationRange = new Vector2(1.60f, 2.30f);
+
+        [Tooltip("Seconds centred to PERFECT.")]
+        public Vector2 perfectHoldRange = new Vector2(1.00f, 1.60f);
+
+        [Tooltip("How close to centre counts as ‘centred’.")]
+        public Vector2 perfectCenterRange = new Vector2(0.28f, 0.16f);
+
+        // ---- Per-round, locked tuning (NEW) ----
+        float rt_inputPower;
+        float rt_drift;
+        float rt_greenWidth;
+        float rt_failGrace;
+        float rt_failEdge;
+        float rt_passDuration;
+        float rt_perfectHold;
+        float rt_centerThresh;
+
+        float ComputeDifficultyBlend(float overshootRatio)
+        {
+            // base difficulty from overspeed amount (unchanged)
+            float baseT = Mathf.Clamp01(overshootRatio / Mathf.Max(0.001f, fullDifficultyAtRatio));
+
+            // precision channel from the multi-channel director
+            float dirT = 0.5f;
+            if (DifficultyDirector.Instance != null)
+                dirT = Mathf.Clamp01(DifficultyDirector.Instance.Current.precision);
+
+            // final blend (your existing directorInfluence 0..1)
+            return Mathf.Clamp01(Mathf.Lerp(baseT, dirT, directorInfluence));
+        }
+
+        void LockRoundTuning(float t)
+        {
+            // existing mapping
+            rt_drift = Mathf.Lerp(driftSpeedEasy, driftSpeedHard, t);
+            float zoneFrac = Mathf.Lerp(zoneFracEasy, zoneFracHard, t);
+            rt_greenWidth = Mathf.Clamp(zoneFrac, greenMinWidth, greenMaxWidth);
+            rt_inputPower = Mathf.Lerp(inputPowerRange.x, inputPowerRange.y, t);
+            rt_failGrace = Mathf.Lerp(failGraceRange.x, failGraceRange.y, t);
+            rt_failEdge = Mathf.Lerp(failEdgeRange.x, failEdgeRange.y, t);
+            rt_passDuration = Mathf.Lerp(passDurationRange.x, passDurationRange.y, t);
+            rt_perfectHold = Mathf.Lerp(perfectHoldRange.x, perfectHoldRange.y, t);
+            rt_centerThresh = Mathf.Lerp(perfectCenterRange.x, perfectCenterRange.y, t);
+
+            // NEW: bias by punishment channel (0 easy -> 1 hard)
+            float punish = 0.5f;
+            if (DifficultyDirector.Instance) punish = Mathf.Clamp01(DifficultyDirector.Instance.Current.punishment);
+
+            // more punishment ? shorter grace, tighter edge, longer pass time
+            rt_failGrace = Mathf.Lerp(rt_failGrace, Mathf.Lerp(failGraceRange.x, failGraceRange.y, 1f), punish);
+            rt_failEdge = Mathf.Lerp(rt_failEdge, Mathf.Lerp(failEdgeRange.x, failEdgeRange.y, 1f), punish);
+            rt_passDuration = Mathf.Lerp(rt_passDuration, Mathf.Lerp(passDurationRange.x, passDurationRange.y, 1f), punish);
+        }
+
 
         void AbortAllSpeedZoneStuff()
         {
@@ -520,7 +594,8 @@ namespace ArcadeVP
                     if (forceOutcomeOnExit)
                     {
                         bool outsideNow = balanceUI ? balanceUI.IsOutside(balanceVal) : false;
-                        bool edgeFail = Mathf.Abs(balanceVal) >= forceFailEdgeThresh;
+                        bool edgeFail = Mathf.Abs(balanceVal) >= (rt_failEdge > 0f ? rt_failEdge : forceFailEdgeThresh);
+
                         if (edgeFail) { EndBalanceMiniGame(MiniGameOutcome.Fail, fullCrash: true); }
                         else if (outsideNow) { EndBalanceMiniGame(MiniGameOutcome.Fail, fullCrash: false); }
                         else
@@ -630,6 +705,7 @@ namespace ArcadeVP
 
             // mark this zone
             miniGamePlayedThisZone = true;
+            if (SkillEstimator.Instance) SkillEstimator.Instance.OnMiniGameStarted();
             overspeedTimer = 0f;
 
             // freeze snapshot during round
@@ -641,15 +717,12 @@ namespace ArcadeVP
             readyPulseShown = false; // NEW
 
             // Difficulty scaling
-            float diffT = Mathf.Clamp01(ratio / Mathf.Max(0.001f, fullDifficultyAtRatio));
-            currentRoundDrift = Mathf.Lerp(driftSpeedEasy, driftSpeedHard, diffT);
-
-            float zoneFrac = Mathf.Lerp(zoneFracEasy, zoneFracHard, diffT);
-            float green = Mathf.Clamp(zoneFrac, greenMinWidth, greenMaxWidth);
+            float t = ComputeDifficultyBlend(ratio);
+            LockRoundTuning(t);
 
             // Arm with a pre-cue BEFORE the gauge appears
             if (armCR != null) StopCoroutine(armCR);
-            armCR = StartCoroutine(ArmMiniGameThenBegin(green)); // NEW
+            armCR = StartCoroutine(ArmMiniGameThenBegin(rt_greenWidth));
         }
 
         System.Collections.IEnumerator ArmMiniGameThenBegin(float green)
@@ -690,6 +763,7 @@ namespace ArcadeVP
             }
             roundStartTime = Time.time;
             balanceActive = true;      // gameplay starts once IsFullyVisible in Update
+            currentRoundDrift = rt_drift;
             isDrifting = false;        // we’ll enable it only when readable
             armCR = null;
         }
@@ -697,10 +771,10 @@ namespace ArcadeVP
 
         void UpdateBalanceMiniGame(float dt)
         {
-            // pointer movement
+            // pointer movement (ADAPTIVE input power)
             float pressureDelta = accelerationInput - slowInput;
             balanceVal = Mathf.Clamp(
-                balanceVal + (pressureDelta * balanceInputPower
+                balanceVal + (pressureDelta * rt_inputPower
                               + currentRoundDrift * Mathf.Sign(balanceVal)) * dt,
                 -1f, 1f);
 
@@ -708,24 +782,24 @@ namespace ArcadeVP
             balanceUI.Tick(dt);
             balanceUI.SetPointer(balanceVal);
 
-            // Fail checks
+            // Fail checks (ADAPTIVE thresholds)
             bool outside = balanceUI.IsOutside(balanceVal);
             if (outside)
             {
-                insideStreakTimer = 0f; // NEW: reset pass streak
-                centreStreakTimer = 0f; // NEW: reset perfect streak
+                insideStreakTimer = 0f;
+                centreStreakTimer = 0f;
                 balanceFailTimer += dt;
 
                 // Edge slam = full crash
-                if (Mathf.Abs(balanceVal) >= balanceFailThresh)
+                if (Mathf.Abs(balanceVal) >= rt_failEdge)
                 {
-                    EndBalanceMiniGame(MiniGameOutcome.Fail, fullCrash: true); // NEW
+                    EndBalanceMiniGame(MiniGameOutcome.Fail, fullCrash: true);
                     return;
                 }
 
-                if (balanceFailTimer >= balanceFailGrace)
+                if (balanceFailTimer >= rt_failGrace)
                 {
-                    EndBalanceMiniGame(MiniGameOutcome.Fail, fullCrash: false); // NEW (stumble)
+                    EndBalanceMiniGame(MiniGameOutcome.Fail, fullCrash: false);
                     return;
                 }
             }
@@ -733,28 +807,29 @@ namespace ArcadeVP
             {
                 balanceFailTimer = 0f;
 
-                // Track pass / perfect streaks
-                insideStreakTimer += dt; // no red
-                if (balanceUI.NormalizedError <= perfectCenterThreshold)
+                // Track pass / perfect streaks (ADAPTIVE windows)
+                insideStreakTimer += dt;
+
+                // If your UI exposes NormalizedError, keep using it
+                if (balanceUI.NormalizedError <= rt_centerThresh)
                     centreStreakTimer += dt;
                 else
                     centreStreakTimer = 0f;
 
-                // PERFECT first (higher bar)
-                if (centreStreakTimer >= perfectHoldTime)
+                if (centreStreakTimer >= rt_perfectHold)
                 {
                     EndBalanceMiniGame(MiniGameOutcome.Perfect, fullCrash: false);
                     return;
                 }
 
-                // PASS (survive without red long enough)
-                if (insideStreakTimer >= passDuration)
+                if (insideStreakTimer >= rt_passDuration)
                 {
                     EndBalanceMiniGame(MiniGameOutcome.Pass, fullCrash: false);
                     return;
                 }
             }
         }
+
 
         void EndBalanceMiniGame(MiniGameOutcome outcome, bool fullCrash)
         {
@@ -772,6 +847,7 @@ namespace ArcadeVP
             switch (outcome)
             {
                 case MiniGameOutcome.Perfect:
+                    if (SkillEstimator.Instance) SkillEstimator.Instance.OnMiniGamePerfect();
                     // small score plus
                     var pm = PlayerManager.Instance;
                     if (pm != null)
@@ -784,10 +860,12 @@ namespace ArcadeVP
                     break;
 
                 case MiniGameOutcome.Pass:
+                    if (SkillEstimator.Instance) SkillEstimator.Instance.OnMiniGamePass();
                     // no penalty, no crash
                     break;
 
                 case MiniGameOutcome.Fail:
+                    if (SkillEstimator.Instance) SkillEstimator.Instance.OnMiniGameFail(fullCrash);
                     if (fullCrash) TriggerSpeedCrash();   // edge slam
                     else TriggerSpeedStumble(); // mild spin/slow
                     break;

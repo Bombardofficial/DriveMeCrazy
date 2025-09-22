@@ -84,7 +84,47 @@ public class ObstacleManager : MonoBehaviour
 
     [Tooltip("If true, treat strategic spawn failure as a regular random spawn fallback.")]
     public bool fallbackToRandomIfBlocked = true;
+    [Header("Fairness")]
+    [Tooltip("Meters ahead of the car where obstacles will not spawn.")]
+    public float playerSafeAheadMeters = 18f;
+    [Tooltip("Meters behind the car where obstacles will not spawn.")]
+    public float playerSafeBehindMeters = 6f;
+    [Tooltip("Minimum meters between an obstacle and any collectible.")]
+    public float minCrossSeparationMeters = 3.0f;
 
+    public ArcadeVP.ArcadeVehicleController player;   // assign in inspector
+
+    // helpers
+    float ArcLen() => _spline.Spline.GetLength();
+    float DtFromMeters(float meters) => (ArcLen() <= 0.001f) ? 0f : meters / ArcLen();
+
+    bool IsClearOfPlayer(float candidateT)
+    {
+        if (!player) return true;
+        float tCar = Mathf.Repeat(player.TrackTNormalized, 1f);
+        float wrap(float d) => (d < 0f) ? d + 1f : d;
+        float dt = wrap(candidateT - tCar);
+        float ahead = dt * ArcLen();
+        float behind = (1f - dt) * ArcLen();
+        if (ahead >= 0f && ahead < playerSafeAheadMeters) return false;
+        if (behind >= 0f && behind < playerSafeBehindMeters) return false;
+        return true;
+    }
+
+    bool IsFarFromCollectibles(Vector3 p)
+    {
+        if (!collectableMgr) return true;
+        float minSq = minCrossSeparationMeters * minCrossSeparationMeters;
+        var metas = collectableMgr.ActiveMetas;
+        if (metas == null) return true;
+        for (int i = 0; i < metas.Count; i++)
+        {
+            var go = metas[i].go;
+            if (!go || !go.activeInHierarchy) continue;
+            if ((go.transform.position - p).sqrMagnitude < minSq) return false;
+        }
+        return true;
+    }
     float DtFromMeters(Spline spline, float meters)
     {
         float len = spline.GetLength();
@@ -160,7 +200,9 @@ public class ObstacleManager : MonoBehaviour
 
             Vector3 finalPos = hit.point + Vector3.up * 0.5f;
 
+            if (!IsClearOfPlayer(t2)) continue;
             if (!IsFarEnough(finalPos)) continue;
+            if (!IsFarFromCollectibles(finalPos)) continue;
 
             // choose type with live weights
             ObstacleType type = GetRandomObstacleType(diff);
@@ -211,6 +253,14 @@ public class ObstacleManager : MonoBehaviour
             }
         }
     }
+    public List<Vector3> GetActiveWorldPositions()
+    {
+        _tmp.Clear();
+        for (int i = 0; i < _active.Count; i++)
+            if (_active[i]) _tmp.Add(_active[i].transform.position);
+        return _tmp;
+    }
+    readonly List<Vector3> _tmp = new();
 
     GameObject NextPooled(GameObject prefab)
     {
@@ -283,7 +333,8 @@ public class ObstacleManager : MonoBehaviour
         // Main loop
         while (enabled)
         {
-            float diff = DifficultyDirector.Instance ? DifficultyDirector.Instance.Current.target : 0.5f;
+            float diff = DifficultyDirector.Instance ? DifficultyDirector.Instance.Current.spawnPressure : 0.5f;
+
             ApplyDifficulty(diff, Time.deltaTime);
 
             if (_active.Count < _currentMaxActive)
@@ -337,6 +388,10 @@ public class ObstacleManager : MonoBehaviour
             {
                 continue;
             }
+
+            if (!IsClearOfPlayer(t)) continue;
+            if (!IsFarEnough(finalPos)) continue;
+            if (!IsFarFromCollectibles(finalPos)) continue;
 
             if (IsFarEnough(finalPos))
             {
