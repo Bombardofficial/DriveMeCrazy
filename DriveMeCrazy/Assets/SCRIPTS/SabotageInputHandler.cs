@@ -29,6 +29,11 @@ namespace ArcadeVP
         {
             _steeringSabotageAction.performed += FireSteeringSabotage;
             _handbrakeSabotageAction.performed += FireHandbrakeSabotage;
+
+            if (_steeringSabotageAction == null || _handbrakeSabotageAction == null)
+            {
+                Debug.LogWarning("[InputManager_ArcadeVP] Sabotage keys not bound!");
+            }
         }
 
         void OnDisable()
@@ -41,14 +46,14 @@ namespace ArcadeVP
         {
             if (IsCurrentDriver) return;
             // Call the static method from your existing script
-            InputManager_ArcadeVP.FireSteeringSabotage();
+            InputManager_ArcadeVP.FireSteeringSabotage(_passenger);
         }
 
         private void FireHandbrakeSabotage(InputAction.CallbackContext context)
         {
             if (IsCurrentDriver) return;
             // Call the static method from your existing script
-            InputManager_ArcadeVP.FireHandbrakeSabotage();
+            InputManager_ArcadeVP.FireHandbrakeSabotage(_passenger);
         }
     }
 }

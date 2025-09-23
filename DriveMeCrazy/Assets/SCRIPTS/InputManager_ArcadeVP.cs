@@ -13,27 +13,31 @@ namespace ArcadeVP
         public InputActionProperty steeringSabotageAction;
         public InputActionProperty handbrakeSabotageAction;
         public bool isDriver = true;
-        public static event System.Action OnSteeringSabotageTriggered;
-        public static event System.Action OnHandbrakeSabotageTriggered;
+        public static event System.Action<Passenger> OnSteeringSabotageTriggered;
+        public static event System.Action<Passenger> OnHandbrakeSabotageTriggered;
 
         private ArcadeVehicleController vehicle;
         bool sabotagesBound;
 
-        public static void FireSteeringSabotage() => OnSteeringSabotageTriggered?.Invoke();
-        public static void FireHandbrakeSabotage() => OnHandbrakeSabotageTriggered?.Invoke();
+        public static void FireSteeringSabotage(Passenger passenger) => OnSteeringSabotageTriggered?.Invoke(passenger);
+        public static void FireHandbrakeSabotage(Passenger passenger) => OnHandbrakeSabotageTriggered?.Invoke(passenger);
 
         void Awake()
         {
             vehicle = GetComponent<ArcadeVehicleController>();
+            print("test");
         }
-        void HandleSteeringSabotage(InputAction.CallbackContext ctx)
+
+        // Deprecated
+        /*void HandleSteeringSabotage(InputAction.CallbackContext ctx)
         {
             if (isDriver) OnSteeringSabotageTriggered?.Invoke();
         }
         void HandleHandbrakeSabotage(InputAction.CallbackContext ctx)
         {
             if (isDriver) OnHandbrakeSabotageTriggered?.Invoke();
-        }
+        }*/
+
         void OnEnable()
         {
             /* enable all actions as before */
@@ -42,8 +46,9 @@ namespace ArcadeVP
                                handbrakeSabotageAction })
                 a.action.Enable();
 
-            steeringSabotageAction.action.performed += HandleSteeringSabotage;
-            handbrakeSabotageAction.action.performed += HandleHandbrakeSabotage;
+            //Deprecated
+            //steeringSabotageAction.action.performed += HandleSteeringSabotage;
+            //handbrakeSabotageAction.action.performed += HandleHandbrakeSabotage;
 
             sabotagesBound = steeringSabotageAction.action != null
                           && handbrakeSabotageAction.action != null;
@@ -60,8 +65,8 @@ namespace ArcadeVP
             steeringSabotageAction.action.Disable();
             handbrakeSabotageAction.action.Disable();
 
-            steeringSabotageAction.action.performed -= HandleSteeringSabotage;
-            handbrakeSabotageAction.action.performed -= HandleHandbrakeSabotage;
+            //steeringSabotageAction.action.performed -= HandleSteeringSabotage;
+            //handbrakeSabotageAction.action.performed -= HandleHandbrakeSabotage;
         }
 
         void Update()

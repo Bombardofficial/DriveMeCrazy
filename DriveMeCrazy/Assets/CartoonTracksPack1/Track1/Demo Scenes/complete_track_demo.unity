@@ -64469,6 +64469,9 @@ MonoBehaviour:
   minCrossSeparationMeters: 3
   player: {fileID: 0}
   obstacleMgr: {fileID: 0}
+  despawnBehindMeters: 10
+  protectAheadMeters: 45
+  hardMaxLifetimeSeconds: 30
 --- !u!114 &1311200376
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -68142,7 +68145,7 @@ MonoBehaviour:
   seatMgr: {fileID: 2111085467219387262}
   passengerPrefab: {fileID: 1174060323843766397, guid: 1affddbe7cc426c459549db87f7e1926,
     type: 3}
-  quickStartSingleDriver: 1
+  quickStartSingleDriver: 0
   driverPrefabOverride: {fileID: 5583802586414202164, guid: 5b262494d1427d94f89a6f1fca36eff5,
     type: 3}
   lobbyCountdownSeconds: 10
@@ -115318,6 +115321,7 @@ MonoBehaviour:
   duration: 2
   maxSteer: 0.8
   wobbleFrequency: 2
+  cooldown: 3
 --- !u!114 &2111085467219387264
 MonoBehaviour:
   m_ObjectHideFlags: 0
