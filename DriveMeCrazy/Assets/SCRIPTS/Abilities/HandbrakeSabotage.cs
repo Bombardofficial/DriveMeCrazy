@@ -16,7 +16,7 @@ public class HandbrakeSabotage : MonoBehaviour
     [Tooltip("Cooldown for ability use per player")]
     [SerializeField] float cooldown = 3f;
 
-    private Dictionary<Passenger, float> _onCooldowns = new();
+    //private Dictionary<Passenger, float> _onCooldowns = new();
 
     Coroutine _co;
 
@@ -26,16 +26,20 @@ public class HandbrakeSabotage : MonoBehaviour
     void Fire(Passenger passenger)
     {
         print("Handbrake fired!");
-        if (!_onCooldowns.ContainsKey(passenger) || Time.time >= _onCooldowns[passenger])
+        /*if (!_onCooldowns.ContainsKey(passenger) || Time.time >= _onCooldowns[passenger])
         {
             print("Handbrake started!");
             StartCoroutine(Run(passenger));
-        }
+        }*/
+
+        StartCoroutine(Run(passenger));
     }
 
     IEnumerator Run(Passenger passenger)
     {
         float t = 0f;
+        //_onCooldowns[passenger] = Time.time + cooldown;
+
         while (t < duration)
         {
             // smooth ramp up / down
@@ -47,7 +51,6 @@ public class HandbrakeSabotage : MonoBehaviour
             yield return null;
         }
         _co = null;
-
-        _onCooldowns[passenger] = Time.time + cooldown;
+        
     }
 }

@@ -64,7 +64,7 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""SteeringSabotage"",
+                    ""name"": ""BlockingSabotage"",
                     ""type"": ""Button"",
                     ""id"": ""a2b8bc12-d386-45b6-8d11-df87006f1ccd"",
                     ""expectedControlType"": ""Button"",
@@ -73,7 +73,7 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""HandbrakeSabotage"",
+                    ""name"": ""DisruptingSabotage"",
                     ""type"": ""Button"",
                     ""id"": ""666530c3-8b0b-40fd-98b6-0e7a20368edf"",
                     ""expectedControlType"": ""Button"",
@@ -266,7 +266,7 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Keyboard"",
-                    ""action"": ""SteeringSabotage"",
+                    ""action"": ""BlockingSabotage"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -277,7 +277,7 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Gamepad"",
-                    ""action"": ""SteeringSabotage"",
+                    ""action"": ""BlockingSabotage"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -288,7 +288,7 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Keyboard"",
-                    ""action"": ""HandbrakeSabotage"",
+                    ""action"": ""DisruptingSabotage"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -299,7 +299,7 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Gamepad"",
-                    ""action"": ""HandbrakeSabotage"",
+                    ""action"": ""DisruptingSabotage"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -415,8 +415,8 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
         m_Gameplay_Throttle = m_Gameplay.FindAction("Throttle", throwIfNotFound: true);
         m_Gameplay_Brake = m_Gameplay.FindAction("Brake", throwIfNotFound: true);
         m_Gameplay_SlowBrake = m_Gameplay.FindAction("SlowBrake", throwIfNotFound: true);
-        m_Gameplay_SteeringSabotage = m_Gameplay.FindAction("SteeringSabotage", throwIfNotFound: true);
-        m_Gameplay_HandbrakeSabotage = m_Gameplay.FindAction("HandbrakeSabotage", throwIfNotFound: true);
+        m_Gameplay_BlockingSabotage = m_Gameplay.FindAction("BlockingSabotage", throwIfNotFound: true);
+        m_Gameplay_DisruptingSabotage = m_Gameplay.FindAction("DisruptingSabotage", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Pause = m_UI.FindAction("Pause", throwIfNotFound: true);
@@ -488,8 +488,8 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_Gameplay_Throttle;
     private readonly InputAction m_Gameplay_Brake;
     private readonly InputAction m_Gameplay_SlowBrake;
-    private readonly InputAction m_Gameplay_SteeringSabotage;
-    private readonly InputAction m_Gameplay_HandbrakeSabotage;
+    private readonly InputAction m_Gameplay_BlockingSabotage;
+    private readonly InputAction m_Gameplay_DisruptingSabotage;
     public struct GameplayActions
     {
         private @VehicleControls m_Wrapper;
@@ -498,8 +498,8 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
         public InputAction @Throttle => m_Wrapper.m_Gameplay_Throttle;
         public InputAction @Brake => m_Wrapper.m_Gameplay_Brake;
         public InputAction @SlowBrake => m_Wrapper.m_Gameplay_SlowBrake;
-        public InputAction @SteeringSabotage => m_Wrapper.m_Gameplay_SteeringSabotage;
-        public InputAction @HandbrakeSabotage => m_Wrapper.m_Gameplay_HandbrakeSabotage;
+        public InputAction @BlockingSabotage => m_Wrapper.m_Gameplay_BlockingSabotage;
+        public InputAction @DisruptingSabotage => m_Wrapper.m_Gameplay_DisruptingSabotage;
         public InputActionMap Get() { return m_Wrapper.m_Gameplay; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -521,12 +521,12 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
             @SlowBrake.started += instance.OnSlowBrake;
             @SlowBrake.performed += instance.OnSlowBrake;
             @SlowBrake.canceled += instance.OnSlowBrake;
-            @SteeringSabotage.started += instance.OnSteeringSabotage;
-            @SteeringSabotage.performed += instance.OnSteeringSabotage;
-            @SteeringSabotage.canceled += instance.OnSteeringSabotage;
-            @HandbrakeSabotage.started += instance.OnHandbrakeSabotage;
-            @HandbrakeSabotage.performed += instance.OnHandbrakeSabotage;
-            @HandbrakeSabotage.canceled += instance.OnHandbrakeSabotage;
+            @BlockingSabotage.started += instance.OnBlockingSabotage;
+            @BlockingSabotage.performed += instance.OnBlockingSabotage;
+            @BlockingSabotage.canceled += instance.OnBlockingSabotage;
+            @DisruptingSabotage.started += instance.OnDisruptingSabotage;
+            @DisruptingSabotage.performed += instance.OnDisruptingSabotage;
+            @DisruptingSabotage.canceled += instance.OnDisruptingSabotage;
         }
 
         private void UnregisterCallbacks(IGameplayActions instance)
@@ -543,12 +543,12 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
             @SlowBrake.started -= instance.OnSlowBrake;
             @SlowBrake.performed -= instance.OnSlowBrake;
             @SlowBrake.canceled -= instance.OnSlowBrake;
-            @SteeringSabotage.started -= instance.OnSteeringSabotage;
-            @SteeringSabotage.performed -= instance.OnSteeringSabotage;
-            @SteeringSabotage.canceled -= instance.OnSteeringSabotage;
-            @HandbrakeSabotage.started -= instance.OnHandbrakeSabotage;
-            @HandbrakeSabotage.performed -= instance.OnHandbrakeSabotage;
-            @HandbrakeSabotage.canceled -= instance.OnHandbrakeSabotage;
+            @BlockingSabotage.started -= instance.OnBlockingSabotage;
+            @BlockingSabotage.performed -= instance.OnBlockingSabotage;
+            @BlockingSabotage.canceled -= instance.OnBlockingSabotage;
+            @DisruptingSabotage.started -= instance.OnDisruptingSabotage;
+            @DisruptingSabotage.performed -= instance.OnDisruptingSabotage;
+            @DisruptingSabotage.canceled -= instance.OnDisruptingSabotage;
         }
 
         public void RemoveCallbacks(IGameplayActions instance)
@@ -682,8 +682,8 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
         void OnThrottle(InputAction.CallbackContext context);
         void OnBrake(InputAction.CallbackContext context);
         void OnSlowBrake(InputAction.CallbackContext context);
-        void OnSteeringSabotage(InputAction.CallbackContext context);
-        void OnHandbrakeSabotage(InputAction.CallbackContext context);
+        void OnBlockingSabotage(InputAction.CallbackContext context);
+        void OnDisruptingSabotage(InputAction.CallbackContext context);
     }
     public interface IUIActions
     {

@@ -25,10 +25,12 @@ public class SteeringSabotage : MonoBehaviour
 
     void Fire(Passenger passenger)
     {
-        if (!_onCooldowns.ContainsKey(passenger) || Time.time >= _onCooldowns[passenger])
+        /*if (!_onCooldowns.ContainsKey(passenger) || Time.time >= _onCooldowns[passenger])
         {
             StartCoroutine(Run(passenger));
-        }
+        }*/
+
+        StartCoroutine(Run(passenger));
     }
 
     IEnumerator Run(Passenger passenger)
@@ -36,6 +38,7 @@ public class SteeringSabotage : MonoBehaviour
         // pick a random side so it doesn't always go right
         float sign = Random.value < .5f ? -1 : 1;
         float t = 0f;
+        //_onCooldowns[passenger] = Time.time + cooldown;
 
         while (t < duration)
         {
@@ -48,7 +51,5 @@ public class SteeringSabotage : MonoBehaviour
             yield return null;
         }
         _co = null;
-
-        _onCooldowns[passenger] = Time.time + cooldown;
     }
 }

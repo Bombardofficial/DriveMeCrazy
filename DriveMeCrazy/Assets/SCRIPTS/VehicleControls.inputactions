@@ -42,7 +42,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "SteeringSabotage",
+                    "name": "BlockingSabotage",
                     "type": "Button",
                     "id": "a2b8bc12-d386-45b6-8d11-df87006f1ccd",
                     "expectedControlType": "Button",
@@ -51,7 +51,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "HandbrakeSabotage",
+                    "name": "DisruptingSabotage",
                     "type": "Button",
                     "id": "666530c3-8b0b-40fd-98b6-0e7a20368edf",
                     "expectedControlType": "Button",
@@ -244,7 +244,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Keyboard",
-                    "action": "SteeringSabotage",
+                    "action": "BlockingSabotage",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -255,7 +255,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
-                    "action": "SteeringSabotage",
+                    "action": "BlockingSabotage",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -266,7 +266,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Keyboard",
-                    "action": "HandbrakeSabotage",
+                    "action": "DisruptingSabotage",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -277,7 +277,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
-                    "action": "HandbrakeSabotage",
+                    "action": "DisruptingSabotage",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
