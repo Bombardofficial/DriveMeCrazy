@@ -16,6 +16,7 @@ public class PlayerManager : MonoBehaviour
 
     [Tooltip("Points awarded when you call AwardDriver().")]
     public int pointIncrement = 100;
+    float pointMultiplier = 1f;
 
     public static event Action<Passenger /*old*/, Passenger /*new*/> OnDriverChanged;
 
@@ -47,7 +48,7 @@ public class PlayerManager : MonoBehaviour
         if (!CurrentDriver) SetDriver(p);
     }
 
-    public void AwardDriver() => CurrentDriver?.IncrementPoints(pointIncrement);
+    public void AwardDriver() => CurrentDriver?.IncrementPoints((int)(pointIncrement * pointMultiplier));
     public void IncrementDriverPoints() => AwardDriver();      // alias
 
     public void SwapPassengers(int a, int b)
@@ -74,6 +75,9 @@ public class PlayerManager : MonoBehaviour
     }
 
     public int GetSeatIndex(Passenger p) => _passengers.IndexOf(p);
+
+    public void SetPointMultiplier(float multiplier) => pointMultiplier = multiplier;
+    public float PointMultiplier => pointMultiplier;
 
     /* ===== helpers ===== */
     void ApplySeatPlacements()

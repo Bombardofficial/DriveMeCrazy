@@ -13,6 +13,9 @@ public class GameUIManager : MonoBehaviour
     [Tooltip("A list of UI Text elements for player scores. Assign these in the Inspector.")]
     [SerializeField] private List<TextMeshProUGUI> playerScoreTexts;
 
+    [Tooltip("A list of UI Text elements for player scores. Assign these in the Inspector.")]
+    [SerializeField] private TextMeshProUGUI pointMultiplierText;
+
     [Header("Game Component References")]
     [Tooltip("Drag the GameObject with the Damageable script here.")]
     [SerializeField] private Damageable carDamageable;
@@ -122,6 +125,7 @@ public class GameUIManager : MonoBehaviour
     {
         UpdateDamageUI();
         UpdatePlayerScoresUI();
+        UpdatePointMultiplierUI();
     }
 
     // ---- MODIFIED ----
@@ -178,5 +182,10 @@ public class GameUIManager : MonoBehaviour
             string driverTag = (p == playerManager.CurrentDriver) ? " (Driver)" : "";
             tx.text = $"Player {p.PlayerNumber}{driverTag}: {p.Points} Points";
         }
+    }
+
+    void UpdatePointMultiplierUI()
+    {
+        pointMultiplierText.text = $"Multiplier: {playerManager.PointMultiplier}";
     }
 }
