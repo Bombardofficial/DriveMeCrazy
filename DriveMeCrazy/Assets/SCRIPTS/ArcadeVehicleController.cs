@@ -684,6 +684,63 @@ namespace ArcadeVP
 
             UpdateBodyTilt(dt); // Update visual tilt
 
+            if (SkillEstimator.Instance != null)
+            {
+                float cornerSmoothSample = -1f;      // -1 = ignore
+                float laneJitterSample = -1f;      // -1 = ignore
+                float overspeedSample = -1f;      // -1 = ignore
+
+                // ----- Corner smoothness (0..1, HIGH = good) -----
+                // Csak akkor értékelünk kanyart, ha tényleg kanyarban vagyunk:
+                bool inCorner = detectedCornerAngle > cornerAngleThreshold && Mathf.Abs(speed) > 0.1f;
+                if (inCorner && splineLength > 0.01f)
+                {
+                    // Corner intenzitás: thresholdtól maxCornerAngleForFullDrift-ig normalizálva
+                    float cornerIntensity = Mathf.Clamp01(
+                        Mathf.InverseLerp(cornerAngleThreshold, maxCornerAngleForFullDrift, detectedCornerAngle));
+
+                    // Speed arány (0..1)
+                    float speedFrac = Mathf.Clamp01(Mathf.Abs(speed) / Mathf.Max(0.01f, maxSpeed));
+
+                    // Ideális speed: enyhe kanyarban magasabb, élesben alacsonyabb
+                    // pl. intensity=0  -> ~0.9
+                    //     intensity=1  -> ~0.4
+                    float idealSpeedFrac = Mathf.Lerp(0.9f, 0.4f, cornerIntensity);
+
+                    // Hiba a speed-ben
+                    float speedError = Mathf.Clamp01(Mathf.Abs(speedFrac - idealSpeedFrac));
+
+                    // CornerSmooth: 1=perfekt, 0=szétcsúszott
+                    cornerSmoothSample = 1f - speedError;
+                }
+
+                // ----- Lane jitter (0..1, HIGH = bad) -----
+                // Ha nagy sebességnél, lane váltás nélkül állandóan piszkálja a kormányt,
+                // az jitter és büntetjük.
+                if (Mathf.Abs(speed) > maxSpeed * 0.2f && !isChangingLane && !balanceActive)
+                {
+                    // steeringInput eleve -1..1
+                    laneJitterSample = Mathf.Clamp01(Mathf.Abs(steeringInput));
+                }
+
+                // ----- Overspeed control (0..1, HIGH = good) -----
+                // Ha van aktív speed limit, akkor azt nézzük mennyire lépi túl.
+                if (activeSpeedLimit > 0f && PlayerJoinManager.IsRaceStarted)
+                {
+                    float limit = activeSpeedLimit;
+                    float overshoot = Mathf.Max(0f, Mathf.Abs(speed) - limit);
+                    float ratio = (limit <= 0.001f) ? 0f : overshoot / limit;
+
+                    // 0 = nincs overspeed, 1 = fullDifficultyAtRatio vagy felette
+                    float t = Mathf.Clamp01(ratio / Mathf.Max(0.001f, fullDifficultyAtRatio));
+                    overspeedSample = 1f - t;   // 1 = teljesen kontrollált, 0 = nagyon túllépi
+                }
+
+                SkillEstimator.Instance.OnTrajectorySample(
+                    cornerSmoothSample,
+                    laneJitterSample,
+                    overspeedSample);
+            }
             previousSteer = steeringInput;
         }
 
