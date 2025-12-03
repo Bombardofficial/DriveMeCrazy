@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: f9048c57251a0a34283338b8d9f9a964
+guid: 6082e0aafd351ec48945013503a94fd6
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
@@ -8,31 +8,31 @@ ModelImporter:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: asphalt_blank.001
-    second: {fileID: -1023030475690700450, guid: 287d9567278d91445a4e0cf136487adf,
+    second: {fileID: -6048764383378758582, guid: f9048c57251a0a34283338b8d9f9a964,
       type: 3}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: asphalt_top_side.001
-    second: {fileID: 7603780499159298858, guid: 287d9567278d91445a4e0cf136487adf,
+    second: {fileID: 2084956295587798674, guid: f9048c57251a0a34283338b8d9f9a964,
       type: 3}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: asphalt_ylw_dash.001
-    second: {fileID: 8669707712507545903, guid: 287d9567278d91445a4e0cf136487adf,
+    second: {fileID: -6492940661963338977, guid: f9048c57251a0a34283338b8d9f9a964,
       type: 3}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: concrete.001
-    second: {fileID: -8350710125277546012, guid: 287d9567278d91445a4e0cf136487adf,
+    second: {fileID: 8956104328322862576, guid: f9048c57251a0a34283338b8d9f9a964,
       type: 3}
   materials:
-    materialImportMode: 2
+    materialImportMode: 1
     materialName: 0
     materialSearch: 1
-    materialLocation: 1
+    materialLocation: 0
   animations:
     legacyGenerateAnimations: 4
     bakeSimulation: 0

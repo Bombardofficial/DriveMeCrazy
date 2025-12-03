@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: f9048c57251a0a34283338b8d9f9a964
+guid: 7cec87ba80a73b54cab722984c1059e6
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
@@ -7,26 +7,25 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: asphalt_blank.001
-    second: {fileID: -1023030475690700450, guid: 287d9567278d91445a4e0cf136487adf,
+      name: ashpalt_ylw_solid.001
+    second: {fileID: 4527355762821450763, guid: 905a138607688be41a7ad145983835e1,
       type: 3}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: asphalt_top_side.001
-    second: {fileID: 7603780499159298858, guid: 287d9567278d91445a4e0cf136487adf,
+      name: asphalt_blank.002
+    second: {fileID: 2100000, guid: 8b3c3872fe6b4654fba71891673ae9eb, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: asphalt_top_side.002
+    second: {fileID: 7603780499159298858, guid: 905a138607688be41a7ad145983835e1,
       type: 3}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: asphalt_ylw_dash.001
-    second: {fileID: 8669707712507545903, guid: 287d9567278d91445a4e0cf136487adf,
-      type: 3}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: concrete.001
-    second: {fileID: -8350710125277546012, guid: 287d9567278d91445a4e0cf136487adf,
+      name: concrete.002
+    second: {fileID: -8350710125277546012, guid: 905a138607688be41a7ad145983835e1,
       type: 3}
   materials:
     materialImportMode: 2
