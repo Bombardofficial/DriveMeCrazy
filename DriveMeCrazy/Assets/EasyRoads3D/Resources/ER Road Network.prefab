@@ -150,7 +150,7 @@ MonoBehaviour:
   projectid: 
   updateInt: 10
   newSplatMapRestoreCode: 0
-  toolbarInt: 0
+  toolbarInt: 4
   oldToolbarInt: 0
   roadToolbarInt: 0
   markerToolbarInt: 0
@@ -510,7 +510,7 @@ MonoBehaviour:
   selectedMaterial: 0
   selectedConnectionMaterial: 0
   materials: []
-  selectedRoadRoadType: 1
+  selectedRoadRoadType: 0
   roadOptions: 1
   sidewalkOptions: 0
   markerOptions: 1
