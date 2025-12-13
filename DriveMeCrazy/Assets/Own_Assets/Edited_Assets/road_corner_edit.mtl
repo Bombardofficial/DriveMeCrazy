@@ -1,0 +1,122 @@
+# Blender 4.3.2 MTL File: 'road_corner_edit.blend'
+# www.blender.org
+
+newmtl ashpalt_ylw_solid.001
+Ns 90.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.070000 0.070000 0.070000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd C:/Users/sagan/Documents/GitHub/DriveMeCrazy/DriveMeCrazy/Assets/4pc_lowpoly_roads_obj/stripe2.png
+
+newmtl ashpalt_ylw_solid.002
+Ns 90.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.070000 0.070000 0.070000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd C:/Users/sagan/Documents/GitHub/DriveMeCrazy/DriveMeCrazy/Assets/4pc_lowpoly_roads_obj/stripe2.png
+
+newmtl ashpalt_ylw_solid.004
+Ns 90.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.070000 0.070000 0.070000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd C:/Users/sagan/Documents/GitHub/DriveMeCrazy/DriveMeCrazy/Assets/4pc_lowpoly_roads_obj/stripe2.png
+
+newmtl asphalt_blank.002
+Ns 90.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.070000 0.070000 0.070000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd C:/Users/sagan/Documents/GitHub/DriveMeCrazy/DriveMeCrazy/Assets/4pc_lowpoly_roads_obj/asphalt.png
+
+newmtl asphalt_blank.003
+Ns 90.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.070000 0.070000 0.070000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd C:/Users/sagan/Documents/GitHub/DriveMeCrazy/DriveMeCrazy/Assets/4pc_lowpoly_roads_obj/asphalt.png
+
+newmtl asphalt_blank.005
+Ns 90.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.070000 0.070000 0.070000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd C:/Users/sagan/Documents/GitHub/DriveMeCrazy/DriveMeCrazy/Assets/4pc_lowpoly_roads_obj/asphalt.png
+
+newmtl asphalt_top_side.002
+Ns 90.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.070000 0.070000 0.070000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd C:/Users/sagan/Documents/GitHub/DriveMeCrazy/DriveMeCrazy/Assets/4pc_lowpoly_roads_obj/stripe4.png
+
+newmtl asphalt_top_side.003
+Ns 90.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.070000 0.070000 0.070000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd C:/Users/sagan/Documents/GitHub/DriveMeCrazy/DriveMeCrazy/Assets/4pc_lowpoly_roads_obj/stripe4.png
+
+newmtl asphalt_top_side.005
+Ns 90.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.070000 0.070000 0.070000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd C:/Users/sagan/Documents/GitHub/DriveMeCrazy/DriveMeCrazy/Assets/4pc_lowpoly_roads_obj/stripe4.png
+
+newmtl concrete.002
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl concrete.003
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl concrete.005
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2

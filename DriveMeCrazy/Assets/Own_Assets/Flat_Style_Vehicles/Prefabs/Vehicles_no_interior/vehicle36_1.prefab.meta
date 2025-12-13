@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: a2c09c6b21d8baf409717c846af22a4c
+timeCreated: 1496413907
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88919
+  packageName: Flat Style Vehicles Pack
+  packageVersion: 2.0
+  assetPath: Assets/Flat_Style_Vehicles/Prefabs/Vehicles_no_interior/vehicle36_1.prefab
+  uploadId: 196408
