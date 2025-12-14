@@ -4,7 +4,6 @@ using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Splines;
 
-
 [RequireComponent(typeof(SplineContainer))]
 public class CollectableManager : MonoBehaviour
 {
@@ -12,24 +11,40 @@ public class CollectableManager : MonoBehaviour
     public struct CollectableMeta
     {
         public GameObject go;
-        public float t;         // 0..1 position on spline
-        public int lane;        // lane index
+        public float t;         // 0..1 position on spline (lane-relative if separate lanes)
+        public int lane;        // lane index (0=RIGHT, 1=CENTER, 2=LEFT when using separate lanes)
         public float spawnTime;
     }
+
     public IReadOnlyList<CollectableMeta> ActiveMetas => _activeMeta;
     readonly List<CollectableMeta> _activeMeta = new();
+
     [Header("Fairness / expiry")]
-    public float autoMissAfterSeconds = 12f; // treat as missed opportunity
+    public float autoMissAfterSeconds = 12f;
 
     [Header("Prefabs & Limits")]
     [SerializeField] GameObject collectablePrefab;
     [Min(1)][SerializeField] int maxActive = 10;
     [Min(.1f)][SerializeField] float spawnInterval = 5f;
 
-    [Header("Lane & Distance Settings")]
+    [Header("Lane Tracks (separate splines)")]
+    [Tooltip("If true, spawns use laneContainers directly. Order MUST be: 0=RIGHT, 1=CENTER, 2=LEFT.")]
+    public bool useSeparateLaneSplines = true;
+
+    [Tooltip("Lane spline containers. 0=RIGHT, 1=CENTER, 2=LEFT.")]
+    public SplineContainer[] laneContainers = new SplineContainer[3];
+
+    [Header("Lane & Distance Settings (legacy offset mode)")]
     [SerializeField] public LaneLinesVisualizer laneVis;
     [Min(.1f)] public float minSeparation = 4f;
     [Range(1, 50)] public int maxPlacementAttempts = 15;
+
+    [Header("Lane Offset Source (legacy offset mode)")]
+    [Tooltip("True = laneVis.laneOffsets. False = fixed 3 lanes: -d, 0, +d (d from player.laneOffsetDistance if available).")]
+    public bool useLaneVisualizerOffsets = true;
+
+    [Tooltip("Only used if useLaneVisualizerOffsets is false and player is not assigned.")]
+    public float fallbackLaneOffsetDistance = 2f;
 
     [Header("Vertical placement")]
     public float rayHeight = 5f;
@@ -46,68 +61,169 @@ public class CollectableManager : MonoBehaviour
     [Header("Audio")]
     [SerializeField] private AudioSourcePool collectableAudioPool;
 
-    // !!! DIFFICULTY — live driving knobs
     [Header("Dynamic Difficulty (Director)")]
     public bool useDirector = true;
 
-    [Tooltip("Max collectibles active by difficulty (easier ? higher)")]
     public AnimationCurve maxActiveByDiff = AnimationCurve.Linear(0, 16, 1, 8);
-
-    [Tooltip("Seconds between spawn attempts (easier ? spawn faster)")]
     public AnimationCurve intervalByDiff = AnimationCurve.Linear(0, 1.2f, 1, 3.5f);
-
-    [Tooltip("Minimum spacing (easier ? spread out more)")]
     public AnimationCurve separationByDiff = AnimationCurve.Linear(0, 6f, 1, 3.5f);
 
-    // smoothers
     float _curInterval, _curSeparation, _curMaxActive;
 
     [Header("Fairness")]
-    [Tooltip("Meters ahead of the car where collectibles will not spawn.")]
     public float playerSafeAheadMeters = 14f;
-    [Tooltip("Meters behind the car where collectibles will not spawn.")]
     public float playerSafeBehindMeters = 5f;
-    [Tooltip("Minimum meters between a collectible and any obstacle.")]
     public float minCrossSeparationMeters = 3.0f;
 
-    public ArcadeVP.ArcadeVehicleController player;  // assign in inspector
-    public ObstacleManager obstacleMgr;               // assign in inspector
+    public ArcadeVP.ArcadeVehicleController player;
+    public ObstacleManager obstacleMgr;
 
     [Header("Fairness • track-relative expiry")]
-    [Tooltip("Meters behind the player at which a collectible is considered missed and despawned.")]
     public float despawnBehindMeters = 10f;
-
-    [Tooltip("While the item is within this many meters AHEAD of the player, never expire it due to age.")]
     public float protectAheadMeters = 45f;
-
-    [Tooltip("Hard cleanup: if older than this AND far away (ahead or behind), despawn without counting a miss.")]
     public float hardMaxLifetimeSeconds = 30f;
 
+    bool HasSeparateLaneSplines()
+    {
+        if (!useSeparateLaneSplines) return false;
+        if (laneContainers == null || laneContainers.Length < 3) return false;
+        return laneContainers[0] != null && laneContainers[1] != null && laneContainers[2] != null;
+    }
 
-    float ArcLen() => _spline.Spline.GetLength();
+    SplineContainer GetLaneContainer(int laneIdx)
+    {
+        if (HasSeparateLaneSplines())
+        {
+            int i = Mathf.Clamp(laneIdx, 0, 2);
+            return laneContainers[i];
+        }
+        return _spline;
+    }
 
-    /// <summary> +meters if b is ahead of a on the spline, -meters if behind </summary>
+    float GetLaneLength(int laneIdx)
+    {
+        var sc = GetLaneContainer(laneIdx);
+        if (!sc) return 0f;
+        return sc.Spline.GetLength();
+    }
+
+    bool TryGetLaneFrame(int laneIdx, float t, out Vector3 worldPos, out Vector3 worldTangent, out Vector3 worldUp, out Vector3 worldRight)
+    {
+        worldPos = default;
+        worldTangent = default;
+        worldUp = Vector3.up;
+        worldRight = Vector3.right;
+
+        var sc = GetLaneContainer(laneIdx);
+        if (!sc) return false;
+
+        var spline = sc.Spline;
+        float len = spline.GetLength();
+        if (len < 0.1f) return false;
+
+        t = Mathf.Repeat(t, 1f);
+
+        SplineUtility.Evaluate(spline, t, out float3 lp, out float3 lt, out float3 lu);
+
+        worldPos = sc.transform.TransformPoint(lp);
+
+        Vector3 wt = sc.transform.TransformDirection(math.normalizesafe(lt));
+        Vector3 wu = sc.transform.TransformDirection(math.normalizesafe(lu));
+
+        if (wt.sqrMagnitude < 0.0001f) wt = sc.transform.forward;
+        if (wu.sqrMagnitude < 0.0001f) wu = Vector3.up;
+
+        worldTangent = wt.normalized;
+        worldUp = wu.normalized;
+
+        worldRight = Vector3.Cross(worldTangent, worldUp).normalized;
+        if (worldRight.sqrMagnitude < 0.0001f)
+            worldRight = Vector3.Cross(Vector3.up, worldTangent).normalized;
+
+        return true;
+    }
+
+    float ArcLen()
+    {
+        // Prefer player's active spline length (most accurate for TrackTNormalized)
+        if (player && player.splineContainer != null)
+        {
+            float pl = player.splineContainer.Spline.GetLength();
+            if (pl > 0.1f) return pl;
+        }
+
+        // Prefer center lane length if separate lanes are used
+        if (HasSeparateLaneSplines() && laneContainers[1] != null)
+        {
+            float cl = laneContainers[1].Spline.GetLength();
+            if (cl > 0.1f) return cl;
+        }
+
+        // Fallback to local spline length
+        if (_spline) return _spline.Spline.GetLength();
+        return 0f;
+    }
+
     float AheadMeters(float aT, float bT)
     {
         float len = ArcLen();
         if (len <= 0.001f) return 0f;
         float dT = bT - aT;
-        // wrap shortest forward arc
         if (dT < -0.5f) dT += 1f;
         else if (dT > 0.5f) dT -= 1f;
         return dT * len;
     }
 
-    float DtFromMeters(float meters) => (ArcLen() <= 0.001f) ? 0f : meters / ArcLen();
+    bool UsingLaneVis()
+    {
+        if (!useLaneVisualizerOffsets) return false;
+        if (!laneVis) return false;
+        if (laneVis.laneOffsets == null) return false;
+        return laneVis.laneOffsets.Length > 0;
+    }
+
+    float GetLaneStep()
+    {
+        if (player && player.laneOffsetDistance > 0.01f) return player.laneOffsetDistance;
+        if (fallbackLaneOffsetDistance > 0.01f) return fallbackLaneOffsetDistance;
+        return 2f;
+    }
+
+    public int SpawnLaneCount
+    {
+        get
+        {
+            if (HasSeparateLaneSplines()) return 3;
+            if (UsingLaneVis()) return laneVis.laneOffsets.Length;
+            return 3;
+        }
+    }
+
+    public float GetLaneOffsetByIndex(int laneIdx)
+    {
+        // LEGACY offset mode only (ignored in separate lane spline mode)
+        if (UsingLaneVis())
+        {
+            int i = Mathf.Clamp(laneIdx, 0, laneVis.laneOffsets.Length - 1);
+            return laneVis.laneOffsets[i];
+        }
+
+        float d = GetLaneStep();
+        int i3 = Mathf.Clamp(laneIdx, 0, 2);
+        return (i3 - 1) * d; // 0=-d, 1=0, 2=+d
+    }
 
     bool IsClearOfPlayer(float candidateT)
     {
         if (!player) return true;
+        float len = ArcLen();
+        if (len <= 0.001f) return true;
+
         float tCar = Mathf.Repeat(player.TrackTNormalized, 1f);
         float wrap(float d) => (d < 0f) ? d + 1f : d;
         float dt = wrap(candidateT - tCar);
-        float ahead = dt * ArcLen();
-        float behind = (1f - dt) * ArcLen();
+        float ahead = dt * len;
+        float behind = (1f - dt) * len;
         if (ahead >= 0f && ahead < playerSafeAheadMeters) return false;
         if (behind >= 0f && behind < playerSafeBehindMeters) return false;
         return true;
@@ -117,7 +233,7 @@ public class CollectableManager : MonoBehaviour
     {
         if (!obstacleMgr) return true;
         float minSq = minCrossSeparationMeters * minCrossSeparationMeters;
-        var list = obstacleMgr.GetActiveWorldPositions(); // add method below
+        var list = obstacleMgr.GetActiveWorldPositions();
         for (int i = 0; i < list.Count; i++)
             if ((list[i] - p).sqrMagnitude < minSq) return false;
         return true;
@@ -126,9 +242,23 @@ public class CollectableManager : MonoBehaviour
     void Awake()
     {
         if (!collectablePrefab) { Debug.LogError("CollectableManager: Prefab missing"); enabled = false; return; }
+
         _spline = GetComponent<SplineContainer>();
+
         if (!laneVis) laneVis = GetComponent<LaneLinesVisualizer>();
-        if (!laneVis) { Debug.LogError("CollectableManager: LaneLinesVisualizer ref missing"); enabled = false; return; }
+
+        if (useSeparateLaneSplines && !HasSeparateLaneSplines())
+        {
+            Debug.LogError("CollectableManager: useSeparateLaneSplines ON, but laneContainers[0..2] are not assigned (0=RIGHT, 1=CENTER, 2=LEFT).");
+            enabled = false;
+            return;
+        }
+
+        if (!HasSeparateLaneSplines() && useLaneVisualizerOffsets && !UsingLaneVis())
+        {
+            Debug.LogWarning("CollectableManager: useLaneVisualizerOffsets true, but laneVis or laneOffsets missing. Switching to fixed 3-lane fallback.");
+            useLaneVisualizerOffsets = false;
+        }
 
         BuildPool();
         StartCoroutine(SpawnLoop());
@@ -152,10 +282,23 @@ public class CollectableManager : MonoBehaviour
     GameObject NextPooled()
     {
         foreach (var g in _pool) if (!g.activeInHierarchy) return g;
+
+        if (_pool.Count < maxActive)
+        {
+            var go = Instantiate(collectablePrefab, Vector3.zero, Quaternion.identity, transform);
+            go.SetActive(false);
+            if (go.TryGetComponent(out Collectable col))
+            {
+                col.manager = this;
+                col.audioPool = collectableAudioPool;
+            }
+            _pool.Add(go);
+            return go;
+        }
+
         return null;
     }
 
-    // !!! DIFFICULTY — apply curves & smoothing
     void ApplyDifficulty(float diff, float dt)
     {
         if (!useDirector) return;
@@ -164,7 +307,7 @@ public class CollectableManager : MonoBehaviour
         float targetInt = Mathf.Max(0.15f, intervalByDiff.Evaluate(diff));
         float targetSep = Mathf.Max(0.5f, separationByDiff.Evaluate(diff));
 
-        float k = 1f - Mathf.Exp(-5f * dt);   // smoothing factor (0..1)
+        float k = 1f - Mathf.Exp(-5f * dt);
 
         _curMaxActive = Mathf.Lerp(_curMaxActive <= 0 ? maxActive : _curMaxActive, targetMax, k);
         _curInterval = Mathf.Lerp(_curInterval <= 0 ? spawnInterval : _curInterval, targetInt, k);
@@ -174,7 +317,6 @@ public class CollectableManager : MonoBehaviour
         spawnInterval = _curInterval;
         minSeparation = _curSeparation;
     }
-
 
     IEnumerator SpawnLoop()
     {
@@ -205,7 +347,6 @@ public class CollectableManager : MonoBehaviour
                 bool isAhead = aheadMeters >= 0f;
                 bool withinProtectAhead = isAhead && aheadMeters <= protectAheadMeters;
 
-                // 1) Miss only when clearly behind by threshold
                 if (!isAhead && Mathf.Abs(aheadMeters) >= despawnBehindMeters)
                 {
                     meta.go.SetActive(false);
@@ -215,19 +356,15 @@ public class CollectableManager : MonoBehaviour
                     continue;
                 }
 
-                // 2) Hard cleanup: very old AND far (don’t count as miss)
                 if (hardMaxLifetimeSeconds > 0f && age > hardMaxLifetimeSeconds && !withinProtectAhead)
                 {
                     meta.go.SetActive(false);
                     _active.Remove(meta.go);
                     _activeMeta.RemoveAt(i);
-                    // no telemetry here — we didn’t fairly pass it
                     continue;
                 }
-
-                // Otherwise: keep it
             }
-            // per-iteration wait (runtime changes take effect)
+
             float wait = Mathf.Max(0.05f, spawnInterval);
             float t = 0f;
             while (t < wait) { t += Time.deltaTime; yield return null; }
@@ -242,44 +379,61 @@ public class CollectableManager : MonoBehaviour
         var go = NextPooled();
         if (!go) return;
 
-        Spline spline = _spline.Spline;
-        float len = spline.GetLength();
-        if (len < 0.1f) return;
+        int laneCount = SpawnLaneCount;
+        if (laneCount <= 0) return;
 
         for (int attempt = 0; attempt < maxPlacementAttempts; ++attempt)
         {
             float t = UnityEngine.Random.value;
-            SplineUtility.Evaluate(spline, t, out float3 lp, out float3 lt, out _);
-            Vector3 wp = transform.TransformPoint(lp);
-            Vector3 wt = transform.TransformDirection(math.normalize(lt));
-            Vector3 right = Vector3.Cross(Vector3.up, wt).normalized;
+            int laneIdx = UnityEngine.Random.Range(0, laneCount);
 
-            int laneIdx = UnityEngine.Random.Range(0, laneVis.laneOffsets.Length);
-            float offset = laneVis.laneOffsets[laneIdx];
+            Vector3 wp, wt, wu, right;
+            if (!TryGetLaneFrame(laneIdx, t, out wp, out wt, out wu, out right))
+                continue;
 
-            Vector3 candidate = wp + right * offset + Vector3.up * rayHeight;
-            if (Physics.Raycast(candidate, Vector3.down, out var hit, rayHeight * 2f, groundMask))
-                candidate = hit.point + Vector3.up * floatHeight;
+            Vector3 candidateRayStart;
+            Vector3 candidateFallback;
+
+            if (HasSeparateLaneSplines())
+            {
+                candidateRayStart = wp + Vector3.up * rayHeight;
+                candidateFallback = wp + Vector3.up * floatHeight;
+            }
             else
-                candidate = wp + right * offset + Vector3.up * floatHeight;
+            {
+                float offset = GetLaneOffsetByIndex(laneIdx);
+                candidateRayStart = wp + right * offset + Vector3.up * rayHeight;
+                candidateFallback = wp + right * offset + Vector3.up * floatHeight;
+            }
+
+            Vector3 finalPos;
+            if (Physics.Raycast(candidateRayStart, Vector3.down, out var hit, rayHeight * 2f, groundMask, QueryTriggerInteraction.Ignore))
+                finalPos = hit.point + Vector3.up * floatHeight;
+            else
+                finalPos = candidateFallback;
 
             if (!IsClearOfPlayer(t)) continue;
-            if (!IsFarEnough(candidate)) { if (drawAttemptGizmos) DebugDraw(candidate, Color.red); continue; }
-            if (!IsFarFromObstacles(candidate)) { if (drawAttemptGizmos) DebugDraw(candidate, Color.red); continue; }
+            if (!IsFarEnough(finalPos)) { if (drawAttemptGizmos) DebugDraw(finalPos, Color.red); continue; }
+            if (!IsFarFromObstacles(finalPos)) { if (drawAttemptGizmos) DebugDraw(finalPos, Color.red); continue; }
 
-            if (IsFarEnough(candidate))
+            if (wt.sqrMagnitude < 0.0001f) wt = transform.forward;
+            if (wu.sqrMagnitude < 0.0001f) wu = Vector3.up;
+
+            go.transform.SetPositionAndRotation(finalPos, Quaternion.LookRotation(wt, wu));
+            go.SetActive(true);
+            _active.Add(go);
+
+            _activeMeta.Add(new CollectableMeta
             {
-                go.transform.SetPositionAndRotation(candidate, Quaternion.LookRotation(wt, Vector3.up));
-                go.SetActive(true);
-                _active.Add(go);
-                _activeMeta.Add(new CollectableMeta { go = go, t = t, lane = laneIdx, spawnTime = Time.time });
+                go = go,
+                t = t,
+                lane = laneIdx,
+                spawnTime = Time.time
+            });
 
-                // NEW: telemetry
-                if (SkillEstimator.Instance) SkillEstimator.Instance.OnCollectibleSpawned();
-                if (drawAttemptGizmos) DebugDraw(candidate, Color.green);
-                return;
-            }
-            else if (drawAttemptGizmos) DebugDraw(candidate, Color.red);
+            if (SkillEstimator.Instance) SkillEstimator.Instance.OnCollectibleSpawned();
+            if (drawAttemptGizmos) DebugDraw(finalPos, Color.green);
+            return;
         }
     }
 
@@ -305,12 +459,9 @@ public class CollectableManager : MonoBehaviour
         g.SetActive(false);
         _active.Remove(g);
 
-        // remove meta
         for (int i = _activeMeta.Count - 1; i >= 0; --i)
             if (_activeMeta[i].go == g) { _activeMeta.RemoveAt(i); break; }
 
-        // telemetry: treat this path as "collected"
         if (SkillEstimator.Instance) SkillEstimator.Instance.OnCollectibleCollected();
     }
-
 }

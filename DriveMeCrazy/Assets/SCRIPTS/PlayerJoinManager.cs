@@ -89,7 +89,7 @@ public class PlayerJoinManager : MonoBehaviour
     [SerializeField] Image blackFadeImage;          // full-screen image
 
     public CanvasGroup fadeintoLobby;
-
+    public bool isDragRace;
     public AudioSource crowdroar;
     /* ?????????????????????? STATIC / INTERNALS ??????????????????? */
     public static bool IsRaceStarted { get; private set; }
@@ -338,7 +338,7 @@ public class PlayerJoinManager : MonoBehaviour
         currentLap++;
         UpdateLapUI();
 
-        if (currentLap >= lapsToFinish)
+        if (currentLap >= lapsToFinish || isDragRace)
             StartCoroutine(FinishRaceSequence());
     }
 

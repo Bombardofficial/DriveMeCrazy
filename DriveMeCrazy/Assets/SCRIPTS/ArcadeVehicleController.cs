@@ -28,11 +28,17 @@ namespace ArcadeVP
         [Range(0f, 1f)]
         public float minSpeedFractionForLaneChange = 0.1f;
         private readonly float[] laneOffsets = new float[3];
-        private int currentLane = 1;
+        [SerializeField] private int currentLane = 1;
         private float targetOffset, currentOffset;
         private float lastLaneChangeTime = -Mathf.Infinity;
         private float previousSteer = 0f;
-        private bool isChangingLane => Mathf.Abs(currentOffset - targetOffset) > laneSnapThreshold;
+        private bool isChangingLane => useSeparateLaneSplines
+    ? (laneTrackSwitcher != null && laneTrackSwitcher.IsChanging)
+    : Mathf.Abs(currentOffset - targetOffset) > laneSnapThreshold;
+
+        [Header("Lane Tracks (separate splines)")]
+        public bool useSeparateLaneSplines = false;
+        public SplineLaneTrackSwitcher laneTrackSwitcher;
 
         [Header("Drifting Settings")]
         public float cornerDetectionLookahead = 2f;
@@ -52,6 +58,11 @@ namespace ArcadeVP
         private int driftDirection = 0;
         private float detectedCornerAngle = 0f;
         private float currentCurvature = 0f;
+
+
+        [Tooltip("If true, lane switching NEVER modifies traveledDistance. Forward motion stays continuous (recommended).")]
+        public bool keepForwardDistanceDuringLaneChange = true;
+
         // --- End Existing Headers ---
 
         [Header("Ground Settings")]
@@ -470,20 +481,50 @@ namespace ArcadeVP
         // Start remains the same
         void Start()
         {
-            if (splineContainer == null)
-            {
-                Debug.LogError("No SplineContainer on " + name);
-                enabled = false;
-                return;
-            }
             PlayerManager.OnDriverChanged += HandleDriverChanged;
-            spline = splineContainer.Spline;
-            splineLength = spline.GetLength();
 
-            laneOffsets[0] = -laneOffsetDistance;
-            laneOffsets[1] = 0f;
-            laneOffsets[2] = +laneOffsetDistance;
-            targetOffset = currentOffset = laneOffsets[currentLane];
+            if (useSeparateLaneSplines)
+            {
+                if (laneTrackSwitcher == null)
+                    laneTrackSwitcher = GetComponent<SplineLaneTrackSwitcher>();
+
+                if (laneTrackSwitcher == null || laneTrackSwitcher.LaneCount == 0)
+                {
+                    Debug.LogError("Separate lane splines ON, but laneTrackSwitcher missing or laneTracks empty on " + name);
+                    enabled = false;
+                    return;
+                }
+
+                currentLane = Mathf.Clamp(currentLane, 0, laneTrackSwitcher.LaneCount - 1);
+
+                laneTrackSwitcher.laneChangeCooldown = laneChangeCooldown;
+                laneTrackSwitcher.laneChangeDuration = Mathf.Max(0.05f, laneOffsetDistance / Mathf.Max(0.01f, laneChangeSpeed));
+
+                laneTrackSwitcher.Initialise(currentLane);
+
+                splineContainer = laneTrackSwitcher.ActiveLaneContainer;
+                spline = laneTrackSwitcher.ActiveSpline;
+                splineLength = laneTrackSwitcher.ActiveLength;
+
+                currentOffset = targetOffset = 0f;
+            }
+            else
+            {
+                if (splineContainer == null)
+                {
+                    Debug.LogError("No SplineContainer on " + name);
+                    enabled = false;
+                    return;
+                }
+
+                spline = splineContainer.Spline;
+                splineLength = spline.GetLength();
+
+                laneOffsets[0] = -laneOffsetDistance;
+                laneOffsets[1] = 0f;
+                laneOffsets[2] = +laneOffsetDistance;
+                targetOffset = currentOffset = laneOffsets[currentLane];
+            }
             _impulseSource = GetComponent<CinemachineImpulseSource>();
             if (engineSound != null)
             {
@@ -539,6 +580,27 @@ namespace ArcadeVP
             if (!inZone) { EnsureGaugeHiddenWhenNotActive(); }
 
             float dt = Time.deltaTime;
+            if (useSeparateLaneSplines && laneTrackSwitcher != null)
+            {
+                laneTrackSwitcher.laneChangeCooldown = laneChangeCooldown;
+                laneTrackSwitcher.laneChangeDuration = Mathf.Max(0.05f, laneOffsetDistance / Mathf.Max(0.01f, laneChangeSpeed));
+
+                float td = traveledDistance; // copy – switcher can do internal math without stealing forward distance
+                laneTrackSwitcher.Tick(dt, ref td, out bool laneFinished);
+
+                // Only apply the switcher's distance corrections if you explicitly want the old behavior
+                if (!keepForwardDistanceDuringLaneChange)
+                    traveledDistance = td;
+
+                if (laneFinished)
+                    currentLane = laneTrackSwitcher.CurrentLane;
+                if (laneFinished)
+                    currentLane = laneTrackSwitcher.CurrentLane;
+
+                splineContainer = laneTrackSwitcher.ActiveLaneContainer;
+                spline = laneTrackSwitcher.ActiveSpline;
+                splineLength = laneTrackSwitcher.ActiveLength;
+            }
 
             float tolFactor = 1f + speedOvershootTolerance;
             bool overspeedEligible = (activeSpeedLimit > 0f)
@@ -676,7 +738,9 @@ namespace ArcadeVP
             UpdateEngineSound(dt);
 
             // Lane offset update
-            currentOffset = Mathf.MoveTowards(currentOffset, targetOffset, laneChangeSpeed * dt);
+            if (!useSeparateLaneSplines)
+                currentOffset = Mathf.MoveTowards(currentOffset, targetOffset, laneChangeSpeed * dt);
+
 
             // --- Movement and physics update ---
             MoveAndHandlePhysics(dt); // New method to handle movement and jumps
@@ -975,7 +1039,19 @@ namespace ArcadeVP
             Debug.Log("CRASHED");
             int dir = UnityEngine.Random.value > .5f ? 1 : -1;
             currentLane = dir > 0 ? 2 : 0;
-            targetOffset = laneOffsets[currentLane];
+
+            if (useSeparateLaneSplines && laneTrackSwitcher != null)
+            {
+                laneTrackSwitcher.ForceSetLane(currentLane, ref traveledDistance);
+                splineContainer = laneTrackSwitcher.ActiveLaneContainer;
+                spline = laneTrackSwitcher.ActiveSpline;
+                splineLength = laneTrackSwitcher.ActiveLength;
+                currentOffset = targetOffset = 0f;
+            }
+            else
+            {
+                targetOffset = laneOffsets[currentLane];
+            }
 
             currentDriftYaw = dir * 80;
             if (bodyMesh) bodyMesh.localRotation = Quaternion.Euler(0, 0, -dir * 45);
@@ -1026,9 +1102,36 @@ namespace ArcadeVP
             bool tapR = steeringInput > 0f && previousSteer <= 0f;
             bool tapL = steeringInput < 0f && previousSteer >= 0f;
             int newLane = currentLane;
-            if (tapL && currentLane < 2) newLane++;
+            int maxLaneIndex = useSeparateLaneSplines && laneTrackSwitcher != null
+    ? (laneTrackSwitcher.LaneCount - 1)
+    : 2;
+
+            // tap logic maradhat, csak a bounds legyen dinamikus
+            if (tapL && currentLane < maxLaneIndex) newLane++;
             if (tapR && currentLane > 0) newLane--;
-            if (newLane != currentLane) { currentLane = newLane; targetOffset = laneOffsets[newLane]; lastLaneChangeTime = Time.time; }
+
+            if (newLane != currentLane)
+            {
+                if (useSeparateLaneSplines && laneTrackSwitcher != null)
+                {
+                    if (laneTrackSwitcher.RequestLane(newLane, traveledDistance, out float remapped))
+                    {
+                        // If we keep forward distance continuous, DO NOT apply remapped
+                        // (remapped exists to keep same normalized progress across splines, but it can feel like a slowdown)
+                        if (!keepForwardDistanceDuringLaneChange)
+                            traveledDistance = remapped;
+
+                        lastLaneChangeTime = Time.time;
+                    }
+                }
+                else
+                {
+                    currentLane = newLane;
+                    targetOffset = laneOffsets[newLane];
+                    lastLaneChangeTime = Time.time;
+                }
+            }
+
         }
 
         // DetectCorner remains the same
@@ -1066,14 +1169,29 @@ namespace ArcadeVP
             float t = traveledDistance / splineLength;
 
             // 2. Evaluate spline
-            SplineUtility.Evaluate(spline, t, out float3 lp, out float3 lt, out float3 lu);
-            Vector3 worldP_Spline = splineContainer.transform.TransformPoint(lp);
-            Vector3 worldT = splineContainer.transform.TransformDirection(lt).normalized;
-            Vector3 worldUp_Spline = splineContainer.transform.TransformDirection(lu).normalized;
-            Vector3 worldRight = splineContainer.transform.TransformDirection(math.normalizesafe(math.cross(lt, lu)));
+            Vector3 worldP_Spline;
+            Vector3 worldT;
+            Vector3 worldUp_Spline;
+            Vector3 worldRight;
 
-            // Calculate target XZ position
-            Vector3 worldPosOnSpline = worldP_Spline + worldRight * currentOffset; // Renamed for clarity
+            if (useSeparateLaneSplines && laneTrackSwitcher != null)
+            {
+                laneTrackSwitcher.GetBlendedSample(traveledDistance, out worldP_Spline, out worldT, out worldUp_Spline);
+                worldT = worldT.normalized;
+                worldUp_Spline = worldUp_Spline.normalized;
+                worldRight = Vector3.Cross(worldT, worldUp_Spline).normalized;
+            }
+            else
+            {
+                SplineUtility.Evaluate(spline, t, out float3 lp, out float3 lt, out float3 lu);
+                worldP_Spline = splineContainer.transform.TransformPoint(lp);
+                worldT = splineContainer.transform.TransformDirection(lt).normalized;
+                worldUp_Spline = splineContainer.transform.TransformDirection(lu).normalized;
+                worldRight = splineContainer.transform.TransformDirection(math.normalizesafe(math.cross(lt, lu)));
+            }
+
+            // old offset only when not using separate lanes
+            Vector3 worldPosOnSpline = worldP_Spline + worldRight * currentOffset;
 
             Vector3 groundCheckOrigin = worldPosOnSpline + Vector3.up * raycastHeight;
             float downwardCheckDistance = raycastHeight + groundCheckDistance;
@@ -1181,7 +1299,11 @@ namespace ArcadeVP
             {
                 // Grounded Tilt Logic (Lane Change / Drift Roll / Accel/Brake Pitch)
                 desiredPitch = -accelerationInput * pitchAngle + slowInput * pitchAngle;
-                float laneDir = isChangingLane ? Mathf.Sign(targetOffset - currentOffset) : 0f;
+                float laneDir = 0f;
+                if (useSeparateLaneSplines && laneTrackSwitcher != null && laneTrackSwitcher.IsChanging)
+                    laneDir = Mathf.Sign(laneTrackSwitcher.TargetLane - laneTrackSwitcher.CurrentLane);
+                else if (!useSeparateLaneSplines && isChangingLane)
+                    laneDir = Mathf.Sign(targetOffset - currentOffset);
                 // Scale drift roll effect based on how much yaw is actually applied?
                 float driftRollFactor = (minDriftYawAngle > 0) ? Mathf.Clamp01(Mathf.Abs(currentDriftYaw) / minDriftYawAngle) : 0f;
                 float driftRoll = isDrifting ? -driftDirection * driftRollAngle * driftRollFactor : 0f;
