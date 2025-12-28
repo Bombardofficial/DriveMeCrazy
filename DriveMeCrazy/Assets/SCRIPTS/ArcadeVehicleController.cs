@@ -85,7 +85,16 @@ namespace ArcadeVP
         public float airbornePitchSpeed = 3f;
         public Transform bodyMesh;
 
+        [Header("Ground Follow Mode")]
+        [Tooltip("OFF = spline height/up (NO jitter). ON = probe mesh (can jitter if mesh is noisy).")]
+        public bool followGroundMesh = false;
 
+        [Tooltip("Seconds we keep last valid ground hit if probe misses for a frame.")]
+        public float groundLostGrace = 0.10f;
+
+        private float _lastGroundHitTime = -999f;
+        private RaycastHit _lastGroundHit;
+        
         // --- Other Headers (Deceleration, Audio, Skid Marks) ---
         [Header("Deceleration & Braking")]
         public float decelerationRate = 2f;
@@ -194,11 +203,26 @@ namespace ArcadeVP
         [Tooltip("Rate car scrubs speed in corners (m/s?)")]
         public float cornerDecel = 12f;
 
+
+        [Header("Ground Smoothing")]
+        public float groundSmoothTime = 0.06f;     // 0.04–0.10 tipik
+        public float maxSnapY = 0.75f;             // nagy lépcsõn snapel, ne simítson örökké
+        public float groundProbeRadius = 0.25f;    // 0.2–0.35 tipik
+
+        private float _ySmoothVel;
+        private float _smoothedY;
+        private Vector3 _smoothedUp;
+        public float normalSmoothSpeed = 12f;
+
         private float _lastOvershootRatio = 0f;
 
         // Add this inside the [Header("Crash Effects")] section in the Inspector
         [Tooltip("The maximum damage taken from a crash when speeding at max difficulty.")]
         public int maxCrashDamage = 25;
+
+        [Header("Control Lock")]
+        public bool allowBrakeDuringLock = true;
+        public float stumbleLockTime = 0.15f; // 0.7 helyett (tweakeld)
 
         int activeSignIndex = -1;        // <-- keep track of which sign we asked for
 
@@ -482,6 +506,9 @@ namespace ArcadeVP
         void Start()
         {
             PlayerManager.OnDriverChanged += HandleDriverChanged;
+            _smoothedY = transform.position.y;
+            _smoothedUp = transform.up;
+            _ySmoothVel = 0f;
 
             if (useSeparateLaneSplines)
             {
@@ -708,10 +735,10 @@ namespace ArcadeVP
                 steeringInput = 0f;
                 accelerationInput = 0f;
                 driftInput = 0f;
-                slowInput = 0f;
 
-                // heavy braking
-                //speed = Mathf.MoveTowards(speed, 0f, overshootBrakeDecel * dt);
+                if (!allowBrakeDuringLock)
+                    slowInput = 0f;   // ha tényleg full freeze kell
+                                      // ha allowBrakeDuringLock=true: slowInput marad, tehát azonnal tudsz fékezni
             }
 
             // Speed Calculation
@@ -868,7 +895,7 @@ namespace ArcadeVP
 
             // small wait (unscaled to feel consistent under hitches)
             float t = 0f;
-            while (t < pre) { t += Time.unscaledDeltaTime; yield return null; }
+            while (t < pre) { t += Time.deltaTime; yield return null; }
 
             if (!PlayerJoinManager.IsRaceStarted) yield break; // NEW
 
@@ -1003,7 +1030,7 @@ namespace ArcadeVP
         {
             if (!PlayerJoinManager.IsRaceStarted) return; // NEW
             // tiny time loss
-            controlLockUntil = Time.time + 0.7f;
+            controlLockUntil = Time.time + stumbleLockTime;
 
             int dir = UnityEngine.Random.value > .5f ? 1 : -1;
 
@@ -1070,6 +1097,8 @@ namespace ArcadeVP
 
         private void UpdateSkidSound(bool active, float dt)
         {
+            if (Time.timeScale <= 0.0001f) return;
+
             if (skidSound == null) return;
 
             /* 1. target volume */
@@ -1164,11 +1193,20 @@ namespace ArcadeVP
         // --- NEW Method for Movement & Physics ---
         private void MoveAndHandlePhysics(float dt)
         {
-            // 1. Advance distance along spline
+            // ---- HARD PAUSE SAFETY ----
+            // If timescale is 0, dt will be 0 -> DO NOT simulate.
+            if (Time.timeScale <= 0f) return;
+            if (dt <= 0f) return;
+
+            if (splineContainer == null || spline == null) return;
+            if (splineLength <= 0.0001f) splineLength = spline.GetLength();
+            if (splineLength <= 0.0001f) return;
+
+            // 1) Advance distance along spline
             traveledDistance = Mathf.Repeat(traveledDistance + speed * dt, splineLength);
             float t = traveledDistance / splineLength;
 
-            // 2. Evaluate spline
+            // 2) Evaluate spline sample (world pos, tangent, up, right)
             Vector3 worldP_Spline;
             Vector3 worldT;
             Vector3 worldUp_Spline;
@@ -1177,115 +1215,160 @@ namespace ArcadeVP
             if (useSeparateLaneSplines && laneTrackSwitcher != null)
             {
                 laneTrackSwitcher.GetBlendedSample(traveledDistance, out worldP_Spline, out worldT, out worldUp_Spline);
-                worldT = worldT.normalized;
-                worldUp_Spline = worldUp_Spline.normalized;
-                worldRight = Vector3.Cross(worldT, worldUp_Spline).normalized;
+
+                worldT = worldT.sqrMagnitude > 1e-6f ? worldT.normalized : transform.forward;
+                worldUp_Spline = worldUp_Spline.sqrMagnitude > 1e-6f ? worldUp_Spline.normalized : Vector3.up;
+
+                worldRight = Vector3.Cross(worldT, worldUp_Spline);
+                if (worldRight.sqrMagnitude < 1e-6f) worldRight = Vector3.Cross(worldT, Vector3.up);
+                worldRight = worldRight.normalized;
             }
             else
             {
                 SplineUtility.Evaluate(spline, t, out float3 lp, out float3 lt, out float3 lu);
+
                 worldP_Spline = splineContainer.transform.TransformPoint(lp);
-                worldT = splineContainer.transform.TransformDirection(lt).normalized;
-                worldUp_Spline = splineContainer.transform.TransformDirection(lu).normalized;
-                worldRight = splineContainer.transform.TransformDirection(math.normalizesafe(math.cross(lt, lu)));
+
+                worldT = splineContainer.transform.TransformDirection(lt);
+                if (worldT.sqrMagnitude < 1e-6f) worldT = transform.forward;
+                worldT = worldT.normalized;
+
+                worldUp_Spline = splineContainer.transform.TransformDirection(lu);
+                if (worldUp_Spline.sqrMagnitude < 1e-6f) worldUp_Spline = Vector3.up;
+                worldUp_Spline = worldUp_Spline.normalized;
+
+                float3 lr = math.normalizesafe(math.cross(lt, lu));
+                worldRight = splineContainer.transform.TransformDirection((Vector3)lr);
+                if (worldRight.sqrMagnitude < 1e-6f) worldRight = Vector3.Cross(worldT, worldUp_Spline);
+                worldRight = worldRight.normalized;
             }
 
-            // old offset only when not using separate lanes
+            // lane offset (Y is still spline Y)
             Vector3 worldPosOnSpline = worldP_Spline + worldRight * currentOffset;
 
-            Vector3 groundCheckOrigin = worldPosOnSpline + Vector3.up * raycastHeight;
-            float downwardCheckDistance = raycastHeight + groundCheckDistance;
+            // 3) Decide height/up source
+            bool groundHit = false;
+            RaycastHit hit = default;
 
-            bool groundHit = Physics.Raycast(
-                    groundCheckOrigin, Vector3.down, out var hit,
-                    downwardCheckDistance, drivableSurface, QueryTriggerInteraction.Ignore);
-
-            Debug.DrawRay(groundCheckOrigin, Vector3.down * downwardCheckDistance,
-                          groundHit ? Color.green : Color.red);
-            Debug.DrawRay(groundCheckOrigin, Vector3.down * downwardCheckDistance, groundHit ? Color.green : Color.red);
-
-            isGrounded = groundHit;
-
-            // 4. Determine Target Y Position & Apply Physics
-            float targetY;
-            Vector3 finalPosition;
-
-            if (isGrounded)
+            if (followGroundMesh)
             {
-                // --- DETAILED LOGGING ---
-                GameObject hitObject = hit.collider.gameObject;
-                float hitY = hit.point.y;
-                targetY = hitY + heightAboveGround;
+                Vector3 origin = worldPosOnSpline + Vector3.up * raycastHeight;
+                float dist = raycastHeight + groundCheckDistance;
 
+                groundHit = Physics.SphereCast(
+                    origin,
+                    groundProbeRadius,
+                    Vector3.down,
+                    out hit,
+                    dist,
+                    drivableSurface,
+                    QueryTriggerInteraction.Ignore
+                );
 
-                // --- END LOGGING ---
+                Debug.DrawRay(origin, Vector3.down * dist, groundHit ? Color.green : Color.red);
 
-                // Check for non-physical Y values before applying
-                if (float.IsNaN(targetY) || float.IsInfinity(targetY))
+                // If probe missed for 1 frame, keep last hit briefly (prevents airborne jitter)
+                if (!groundHit && (Time.time - _lastGroundHitTime) <= groundLostGrace)
                 {
-                    Debug.LogError($"Invalid TargetY calculated: {targetY}. Hit Point: {hit.point}, Height: {heightAboveGround}. Resetting to current Y.");
-                    targetY = transform.position.y; // Fallback to prevent error propagation
-                    isGrounded = false; // Treat as not grounded if calculation failed
-                    verticalVelocity = 0f; // Prevent accumulating velocity from bad state
+                    groundHit = true;
+                    hit = _lastGroundHit;
+                }
+
+                if (groundHit)
+                {
+                    _lastGroundHit = hit;
+                    _lastGroundHitTime = Time.time;
+                }
+            }
+            else
+            {
+                // spline mode: always "grounded"
+                groundHit = false;
+            }
+
+            // 4) Compute target Y
+            float targetY;
+
+            if (!followGroundMesh)
+            {
+                // SPLINE MODE (recommended) -> zero jitter
+                isGrounded = true;
+                verticalVelocity = 0f;
+                targetY = worldPosOnSpline.y + heightAboveGround;
+            }
+            else
+            {
+                if (groundHit)
+                {
+                    isGrounded = true;
+                    targetY = hit.point.y + heightAboveGround;
+
+                    if (verticalVelocity < 0f) verticalVelocity = 0f;
                 }
                 else
                 {
-                    if (verticalVelocity < 0)
-                        verticalVelocity = 0f; // Reset velocity on proper landing
+                    // real airborne only if we truly lost ground beyond grace
+                    isGrounded = false;
+                    verticalVelocity += Physics.gravity.y * gravityScale * dt;
+                    targetY = transform.position.y + verticalVelocity * dt;
                 }
-
-                finalPosition = new Vector3(worldPosOnSpline.x, targetY, worldPosOnSpline.z);
             }
-            else // Airborne
+
+            // 5) Smooth Y (but NEVER force dt while paused)
+            if (Mathf.Abs(targetY - _smoothedY) > maxSnapY)
             {
-                verticalVelocity += Physics.gravity.y * gravityScale * dt;
-                targetY = transform.position.y + verticalVelocity * dt;
-
-                finalPosition = new Vector3(worldPosOnSpline.x, targetY, worldPosOnSpline.z);
+                _smoothedY = targetY;
+                _ySmoothVel = 0f;
             }
-
-            if (dt > 0)
+            else
             {
-                _currentVelocity = (finalPosition - transform.position) / dt;
+                _smoothedY = Mathf.SmoothDamp(_smoothedY, targetY, ref _ySmoothVel, groundSmoothTime, Mathf.Infinity, dt);
             }
-            // Apply final calculated position
-            transform.position = finalPosition;
 
-            // 5. Handle Rotation (Same as before)
-            Vector3 forwardDir = worldT.normalized;
-            if (forwardDir == Vector3.zero) forwardDir = transform.forward;
+            Vector3 finalPos = new Vector3(worldPosOnSpline.x, _smoothedY, worldPosOnSpline.z);
 
-            // use road normal when grounded, fall back to spline?up in the air
-            Vector3 upDir = (groundHit ? hit.normal : worldUp_Spline).normalized;
+            _currentVelocity = (finalPos - transform.position) / dt;
+            transform.position = finalPos;
 
-            Quaternion baseRotation = Quaternion.LookRotation(forwardDir, upDir);
+            // 6) Rotation up vector
+            Vector3 forwardDir = worldT.sqrMagnitude > 1e-6f ? worldT.normalized : transform.forward;
 
-            /* ------------------ drift yaw stays exactly the same ------------------ */
+            Vector3 rawUp;
+            if (!followGroundMesh)
+                rawUp = worldUp_Spline;
+            else
+                rawUp = (groundHit ? hit.normal : worldUp_Spline);
+
+            if (rawUp.sqrMagnitude < 1e-6f) rawUp = Vector3.up;
+            rawUp.Normalize();
+
+            float normalLerp = 1f - Mathf.Exp(-normalSmoothSpeed * dt);
+            _smoothedUp = Vector3.Slerp(_smoothedUp == Vector3.zero ? rawUp : _smoothedUp, rawUp, normalLerp).normalized;
+
+            Quaternion baseRot = Quaternion.LookRotation(forwardDir, _smoothedUp);
+
+            // 7) Drift yaw around smoothed up
             float targetDriftYaw = 0f;
+
             if (balanceActive)
             {
-                // Strong forced yaw during mini-game
                 targetDriftYaw = 100f * driftDirection;
             }
             else if (isDrifting)
             {
-                float cornerIntensity = Mathf.Clamp01(Mathf.InverseLerp(cornerAngleThreshold,
-                                                     maxCornerAngleForFullDrift, detectedCornerAngle));
+                float cornerIntensity = Mathf.Clamp01(Mathf.InverseLerp(cornerAngleThreshold, maxCornerAngleForFullDrift, detectedCornerAngle));
                 float cornerBasedYaw = Mathf.Lerp(minDriftYawAngle, maxDriftYawAngle, cornerIntensity);
                 float speedScaleFactor = Mathf.Clamp(Mathf.InverseLerp(minSpeedFractionForYawEffect, maxSpeedFractionForYawEffect, smoothedSpeedRatio), 0.4f, 1f);
-
-                float speedScaledYaw = cornerBasedYaw * speedScaleFactor;
-                targetDriftYaw = speedScaledYaw * driftDirection;
+                targetDriftYaw = (cornerBasedYaw * speedScaleFactor) * driftDirection;
             }
-            currentDriftYaw = Mathf.Lerp(currentDriftYaw, targetDriftYaw,
-                             (isDrifting ? driftEntrySpeed : driftExitSpeed) * dt);
 
-            /* NOTE: yaw is applied around the *road normal* so the car keeps hugging the slope */
-            Quaternion driftRot = Quaternion.AngleAxis(currentDriftYaw, upDir);
-            Quaternion targetRotation = baseRotation * driftRot;
+            currentDriftYaw = Mathf.Lerp(currentDriftYaw, targetDriftYaw, (isDrifting ? driftEntrySpeed : driftExitSpeed) * dt);
 
-            transform.rotation = targetRotation;
+            Quaternion driftRot = Quaternion.AngleAxis(currentDriftYaw, _smoothedUp);
+            transform.rotation = baseRot * driftRot;
         }
+
+
 
 
         private void UpdateBodyTilt(float dt)
@@ -1334,6 +1417,8 @@ namespace ArcadeVP
         // UpdateEngineSound remains the same
         private void UpdateEngineSound(float dt)
         {
+            if (Time.timeScale <= 0.0001f) return;
+
             if (engineSound == null || maxSpeed <= 0f) return;
             float targetPitch = Mathf.Lerp(minPitch, maxPitch, smoothedSpeedRatio);
             float maxDelta = maxPitchChangePerSecond * dt;

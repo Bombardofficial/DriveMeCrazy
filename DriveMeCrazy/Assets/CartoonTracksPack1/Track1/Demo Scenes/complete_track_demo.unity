@@ -29872,7 +29872,7 @@ AudioSource:
   Spatialize: 0
   SpatializePostEffects: 0
   Priority: 62
-  DopplerLevel: 1
+  DopplerLevel: 0
   MinDistance: 1
   MaxDistance: 500
   Pan2D: 0
@@ -38325,7 +38325,7 @@ GameObject:
   - component: {fileID: 621698368}
   - component: {fileID: 621698371}
   - component: {fileID: 621698370}
-  - component: {fileID: 621698369}
+  - component: {fileID: 621698372}
   m_Layer: 0
   m_Name: cm
   m_TagString: Untagged
@@ -38348,18 +38348,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1019152790}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &621698369
-MonoBehaviour:
-  m_ObjectHideFlags: 3
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 621698367}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e8b78ac948f05a46a6d8339a503172b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &621698370
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -38392,6 +38380,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ac0b09e7857660247b1477e93731de29, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &621698372
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 621698367}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e8b78ac948f05a46a6d8339a503172b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1001 &622265705
@@ -39990,7 +39990,7 @@ Transform:
   m_GameObject: {fileID: 648142710}
   serializedVersion: 2
   m_LocalRotation: {x: 0.064609036, y: 0, z: 0, w: 0.9979107}
-  m_LocalPosition: {x: 1.07, y: -1.3, z: -2.345}
+  m_LocalPosition: {x: 1.07, y: -1.32, z: -2.19}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -45189,7 +45189,7 @@ Transform:
   m_GameObject: {fileID: 764639065}
   serializedVersion: 2
   m_LocalRotation: {x: 0.064609036, y: 0, z: 0, w: 0.9979107}
-  m_LocalPosition: {x: -1.15, y: -1.3, z: -0.338}
+  m_LocalPosition: {x: -1.15, y: -1.32, z: -0.18}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -59059,7 +59059,7 @@ Transform:
   m_GameObject: {fileID: 954456965}
   serializedVersion: 2
   m_LocalRotation: {x: 0.064609036, y: 0, z: 0, w: 0.9979107}
-  m_LocalPosition: {x: 1.163, y: -1.3030002, z: -0.292}
+  m_LocalPosition: {x: 1.163, y: -1.32, z: -0.13}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -66915,8 +66915,8 @@ MonoBehaviour:
   m_StreamingVersion: 20170927
   m_Priority: 10
   m_StandbyUpdate: 2
-  m_LookAt: {fileID: 2111085467219387254}
-  m_Follow: {fileID: 2111085467219387254}
+  m_LookAt: {fileID: 1520874666}
+  m_Follow: {fileID: 1280648064}
   m_Lens:
     FieldOfView: 80
     OrthographicSize: 5
@@ -78844,6 +78844,59 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!1 &1280648063
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1280648064}
+  - component: {fileID: 1280648065}
+  m_Layer: 7
+  m_Name: CamFollowProxy
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1280648064
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1280648063}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2111085467219387254}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1280648065
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1280648063}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ffe5175a4f6889c4899389c03ea97b1b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  car: {fileID: 2111085467219387254}
+  lookAtProxy: {fileID: 1520874666}
+  followWorldOffset: {x: 0, y: 0, z: 0}
+  smoothYOnly: 1
+  followSmoothTime: 0.1
+  lookAtLocalOffset: {x: 0, y: 0.8, z: 0}
+  lookAtSmoothTime: 0.3
+  lockLookAtY: 0
+  lookAtYFromCarPlus: 1
 --- !u!1 &1282004340
 GameObject:
   m_ObjectHideFlags: 0
@@ -79006,7 +79059,7 @@ Transform:
   m_GameObject: {fileID: 1285978966}
   serializedVersion: 2
   m_LocalRotation: {x: 0.064609036, y: 0, z: 0, w: 0.9979107}
-  m_LocalPosition: {x: -1.02, y: -1.3, z: -2.345}
+  m_LocalPosition: {x: -1.02, y: -1.32, z: -2.19}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -85632,7 +85685,7 @@ MonoBehaviour:
   seatMgr: {fileID: 2111085467219387262}
   passengerPrefab: {fileID: 1174060323843766397, guid: 1affddbe7cc426c459549db87f7e1926,
     type: 3}
-  quickStartSingleDriver: 0
+  quickStartSingleDriver: 1
   driverPrefabOverride: {fileID: 5583802586414202164, guid: 5b262494d1427d94f89a6f1fca36eff5,
     type: 3}
   lobbyCountdownSeconds: 10
@@ -92291,6 +92344,37 @@ PrefabInstance:
       addedObject: {fileID: 1921503629}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b31cca7e1418b9042921e3ec481ec6ac, type: 3}
+--- !u!1 &1520874665
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1520874666}
+  m_Layer: 7
+  m_Name: CamLookAtProxy
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1520874666
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1520874665}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2111085467219387254}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1521243041
 GameObject:
   m_ObjectHideFlags: 0
@@ -164115,6 +164199,8 @@ Transform:
   - {fileID: 540116801}
   - {fileID: 1460756886}
   - {fileID: 2064839992}
+  - {fileID: 1280648064}
+  - {fileID: 1520874666}
   m_Father: {fileID: 1358783320}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!54 &2111085467219387257
@@ -164156,16 +164242,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f2d69c44041501f4aab1c355410d67b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  splineContainer: {fileID: 1311200373}
+  splineContainer: {fileID: 1775033746}
   maxSpeed: 50
   acceleration: 3
-  laneOffsetDistance: 3
+  laneOffsetDistance: 4.8
   laneChangeSpeed: 10
   laneSnapThreshold: 0.05
   laneChangeCooldown: 0.75
   minSpeedFractionForLaneChange: 0.1
   currentLane: 1
-  useSeparateLaneSplines: 1
+  useSeparateLaneSplines: 0
   laneTrackSwitcher: {fileID: 2111085467219387269}
   cornerDetectionLookahead: 2
   cornerAngleThreshold: 6
@@ -164182,8 +164268,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   raycastHeight: 5
-  groundCheckDistance: 1.2
-  heightAboveGround: 1.1
+  groundCheckDistance: 1
+  heightAboveGround: 1
   gravityScale: 1
   pitchAngle: 5
   rollAngle: 8
@@ -164191,6 +164277,8 @@ MonoBehaviour:
   airbornePitchAngle: 30
   airbornePitchSpeed: 3
   bodyMesh: {fileID: 9074199189886782241}
+  followGroundMesh: 0
+  groundLostGrace: 0.1
   decelerationRate: 3
   brakeDeceleration: 10
   engineSound: {fileID: 540116800}
@@ -164235,7 +164323,13 @@ MonoBehaviour:
   perfectBonusPoints: 100
   cornerSlowFactor: 0
   cornerDecel: 0
+  groundSmoothTime: 0.1
+  maxSnapY: 0.75
+  groundProbeRadius: 0.35
+  normalSmoothSpeed: 18
   maxCrashDamage: 25
+  allowBrakeDuringLock: 1
+  stumbleLockTime: 0.15
   debugLogs: 1
   driverChangeGrace: 3
   stickyExitSeconds: 0.75
@@ -164384,6 +164478,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  arcSamples: 256
+  referenceLaneIndex: 1
   currentLane: 0
   targetLane: 0
   blendT: 1
@@ -165653,6 +165749,8 @@ MonoBehaviour:
   airbornePitchAngle: 30
   airbornePitchSpeed: 3
   bodyMesh: {fileID: 1942600523}
+  followGroundMesh: 0
+  groundLostGrace: 0.1
   decelerationRate: 3
   brakeDeceleration: 10
   engineSound: {fileID: 4051074286637142755}
@@ -165697,7 +165795,13 @@ MonoBehaviour:
   perfectBonusPoints: 100
   cornerSlowFactor: 0
   cornerDecel: 0
+  groundSmoothTime: 0.06
+  maxSnapY: 0.75
+  groundProbeRadius: 0.25
+  normalSmoothSpeed: 12
   maxCrashDamage: 25
+  allowBrakeDuringLock: 1
+  stumbleLockTime: 0.15
   debugLogs: 1
   driverChangeGrace: 3
   stickyExitSeconds: 0.75

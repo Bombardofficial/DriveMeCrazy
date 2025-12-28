@@ -15,6 +15,13 @@ namespace ArcadeVP
         [Min(0f)] public float laneChangeCooldown = 0.75f;
         public AnimationCurve blendCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
 
+        [Header("Arc-length sampling (anti time-warp)")]
+        [Range(32, 1024)]
+        public int arcSamples = 256;
+
+        [Tooltip("Reference lane index used as 'master distance' length. (1 = middle lane if you have 3)")]
+        public int referenceLaneIndex = 1;
+
         [Header("Runtime (read-only)")]
         [SerializeField] int currentLane = 0;
         [SerializeField] int targetLane = 0;
@@ -22,19 +29,35 @@ namespace ArcadeVP
 
         float lastSwitchTime = -999f;
 
-        // Cached transition state
-        SplineContainer fromC, toC;
-        Spline fromS, toS;
-        float fromLen = 1f, toLen = 1f;
+        struct LaneCache
+        {
+            public SplineContainer c;
+            public Spline s;
+            public float lengthWorld;     // arc-length approx in world space
+            public float[] cumDist;       // cumulative distance at each sample
+            public float[] tAt;           // corresponding spline t for each sample
+            public bool valid;
+        }
+
+        LaneCache[] _cache;
+        float _referenceLength = 1f;
 
         public int LaneCount => laneTracks != null ? laneTracks.Length : 0;
         public int CurrentLane => currentLane;
         public int TargetLane => targetLane;
         public bool IsChanging => blendT < 1f;
 
-        public SplineContainer ActiveLaneContainer => (laneTracks != null && laneTracks.Length > 0) ? laneTracks[currentLane] : null;
-        public Spline ActiveSpline => fromS;     // idle stateben from == active
-        public float ActiveLength => fromLen;    // idle stateben fromLen == active length
+        public float ReferenceLength => Mathf.Max(0.0001f, _referenceLength);
+
+        // IMPORTANT: return the reference length so the controller's traveledDistance wrapping is stable
+        public float ActiveLength => ReferenceLength;
+
+        public SplineContainer ActiveLaneContainer =>
+            (laneTracks != null && laneTracks.Length > 0) ? laneTracks[currentLane] : null;
+
+        // "active spline" is current lane spline (idle) or from-lane while switching
+        public Spline ActiveSpline =>
+            (_cache != null && _cache.Length > 0 && _cache[currentLane].valid) ? _cache[currentLane].s : null;
 
         float Blend01
         {
@@ -45,27 +68,115 @@ namespace ArcadeVP
             }
         }
 
+        void OnValidate()
+        {
+            arcSamples = Mathf.Clamp(arcSamples, 32, 1024);
+        }
+
         public void Initialise(int startLane)
         {
             if (laneTracks == null || laneTracks.Length == 0)
                 return;
 
+            BuildAllCaches();
+
             currentLane = Mathf.Clamp(startLane, 0, laneTracks.Length - 1);
             targetLane = currentLane;
             blendT = 1f;
 
-            CacheCurrentAsFrom();
+            // Pick a stable reference length (middle lane if possible)
+            int refIdx = Mathf.Clamp(referenceLaneIndex, 0, laneTracks.Length - 1);
+            if (_cache != null && _cache.Length > refIdx && _cache[refIdx].valid)
+                _referenceLength = _cache[refIdx].lengthWorld;
+            else if (_cache != null && _cache.Length > currentLane && _cache[currentLane].valid)
+                _referenceLength = _cache[currentLane].lengthWorld;
+            else
+                _referenceLength = 1f;
         }
 
-        void CacheCurrentAsFrom()
+        void BuildAllCaches()
         {
-            fromC = laneTracks[currentLane];
-            fromS = fromC != null ? fromC.Spline : null;
-            fromLen = (fromS != null) ? Mathf.Max(0.0001f, fromS.GetLength()) : 0.0001f;
+            int n = LaneCount;
+            _cache = new LaneCache[n];
 
-            toC = fromC;
-            toS = fromS;
-            toLen = fromLen;
+            for (int i = 0; i < n; i++)
+            {
+                var c = laneTracks[i];
+                if (c == null || c.Spline == null)
+                {
+                    _cache[i] = new LaneCache { valid = false };
+                    continue;
+                }
+
+                var s = c.Spline;
+                int N = Mathf.Max(32, arcSamples);
+
+                float[] cum = new float[N + 1];
+                float[] tt = new float[N + 1];
+
+                Vector3 prev = EvalWorldPos(c, s, 0f);
+                cum[0] = 0f;
+                tt[0] = 0f;
+
+                float total = 0f;
+                for (int k = 1; k <= N; k++)
+                {
+                    float t = k / (float)N;
+                    Vector3 p = EvalWorldPos(c, s, t);
+                    total += Vector3.Distance(prev, p);
+                    prev = p;
+
+                    cum[k] = total;
+                    tt[k] = t;
+                }
+
+                _cache[i] = new LaneCache
+                {
+                    c = c,
+                    s = s,
+                    lengthWorld = Mathf.Max(0.0001f, total),
+                    cumDist = cum,
+                    tAt = tt,
+                    valid = true
+                };
+            }
+        }
+
+        static Vector3 EvalWorldPos(SplineContainer c, Spline s, float t)
+        {
+            SplineUtility.Evaluate(s, t, out float3 lp, out _, out _);
+            return c.transform.TransformPoint(lp);
+        }
+
+        float DistanceToT(int laneIdx, float dist)
+        {
+            var lc = _cache[laneIdx];
+            if (!lc.valid || lc.cumDist == null || lc.cumDist.Length < 2)
+                return Mathf.Clamp01(dist / Mathf.Max(0.0001f, lc.lengthWorld));
+
+            float len = lc.lengthWorld;
+            dist = Mathf.Clamp(dist, 0f, len);
+
+            var cum = lc.cumDist;
+            var tt = lc.tAt;
+
+            int lo = 0;
+            int hi = cum.Length - 1;
+
+            while (hi - lo > 1)
+            {
+                int mid = (lo + hi) >> 1;
+                if (cum[mid] <= dist) lo = mid;
+                else hi = mid;
+            }
+
+            float d0 = cum[lo];
+            float d1 = cum[hi];
+            float t0 = tt[lo];
+            float t1 = tt[hi];
+
+            float a = (Mathf.Abs(d1 - d0) < 1e-6f) ? 0f : (dist - d0) / (d1 - d0);
+            return Mathf.LerpUnclamped(t0, t1, a);
         }
 
         public bool RequestLane(int newLane, float traveledDistanceMeters, out float remappedTravelDistanceMeters)
@@ -80,30 +191,17 @@ namespace ArcadeVP
             if (Time.time < lastSwitchTime + laneChangeCooldown)
                 return false;
 
-            // Ha már épp váltunk, akkor fejezzük be “logikailag” és onnan indítsuk az újat
+            // If already changing, commit logically (WITHOUT touching traveled distance)
             if (IsChanging)
             {
-                float tNorm = traveledDistanceMeters / Mathf.Max(0.0001f, fromLen);
-                remappedTravelDistanceMeters = tNorm * Mathf.Max(0.0001f, toLen);
-
                 currentLane = targetLane;
-                CacheCurrentAsFrom();
-
-                traveledDistanceMeters = remappedTravelDistanceMeters;
+                blendT = 1f;
             }
 
             if (newLane == currentLane)
                 return false;
 
-            fromC = laneTracks[currentLane];
-            fromS = fromC != null ? fromC.Spline : null;
-            fromLen = (fromS != null) ? Mathf.Max(0.0001f, fromS.GetLength()) : 0.0001f;
-
             targetLane = newLane;
-            toC = laneTracks[targetLane];
-            toS = toC != null ? toC.Spline : null;
-            toLen = (toS != null) ? Mathf.Max(0.0001f, toS.GetLength()) : fromLen;
-
             blendT = 0f;
             lastSwitchTime = Time.time;
             return true;
@@ -117,16 +215,13 @@ namespace ArcadeVP
             float dur = Mathf.Max(0.0001f, laneChangeDuration);
             blendT = Mathf.Clamp01(blendT + dt / dur);
 
+            // Keep traveled distance stable in the controller’s reference-length space
+            traveledDistanceMeters = Mathf.Repeat(traveledDistanceMeters, ReferenceLength);
+
             if (blendT >= 0.99999f)
             {
-                // Commit + distance remap (ugyanaz a normalized t marad, csak az új spline lengthre skálázunk)
-                float tNorm = traveledDistanceMeters / Mathf.Max(0.0001f, fromLen);
-                traveledDistanceMeters = tNorm * Mathf.Max(0.0001f, toLen);
-
                 currentLane = targetLane;
-                CacheCurrentAsFrom();
                 blendT = 1f;
-
                 justFinished = true;
             }
         }
@@ -138,22 +233,16 @@ namespace ArcadeVP
 
             laneIndex = Mathf.Clamp(laneIndex, 0, laneTracks.Length - 1);
 
-            if (IsChanging)
-            {
-                float tNorm = traveledDistanceMeters / Mathf.Max(0.0001f, fromLen);
-                traveledDistanceMeters = tNorm * Mathf.Max(0.0001f, toLen);
-            }
-
             currentLane = targetLane = laneIndex;
             blendT = 1f;
 
-            CacheCurrentAsFrom();
+            traveledDistanceMeters = Mathf.Repeat(traveledDistanceMeters, ReferenceLength);
         }
 
         public void GetBlendedSample(float traveledDistanceMeters,
                                      out Vector3 worldPos, out Vector3 worldTangent, out Vector3 worldUp)
         {
-            if (fromC == null || fromS == null)
+            if (_cache == null || _cache.Length == 0 || !_cache[currentLane].valid)
             {
                 worldPos = transform.position;
                 worldTangent = transform.forward;
@@ -161,17 +250,18 @@ namespace ArcadeVP
                 return;
             }
 
-            float baseLen = Mathf.Max(0.0001f, fromLen);
-            float t = Mathf.Repeat(traveledDistanceMeters / baseLen, 1f);
+            // MASTER progress in 0..1 based on stable ReferenceLength
+            float refLen = ReferenceLength;
+            float progress01 = Mathf.Repeat(traveledDistanceMeters / refLen, 1f);
 
-            Sample(fromC, fromS, t, out var pA, out var tA, out var uA);
+            SampleLaneAtProgress(currentLane, progress01, out var pA, out var tA, out var uA);
 
-            if (IsChanging && toC != null && toS != null)
+            if (IsChanging && targetLane >= 0 && targetLane < _cache.Length && _cache[targetLane].valid)
             {
-                Sample(toC, toS, t, out var pB, out var tB, out var uB);
+                SampleLaneAtProgress(targetLane, progress01, out var pB, out var tB, out var uB);
 
                 float b = Blend01;
-                worldPos = Vector3.LerpUnclamped(pA, pB, b);
+                worldPos = Vector3.Lerp(pA, pB, b);
                 worldTangent = Vector3.Slerp(tA, tB, b).normalized;
                 worldUp = Vector3.Slerp(uA, uB, b).normalized;
             }
@@ -183,14 +273,26 @@ namespace ArcadeVP
             }
         }
 
-        static void Sample(SplineContainer c, Spline s, float t,
-                           out Vector3 worldPos, out Vector3 worldTangent, out Vector3 worldUp)
+        void SampleLaneAtProgress(int laneIdx, float progress01,
+                                  out Vector3 worldPos, out Vector3 worldTangent, out Vector3 worldUp)
         {
-            SplineUtility.Evaluate(s, t, out float3 lp, out float3 lt, out float3 lu);
+            var lc = _cache[laneIdx];
+            if (!lc.valid || lc.c == null || lc.s == null)
+            {
+                worldPos = transform.position;
+                worldTangent = transform.forward;
+                worldUp = transform.up;
+                return;
+            }
 
-            worldPos = c.transform.TransformPoint(lp);
-            worldTangent = c.transform.TransformDirection(lt).normalized;
-            worldUp = c.transform.TransformDirection(lu).normalized;
+            float dist = Mathf.Clamp01(progress01) * lc.lengthWorld;
+            float t = DistanceToT(laneIdx, dist);
+
+            SplineUtility.Evaluate(lc.s, t, out float3 lp, out float3 lt, out float3 lu);
+
+            worldPos = lc.c.transform.TransformPoint(lp);
+            worldTangent = lc.c.transform.TransformDirection(lt).normalized;
+            worldUp = lc.c.transform.TransformDirection(lu).normalized;
         }
     }
 }
