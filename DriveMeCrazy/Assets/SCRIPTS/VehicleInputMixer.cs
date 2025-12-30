@@ -21,6 +21,8 @@ namespace ArcadeVP
         static bool _isBrakeBlocked = false, _isGasBlocked = false, _isSteeringBlocked = false;
         ArcadeVehicleController _car;
 
+        public ArcadeVehicleController Car => _car;
+
         void Awake()
         {
             if (Instance && Instance != this)

@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.Splines;
 using Unity.Mathematics; // for float3 & math.normalize
 using Cinemachine;
+using System;
 namespace ArcadeVP
 {
     [RequireComponent(typeof(Collider))]
@@ -179,12 +180,18 @@ namespace ArcadeVP
         public float overspeedTriggerTime = 0.40f;  // sustain time before start
         public float extraGraceAfterSwap = 1.0f;   // in addition to driverChangeGrace
                                                    // ---------------------------------------------------------------------
+        bool miniGameArmedThisZone = false;   // pending pre-cue armed but not started
+        int speedZoneEpoch = 0;              // increments on real zone changes (kills stale coroutines)
+        int armedEpoch = -1;
+        int armedSignIndex = -1;
+        float armedLimitSnapshot = 0f;
 
         [Header("Mini-game – UX & Pre-cue")]
         [Tooltip("Pre-cue window before the gauge appears (seconds)")]
         public Vector2 preCueRange = new Vector2(0.25f, 0.40f); // NEW
         [Tooltip("Optional UI SFX source for mini-game beeps")]
         public AudioSource uiAudio; // NEW
+
 
         [Header("Mini-game – outcomes")]
         [Tooltip("Stay within this NormalizedError to count as centred")]
@@ -331,6 +338,66 @@ namespace ArcadeVP
         float rt_perfectHold;
         float rt_centerThresh;
 
+        public event Action CrashHappened;
+
+        // +1 = jobbra vált, -1 = balra vált, 0 = nincs váltás
+        public int LaneChangeDirection
+        {
+            get
+            {
+                if (useSeparateLaneSplines && laneTrackSwitcher != null && laneTrackSwitcher.IsChanging)
+                {
+                    int dir = (int)Mathf.Sign(laneTrackSwitcher.TargetLane - laneTrackSwitcher.CurrentLane);
+                    return dir;
+                }
+
+                if (!useSeparateLaneSplines)
+                {
+                    float d = targetOffset - currentOffset;
+                    if (Mathf.Abs(d) <= laneSnapThreshold) return 0;
+                    return (int)Mathf.Sign(d);
+                }
+
+                return 0;
+            }
+        }
+
+        bool IsOverspeedingNow(float absSpeed)
+        {
+            if (activeSpeedLimit <= 0f) return false;
+            float tolFactor = 1f + speedOvershootTolerance;
+            // + tiny epsilon to avoid float jitter edge cases
+            return absSpeed > (activeSpeedLimit * tolFactor + 0.0001f);
+        }
+
+        float OvershootRatioNow(float absSpeed)
+        {
+            if (activeSpeedLimit <= 0f) return 0f;
+            float over = Mathf.Max(0f, absSpeed - activeSpeedLimit);
+            return over / activeSpeedLimit;
+        }
+
+        void CancelPendingArm(string reason, bool fromCoroutine = false)
+        {
+            // if called from inside the coroutine, DON'T StopCoroutine(self)
+            if (!fromCoroutine && armCR != null)
+                StopCoroutine(armCR);
+
+            armCR = null;
+            miniGameArmedThisZone = false;
+            armedEpoch = -1;
+            armedSignIndex = -1;
+            armedLimitSnapshot = 0f;
+
+            // no “zone consumed” on cancel
+            overspeedTimer = 0f;
+
+            // stop any pre-cue beep
+            if (speedLimitUI && speedLimitUI.sfx) speedLimitUI.sfx.Stop();
+
+            if (debugLogs) Debug.Log($"[SpeedZone] ARM CANCELED: {reason}");
+        }
+
         float ComputeDifficultyBlend(float overshootRatio)
         {
             // base difficulty from overspeed amount (unchanged)
@@ -392,77 +459,73 @@ namespace ArcadeVP
         {
             if (!PlayerJoinManager.IsRaceStarted) return;
 
-            // Always update current zone metadata
+            // detect “bounce enter” (multiple colliders / tiny re-enter) -> don’t nuke state
+            int prevSign = activeSignIndex;
+            float prevLimit = activeSpeedLimit;
+            bool wasInZone = activeSpeedLimit > 0f;
+
+            // Always update metadata FIRST
             activeSpeedLimit = limitMps;
             activeSignIndex = signIndex;
+
+            bool bounceEnter =
+                wasInZone &&
+                prevSign == signIndex &&
+                Mathf.Abs(prevLimit - limitMps) < 0.01f &&
+                (Time.time - zoneEnterTime) < 0.25f;
+
+            // real zone entry -> kill stale arming and reset trackers
+            if (!bounceEnter)
+            {
+                speedZoneEpoch++;               // INVALIDATES any pending coroutine from older zone
+                CancelPendingArm("new zone entered");
+
+                miniGamePlayedThisZone = false; // allow a fresh trigger in this zone
+                miniGameArmedThisZone = false;
+                overspeedTimer = 0f;
+                readyPulseShown = false;
+            }
 
             // Mark zone entry and cancel any pending exit
             zoneEnterTime = Time.time;
             zoneExiting = false;
             zoneStickyUntil = -1f;
 
-            // CARRY-OVER: if a round is active OR the gauge is still visible,
-            // we DO NOT reset / re-arm — we just pop the current UI back in and continue.
-            bool gaugeIsVisible = balanceUI && balanceUI.IsVisible;
-            if (balanceActive || gaugeIsVisible)
-            {
-                // Keep the ongoing round and UI state (pointer, zone, difficulty).
-                if (balanceUI) balanceUI.PopBackIn(); // quick fade-in if it was fading out
-                if (speedLimitUI)
-                {
-                    // Still OK to update the sign visuals if you want (no harm)
-                    speedLimitUI.gameObject.SetActive(true);
-                    speedLimitUI.Show(signIndex);
-                }
-
-                // Nothing else — DO NOT call StartBalanceMiniGame here.
-                Debug.Log("[SpeedZone] ENTER (carry-over) — continuing same mini-game round");
-                return;
-            }
-
-            // Otherwise: normal fresh-entry housekeeping (as before)
-            miniGamePlayedThisZone = false;
-            overspeedTimer = 0f;
-
-            if (balanceUI && balanceUI.IsVisible) balanceUI.End();
-            balanceActive = false;
-
+            // UI sign
             if (speedLimitUI)
             {
                 speedLimitUI.gameObject.SetActive(true);
                 speedLimitUI.Show(signIndex);
             }
 
-            Debug.Log($"ENTER zone  limit={limitMps:0.00}  speed={speed:0.0}");
-
-            // We still rely on Update() overspeed sustain to trigger StartBalanceMiniGame
+            Debug.Log($"[SpeedZone] ENTER sign={signIndex}  limit={limitMps:0.00}m/s  speed={speed:0.00}");
         }
 
 
-
-        void CheckOverspeedImmediate()
+        public void ExitSpeedLimit(int signIndex)
         {
-            if (activeSpeedLimit <= 0) return;
+            if (signIndex != activeSignIndex)
+            {
+                if (debugLogs)
+                    Debug.LogWarning($"[SpeedZone] EXIT IGNORED: got={signIndex} active={activeSignIndex} limit={activeSpeedLimit:0.00}");
+                return;
+            }
 
-            float tol = 1f + speedOvershootTolerance;
-            bool over = speed > activeSpeedLimit * tol;
-            if (debugLogs) Debug.Log($"[Car]  immediate overspeed? {over}");
+            if (activeSpeedLimit <= 0f && !zoneExiting) return;
 
-            if (over && !balanceActive) StartBalanceMiniGame();
-        }
-
-        public void ExitSpeedLimit()
-        {
-            if (activeSpeedLimit <= 0f && !zoneExiting) return; // guard
-
-            // Start sticky window so the mini-game can still matter briefly
             zoneExiting = true;
             zoneStickyUntil = Time.time + stickyExitSeconds;
 
-            // DO NOT immediately zero activeSpeedLimit or hide UI;
-            // let Update() finalize when sticky ends, or when the round ends.
-            Debug.Log("[SpeedZone] EXIT -> sticky active for " + stickyExitSeconds + "s");
+            Debug.Log($"[SpeedZone] EXIT (sticky) sign={signIndex} for {stickyExitSeconds:0.00}s");
         }
+
+
+        // Optional legacy wrapper (ha máshol hívod paraméter nélkül)
+        public void ExitSpeedLimit()
+        {
+            ExitSpeedLimit(activeSignIndex);
+        }
+
 
 
         void EnsureGaugeHiddenWhenNotActive()
@@ -630,16 +693,42 @@ namespace ArcadeVP
             }
 
             float tolFactor = 1f + speedOvershootTolerance;
+
+
             bool overspeedEligible = (activeSpeedLimit > 0f)
-                      && inZone
-                      && (Time.time >= (ignoreOverspeedUntil + extraGraceAfterSwap));
-            bool isOverspeeding = overspeedEligible && (Mathf.Abs(speed) > activeSpeedLimit * tolFactor);
+                                  && inZone
+                                  && !balanceActive
+                                  && (Time.time >= (ignoreOverspeedUntil + extraGraceAfterSwap));
 
             if (overspeedEligible && !miniGamePlayedThisZone)
             {
-                overspeedTimer = isOverspeeding ? overspeedTimer + dt : 0f;
-                if (overspeedTimer >= overspeedTriggerTime)
-                    StartBalanceMiniGame(); // schedules pre-cue + begin
+                float absSpeed = Mathf.Abs(speed);
+                bool isOverspeeding = IsOverspeedingNow(absSpeed);
+                float ratioNow = OvershootRatioNow(absSpeed);
+
+                // If we were armed but player dropped back under -> cancel pending start
+                if (armCR != null && (!isOverspeeding || ratioNow < minOvershootRatioToTrigger))
+                    CancelPendingArm("dropped under threshold");
+
+                // Timer ONLY counts if overspeed is real AND ratio is strong enough
+                if (!miniGameArmedThisZone)
+                {
+                    if (isOverspeeding && ratioNow >= minOvershootRatioToTrigger)
+                        overspeedTimer += dt;
+                    else
+                        overspeedTimer = 0f;
+
+                    if (overspeedTimer >= overspeedTriggerTime)
+                    {
+                        overspeedTimer = 0f;
+                        StartBalanceMiniGame(ratioNow);
+                    }
+                }
+            }
+            else
+            {
+                // outside eligibility -> don’t accumulate
+                overspeedTimer = 0f;
             }
 
             // If the mini-game is active, wait for readability then run
@@ -742,12 +831,25 @@ namespace ArcadeVP
             }
 
             // Speed Calculation
-            speed += accelerationInput * acceleration * dt;
-            if (slowInput > 0f)
-                speed = Mathf.MoveTowards(speed, 0f, slowInput * brakeDeceleration * dt);
-            else if (Mathf.Approximately(accelerationInput, 0f))
-                speed = Mathf.MoveTowards(speed, 0f, decelerationRate * dt);
-            speed = Mathf.Clamp(speed, -maxSpeed, maxSpeed);
+            if (balanceActive)
+            {
+                // Mini-game alatt a speed legyen beton fix.
+                speed = frozenSpeed;
+            }
+            else
+            {
+                speed += accelerationInput * acceleration * dt;
+
+                if (slowInput > 0f)
+                    speed = Mathf.MoveTowards(speed, 0f, slowInput * brakeDeceleration * dt);
+                else if (Mathf.Approximately(accelerationInput, 0f))
+                    speed = Mathf.MoveTowards(speed, 0f, decelerationRate * dt);
+
+                speed = Mathf.Clamp(speed, -maxSpeed, maxSpeed);
+
+                // Corner drag csak normál vezetésnél
+                ApplyCornerDrag(dt);
+            }
 
             // Update smoothed speed ratio
             float rawRatio = Mathf.Clamp01(Mathf.Abs(speed) / maxSpeed);
@@ -837,84 +939,132 @@ namespace ArcadeVP
 
         // ==== MINI-GAME CONTROL =================================================
         /*?????????????????? MINI-GAME ??????????????????*/
-        void StartBalanceMiniGame()
+        void StartBalanceMiniGame(float ratioNow)
         {
-            if (!PlayerJoinManager.IsRaceStarted) return; // NEW
-            // Compute difficulty snapshot
-            float overshoot = Mathf.Max(0f, Mathf.Abs(speed) - activeSpeedLimit);
-            float ratio = (activeSpeedLimit <= 0f) ? 0f : overshoot / activeSpeedLimit;
-            _lastOvershootRatio = ratio;
+            if (!PlayerJoinManager.IsRaceStarted) return;
+            if (balanceActive) return;
+            if (armCR != null) return;
+            if (miniGamePlayedThisZone || miniGameArmedThisZone) return;
 
-            if (ratio < minOvershootRatioToTrigger)
-            {
-                miniGamePlayedThisZone = true;
-                return;
-            }
+            // still must meet threshold at ARM time
+            if (ratioNow < minOvershootRatioToTrigger) return;
 
-            // mark this zone
-            miniGamePlayedThisZone = true;
-            if (SkillEstimator.Instance) SkillEstimator.Instance.OnMiniGameStarted();
-            overspeedTimer = 0f;
+            // arm snapshot
+            miniGameArmedThisZone = true;
+            armedEpoch = speedZoneEpoch;
+            armedSignIndex = activeSignIndex;
+            armedLimitSnapshot = activeSpeedLimit;
 
-            // freeze snapshot during round
-            frozenSpeed = speed;
-            balanceVal = 0f;
-            balanceFailTimer = 0f;
-            insideStreakTimer = 0f;  // NEW
-            centreStreakTimer = 0f;  // NEW
-            readyPulseShown = false; // NEW
+            // store for crash damage scaling if needed
+            _lastOvershootRatio = ratioNow;
 
-            // Difficulty scaling
-            float t = ComputeDifficultyBlend(ratio);
-            LockRoundTuning(t);
-
-            // Arm with a pre-cue BEFORE the gauge appears
-            if (armCR != null) StopCoroutine(armCR);
-            armCR = StartCoroutine(ArmMiniGameThenBegin(rt_greenWidth));
+            // schedule pre-cue -> but BEGIN will re-check again
+            armCR = StartCoroutine(ArmMiniGameThenBegin());
         }
 
-        System.Collections.IEnumerator ArmMiniGameThenBegin(float green)
+        // keep compatibility if you still call StartBalanceMiniGame() somewhere
+        void StartBalanceMiniGame()
         {
-            if (!PlayerJoinManager.IsRaceStarted) yield break; // NEW
-            // pre-cue: sign pop + beep
+            float absSpeed = Mathf.Abs(speed);
+            float ratioNow = OvershootRatioNow(absSpeed);
+            StartBalanceMiniGame(ratioNow);
+        }
+
+
+        System.Collections.IEnumerator ArmMiniGameThenBegin()
+        {
+            if (!PlayerJoinManager.IsRaceStarted) yield break;
+
+            // pre-cue wait
             float pre = UnityEngine.Random.Range(preCueRange.x, preCueRange.y);
 
             // If we’re already exiting and the pre-cue wouldn’t fit, skip it
             if (zoneExiting && (Time.time + pre > zoneStickyUntil))
                 pre = 0f;
 
-            // Also: if the remaining window is tiny, pop instantly (no pre-cue, fast fade)
+            // tiny remaining window -> pop instantly
             float remainingWindow = (zoneExiting ? Mathf.Max(0f, zoneStickyUntil - Time.time) : 999f);
             bool instant = remainingWindow <= instantStartShortWindow;
             if (instant) pre = 0f;
 
             if (speedLimitUI && pre > 0f) speedLimitUI.PlayPreCue(pre);
 
+            // Make sure sticky window can contain the minimum visible time AFTER pre-cue
             if (zoneExiting)
                 zoneStickyUntil = Mathf.Max(zoneStickyUntil, Time.time + pre + minRoundVisible);
 
-            // small wait (unscaled to feel consistent under hitches)
+            // wait
             float t = 0f;
             while (t < pre) { t += Time.deltaTime; yield return null; }
 
-            if (!PlayerJoinManager.IsRaceStarted) yield break; // NEW
+            if (!PlayerJoinManager.IsRaceStarted) yield break;
 
+            // -------------------- HARD RECHECK (THIS IS THE BULLETPROOF PART) --------------------
+            // 1) zone/epoch changed? -> cancel
+            if (armedEpoch != speedZoneEpoch)
+            {
+                CancelPendingArm("epoch changed", fromCoroutine: true);
+                yield break;
+            }
+
+            // 2) sign changed? -> cancel
+            if (armedSignIndex != activeSignIndex)
+            {
+                CancelPendingArm("sign changed", fromCoroutine: true);
+                yield break;
+            }
+
+            // 3) limit changed? -> cancel
+            if (Mathf.Abs(armedLimitSnapshot - activeSpeedLimit) > 0.01f || activeSpeedLimit <= 0f)
+            {
+                CancelPendingArm("limit changed/invalid", fromCoroutine: true);
+                yield break;
+            }
+
+            // 4) still overspeeding NOW? -> otherwise cancel (THIS FIXES “30-nál is bedobja” feeling)
+            float absSpeed = Mathf.Abs(speed);
+            float ratioNow = OvershootRatioNow(absSpeed);
+
+            if (!IsOverspeedingNow(absSpeed) || ratioNow < minOvershootRatioToTrigger)
+            {
+                CancelPendingArm("no longer overspeeding at begin", fromCoroutine: true);
+                yield break;
+            }
+
+            // -------------------- BEGIN ROUND NOW --------------------
+            // lock per-round tuning at BEGIN time (not earlier)
+            frozenSpeed = speed;
+            balanceVal = 0f;
+            balanceFailTimer = 0f;
+            insideStreakTimer = 0f;
+            centreStreakTimer = 0f;
+            readyPulseShown = false;
+
+            float diffT = ComputeDifficultyBlend(ratioNow);
+            LockRoundTuning(diffT);
+
+            // instant pop tuning
             if (instant && balanceUI)
             {
                 if (_origFadeInSpeed < 0f) _origFadeInSpeed = balanceUI.fadeInSpeed;
-                balanceUI.fadeInSpeed = 99f; // pop in
+                balanceUI.fadeInSpeed = 99f;
             }
-            // actually show the gauge (will fade in)
-            if (balanceUI)
-            {
-                balanceUI.Begin(green);
-            }
+
+            // show gauge
+            if (balanceUI) balanceUI.Begin(rt_greenWidth);
+
             roundStartTime = Time.time;
-            balanceActive = true;      // gameplay starts once IsFullyVisible in Update
+            balanceActive = true;
             currentRoundDrift = rt_drift;
-            isDrifting = false;        // we’ll enable it only when readable
+            isDrifting = false;
+
+            // NOW we consume this zone’s mini-game (only once it actually begins)
+            miniGamePlayedThisZone = true;
+            miniGameArmedThisZone = false;
+
             armCR = null;
         }
+
 
 
         void UpdateBalanceMiniGame(float dt)
@@ -1060,6 +1210,7 @@ namespace ArcadeVP
                 Debug.Log($"Crashed while speeding! Dealt {damage} damage.");
             }
             if (Time.time < controlLockUntil) return;
+            CrashHappened?.Invoke();
             var fx = FindObjectOfType<SpeedZoneFeedbackFX>();
             if (fx) fx.CrashPulse();
             controlLockUntil = Time.time + overshootLockTime;

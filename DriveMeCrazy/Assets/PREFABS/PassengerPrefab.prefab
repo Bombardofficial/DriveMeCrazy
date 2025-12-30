@@ -113,6 +113,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 80596454539653013}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f9202f24e4d7774419f128cc1d59d455,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5784341676447220472}
   m_SourcePrefab: {fileID: 100100000, guid: f9202f24e4d7774419f128cc1d59d455, type: 3}
 --- !u!1 &1174060323843766397 stripped
 GameObject:
@@ -145,6 +149,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 88d87c3cd1a013b4f94c2d97f1ce6b53, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _blockingSabotageCooldown: 6
+  _disruptingSabotageCooldown: 4
 --- !u!114 &1947274624401981480
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -188,3 +194,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1f4e8908e5ce5a047a1dac7ce1b334cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &5784341676447220472
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174060323843766397}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 76f1624b6fd09a64d822f4c8ede7cf54, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isDrivingBool: IsDriving
+  steerLeftTrigger: SteerLeft
+  steerLeftBackTrigger: SteerLeftBack
+  steerRightTrigger: SteerRight
+  steerRightBackTrigger: SteerRightBack
+  crashTrigger: Crash
+  drivingStateName: Driving
+  onlyDriverSteers: 1
