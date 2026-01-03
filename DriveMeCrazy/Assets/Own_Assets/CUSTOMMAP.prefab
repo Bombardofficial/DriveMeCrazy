@@ -13788,7 +13788,7 @@ Transform:
   m_GameObject: {fileID: 3812427780153959674}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 1162.077, y: 137.01207, z: 7.9350586}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -14244,7 +14244,7 @@ MonoBehaviour:
   terrainCellAngleThreshold: 90
   terrainCellHeightThreshold: 25
   maxIndentSurrounding: 50
-  terrainY: -0.08
+  terrainY: -137.09207
   terrainDetailSplatX: 0.48828125
   terrainDetailSplatY: 0.7324219
   detailOffsetVec: {x: 0.48828125, y: 0, z: 0.7324219}
@@ -14256,7 +14256,7 @@ MonoBehaviour:
   - Terrain
   terrainObjects:
   - {fileID: 0}
-  - {fileID: 149850634755253926}
+  - {fileID: 0}
   terrainSplatTextures: []
   activeTerrain: {fileID: 0}
   activeTerrainY: 0
@@ -14405,7 +14405,7 @@ MonoBehaviour:
   importCrossingPresetsAlert: 0
   importSidewalkPresetsAlert: 1
   updateSideObjectsAlert: 0
-  updateRoadPresetsAlert: 1
+  updateRoadPresetsAlert: 0
   updateCrossingPresetsAlert: 0
   updateSidewalkPresetsAlert: 0
   waypointDistance: 10
