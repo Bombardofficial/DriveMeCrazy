@@ -1092,6 +1092,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 2363760000770058155}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f9202f24e4d7774419f128cc1d59d455,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -283407955020709006}
   m_SourcePrefab: {fileID: 100100000, guid: f9202f24e4d7774419f128cc1d59d455, type: 3}
 --- !u!1 &5583802586414202164 stripped
 GameObject:
@@ -1189,3 +1193,17 @@ MonoBehaviour:
   crashTrigger: Crash
   drivingStateName: Driving
   onlyDriverSteers: 1
+--- !u!114 &-283407955020709006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5583802586414202164}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93a8d5360f7ee414ebc27bb5bda34323, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _iconPrefab: {fileID: 259804285893164774, guid: f0b067aaa93bcfb45aed58e305fffed2,
+    type: 3}

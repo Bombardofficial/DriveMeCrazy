@@ -27,6 +27,8 @@ namespace ArcadeVP
 
         private Passenger _passenger;
 
+        private SabotageIconHandler _iconHandler;
+
         private bool IsCurrentDriver =>
             PlayerManager.Instance && PlayerManager.Instance.CurrentDriver == _passenger;
 
@@ -34,6 +36,7 @@ namespace ArcadeVP
         {
             _playerInput = GetComponent<PlayerInput>();
             _passenger = GetComponent<Passenger>();
+            _iconHandler = GetComponent<SabotageIconHandler>();
             // Find actions by name from the asset attached to PlayerInput
             /*_steeringSabotageAction = _playerInput.actions.FindAction("SteeringSabotage", true);
             _handbrakeSabotageAction = _playerInput.actions.FindAction("HandbrakeSabotage", true);
@@ -143,9 +146,9 @@ namespace ArcadeVP
             _lastBlock = Time.time;
 
             float randomValue = Random.value;
-            if (randomValue < 0.3f) { InputManager_ArcadeVP.FireBlockGasSabotage(_passenger); Debug.Log("BlockGasSabotage Fired!"); }
-            else if (randomValue < 0.7f) { InputManager_ArcadeVP.FireBlockBrakeSabotage(_passenger); Debug.Log("BlockBrakeSabotage Fired!"); }
-            else if (randomValue <= 1f) { InputManager_ArcadeVP.FireBlockSteeringSabotage(_passenger); Debug.Log("BlockSteeringSabotage Fired!");}
+            if (randomValue < 0.3f) { InputManager_ArcadeVP.FireBlockGasSabotage(_passenger); _iconHandler.ShowActionIcon(GetCurrentIconAnchor()); Debug.Log("BlockGasSabotage Fired!"); }
+            else if (randomValue < 0.7f) { InputManager_ArcadeVP.FireBlockBrakeSabotage(_passenger); _iconHandler.ShowActionIcon(GetCurrentIconAnchor()); Debug.Log("BlockBrakeSabotage Fired!"); }
+            else if (randomValue <= 1f) { InputManager_ArcadeVP.FireBlockSteeringSabotage(_passenger); _iconHandler.ShowActionIcon(GetCurrentIconAnchor()); Debug.Log("BlockSteeringSabotage Fired!");}
         }
 
         private void FireDisruptingSabotage(InputAction.CallbackContext context)
@@ -155,10 +158,13 @@ namespace ArcadeVP
             _lastDisrupt = Time.time;
             
             float randomValue = Random.value;
-            if (randomValue < 0.3f) { InputManager_ArcadeVP.FireLeftSteerSabotage(_passenger); Debug.Log("LeftSteerSabotage Fired!"); }
-            else if (randomValue < 0.6f) { InputManager_ArcadeVP.FireRightSteerSabotage(_passenger); Debug.Log("RightSteerSabotage Fired!"); }
-            else if (randomValue < 0.8f) { InputManager_ArcadeVP.FireHandbrakeSabotage(_passenger); Debug.Log("HandbrakeSabotage Fired!"); }
-            else if (randomValue <= 1f) { InputManager_ArcadeVP.FireSteeringSabotage(_passenger); Debug.Log("SteeringSabotage Fired!");}
+            if (randomValue < 0.3f) { InputManager_ArcadeVP.FireLeftSteerSabotage(_passenger); _iconHandler.ShowActionIcon(GetCurrentIconAnchor()); Debug.Log("LeftSteerSabotage Fired!"); }
+            else if (randomValue < 0.6f) { InputManager_ArcadeVP.FireRightSteerSabotage(_passenger); _iconHandler.ShowActionIcon(GetCurrentIconAnchor()); Debug.Log("RightSteerSabotage Fired!"); }
+            else if (randomValue < 0.8f) { InputManager_ArcadeVP.FireHandbrakeSabotage(_passenger); _iconHandler.ShowActionIcon(GetCurrentIconAnchor()); Debug.Log("HandbrakeSabotage Fired!"); }
+            else if (randomValue <= 1f) { InputManager_ArcadeVP.FireSteeringSabotage(_passenger); _iconHandler.ShowActionIcon(GetCurrentIconAnchor()); Debug.Log("SteeringSabotage Fired!");}
         }
+
+        private Transform GetCurrentIconAnchor() => transform.parent.Find("SymbolAnchor");
+        
     }
 }
