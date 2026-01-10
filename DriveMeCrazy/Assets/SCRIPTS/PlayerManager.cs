@@ -79,6 +79,25 @@ public class PlayerManager : MonoBehaviour
     public void SetPointMultiplier(float multiplier) => pointMultiplier = multiplier;
     public float PointMultiplier => pointMultiplier;
 
+    public void AwardAllPassengers(int amount)
+    {
+        foreach (Passenger passenger in _passengers)
+        {
+            passenger.IncrementPoints(amount);
+        }
+    }
+
+    public Passenger GetPassengerByNumber(int number)
+    {
+        foreach (Passenger passenger in _passengers)
+        {
+            if (passenger.PlayerNumber == number)
+                return passenger;
+        }
+
+        return new Passenger();
+    }
+
     /* ===== helpers ===== */
     void ApplySeatPlacements()
     {
