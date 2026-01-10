@@ -6078,11 +6078,11 @@ MonoBehaviour:
   infoTexture: {fileID: 0}
   infoTexture2: {fileID: 0}
   infoTextures: []
-  plusSignTexture: {fileID: 1177587293}
-  minSignTexture: {fileID: 1294526874}
-  signPostHeaderBG: {fileID: 587929706}
-  signPostListBG: {fileID: 205129444}
-  signPostListSelBG: {fileID: 1941898655}
+  plusSignTexture: {fileID: 666934012}
+  minSignTexture: {fileID: 2071163553}
+  signPostHeaderBG: {fileID: 1883453259}
+  signPostListBG: {fileID: 1828716963}
+  signPostListSelBG: {fileID: 250237115}
   editorSkin: 0
   showAllPrefabs: 1
   standardPrefabsFlag: 0
@@ -11931,54 +11931,6 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -2432090755550338912, guid: 6082e0aafd351ec48945013503a94fd6, type: 3}
---- !u!28 &205129444
-Texture2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  m_ImageContentsHash:
-    serializedVersion: 2
-    Hash: 00000000000000000000000000000000
-  m_ForcedFallbackFormat: 4
-  m_DownscaleFallback: 0
-  m_IsAlphaChannelOptional: 0
-  serializedVersion: 2
-  m_Width: 2
-  m_Height: 2
-  m_CompleteImageSize: 20
-  m_MipsStripped: 0
-  m_TextureFormat: 4
-  m_MipCount: 2
-  m_IsReadable: 1
-  m_IsPreProcessed: 0
-  m_IgnoreMipmapLimit: 0
-  m_MipmapLimitGroupName: 
-  m_StreamingMipmaps: 0
-  m_StreamingMipmapsPriority: 0
-  m_VTOnly: 0
-  m_AlphaIsTransparency: 0
-  m_ImageCount: 1
-  m_TextureDimension: 2
-  m_TextureSettings:
-    serializedVersion: 2
-    m_FilterMode: 1
-    m_Aniso: 1
-    m_MipBias: 0
-    m_WrapU: 0
-    m_WrapV: 0
-    m_WrapW: 0
-  m_LightmapFormat: 0
-  m_ColorSpace: 1
-  m_PlatformBlob: 
-  image data: 20
-  _typelessdata: 414141ff414141ff414141ff414141ff414141ff
-  m_StreamData:
-    serializedVersion: 2
-    offset: 0
-    size: 0
-    path: 
 --- !u!1 &205566153
 GameObject:
   m_ObjectHideFlags: 0
@@ -14192,6 +14144,54 @@ Mesh:
   m_MeshMetrics[0]: 1
   m_MeshMetrics[1]: 1
   m_MeshOptimizationFlags: 1
+  m_StreamData:
+    serializedVersion: 2
+    offset: 0
+    size: 0
+    path: 
+--- !u!28 &250237115
+Texture2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_ForcedFallbackFormat: 4
+  m_DownscaleFallback: 0
+  m_IsAlphaChannelOptional: 0
+  serializedVersion: 2
+  m_Width: 2
+  m_Height: 2
+  m_CompleteImageSize: 20
+  m_MipsStripped: 0
+  m_TextureFormat: 4
+  m_MipCount: 2
+  m_IsReadable: 1
+  m_IsPreProcessed: 0
+  m_IgnoreMipmapLimit: 0
+  m_MipmapLimitGroupName: 
+  m_StreamingMipmaps: 0
+  m_StreamingMipmapsPriority: 0
+  m_VTOnly: 0
+  m_AlphaIsTransparency: 0
+  m_ImageCount: 1
+  m_TextureDimension: 2
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 1
+    m_MipBias: 0
+    m_WrapU: 0
+    m_WrapV: 0
+    m_WrapW: 0
+  m_LightmapFormat: 0
+  m_ColorSpace: 1
+  m_PlatformBlob: 
+  image data: 20
+  _typelessdata: 4d4d4dff4d4d4dff4d4d4dff4d4d4dff4d4d4dff
   m_StreamData:
     serializedVersion: 2
     offset: 0
@@ -105347,54 +105347,6 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 934325961}
   m_PrefabAsset: {fileID: 0}
---- !u!28 &587929706
-Texture2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  m_ImageContentsHash:
-    serializedVersion: 2
-    Hash: 00000000000000000000000000000000
-  m_ForcedFallbackFormat: 4
-  m_DownscaleFallback: 0
-  m_IsAlphaChannelOptional: 0
-  serializedVersion: 2
-  m_Width: 2
-  m_Height: 2
-  m_CompleteImageSize: 20
-  m_MipsStripped: 0
-  m_TextureFormat: 4
-  m_MipCount: 2
-  m_IsReadable: 1
-  m_IsPreProcessed: 0
-  m_IgnoreMipmapLimit: 0
-  m_MipmapLimitGroupName: 
-  m_StreamingMipmaps: 0
-  m_StreamingMipmapsPriority: 0
-  m_VTOnly: 0
-  m_AlphaIsTransparency: 0
-  m_ImageCount: 1
-  m_TextureDimension: 2
-  m_TextureSettings:
-    serializedVersion: 2
-    m_FilterMode: 1
-    m_Aniso: 1
-    m_MipBias: 0
-    m_WrapU: 0
-    m_WrapV: 0
-    m_WrapW: 0
-  m_LightmapFormat: 0
-  m_ColorSpace: 1
-  m_PlatformBlob: 
-  image data: 20
-  _typelessdata: 383838ff383838ff383838ff383838ff383838ff
-  m_StreamData:
-    serializedVersion: 2
-    offset: 0
-    size: 0
-    path: 
 --- !u!1 &588868783
 GameObject:
   m_ObjectHideFlags: 0
@@ -110815,7 +110767,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: -504.99377, w: 0}
+  m_margin: {x: 0, y: 0, z: -558.60394, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -114773,6 +114725,54 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -2432090755550338912, guid: 6082e0aafd351ec48945013503a94fd6, type: 3}
+--- !u!28 &666934012
+Texture2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_ForcedFallbackFormat: 4
+  m_DownscaleFallback: 0
+  m_IsAlphaChannelOptional: 0
+  serializedVersion: 2
+  m_Width: 12
+  m_Height: 12
+  m_CompleteImageSize: 760
+  m_MipsStripped: 0
+  m_TextureFormat: 4
+  m_MipCount: 4
+  m_IsReadable: 1
+  m_IsPreProcessed: 0
+  m_IgnoreMipmapLimit: 0
+  m_MipmapLimitGroupName: 
+  m_StreamingMipmaps: 0
+  m_StreamingMipmapsPriority: 0
+  m_VTOnly: 0
+  m_AlphaIsTransparency: 0
+  m_ImageCount: 1
+  m_TextureDimension: 2
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 1
+    m_MipBias: 0
+    m_WrapU: 0
+    m_WrapV: 0
+    m_WrapW: 0
+  m_LightmapFormat: 0
+  m_ColorSpace: 1
+  m_PlatformBlob: 
+  image data: 760
+  _typelessdata: 0000000000000000000000000000000000000000ffffffccffffffcc00000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffccffffffcc00000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffccffffffcc00000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffccffffffcc00000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffccffffffcc0000000000000000000000000000000000000000ffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffcc0000000000000000000000000000000000000000ffffffccffffffcc00000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffccffffffcc00000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffccffffffcc00000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffccffffffcc00000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffccffffffcc000000000000000000000000000000000000000000000000000000007f7f7f667f7f7f66000000000000000000000000000000007f7f7f667f7f7f6600000000000000007f7f7f667f7f7f66bfbfbf99bfbfbf997f7f7f667f7f7f667f7f7f667f7f7f66bfbfbf99bfbfbf997f7f7f667f7f7f6600000000000000007f7f7f667f7f7f66000000000000000000000000000000007f7f7f667f7f7f660000000000000000000000007f7f7f66000000007f7f7f66bfbfbf997f7f7f66000000007f7f7f6600000000bfbfbf99
+  m_StreamData:
+    serializedVersion: 2
+    offset: 0
+    size: 0
+    path: 
 --- !u!4 &667938440 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 160535730619945981, guid: 243a4033fc4deac45936cd8382edcda0,
@@ -115211,7 +115211,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: -504.23798, w: 0}
+  m_margin: {x: 0, y: 0, z: -558.60394, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -138282,7 +138282,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &970682514
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -147921,54 +147921,6 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -2432090755550338912, guid: 6082e0aafd351ec48945013503a94fd6, type: 3}
---- !u!28 &1177587293
-Texture2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  m_ImageContentsHash:
-    serializedVersion: 2
-    Hash: 00000000000000000000000000000000
-  m_ForcedFallbackFormat: 4
-  m_DownscaleFallback: 0
-  m_IsAlphaChannelOptional: 0
-  serializedVersion: 2
-  m_Width: 12
-  m_Height: 12
-  m_CompleteImageSize: 760
-  m_MipsStripped: 0
-  m_TextureFormat: 4
-  m_MipCount: 4
-  m_IsReadable: 1
-  m_IsPreProcessed: 0
-  m_IgnoreMipmapLimit: 0
-  m_MipmapLimitGroupName: 
-  m_StreamingMipmaps: 0
-  m_StreamingMipmapsPriority: 0
-  m_VTOnly: 0
-  m_AlphaIsTransparency: 0
-  m_ImageCount: 1
-  m_TextureDimension: 2
-  m_TextureSettings:
-    serializedVersion: 2
-    m_FilterMode: 1
-    m_Aniso: 1
-    m_MipBias: 0
-    m_WrapU: 0
-    m_WrapV: 0
-    m_WrapW: 0
-  m_LightmapFormat: 0
-  m_ColorSpace: 1
-  m_PlatformBlob: 
-  image data: 760
-  _typelessdata: 0000000000000000000000000000000000000000ffffffccffffffcc00000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffccffffffcc00000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffccffffffcc00000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffccffffffcc00000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffccffffffcc0000000000000000000000000000000000000000ffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffcc0000000000000000000000000000000000000000ffffffccffffffcc00000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffccffffffcc00000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffccffffffcc00000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffccffffffcc00000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffccffffffcc000000000000000000000000000000000000000000000000000000007f7f7f667f7f7f66000000000000000000000000000000007f7f7f667f7f7f6600000000000000007f7f7f667f7f7f66bfbfbf99bfbfbf997f7f7f667f7f7f667f7f7f667f7f7f66bfbfbf99bfbfbf997f7f7f667f7f7f6600000000000000007f7f7f667f7f7f66000000000000000000000000000000007f7f7f667f7f7f660000000000000000000000007f7f7f66000000007f7f7f66bfbfbf997f7f7f66000000007f7f7f6600000000bfbfbf99
-  m_StreamData:
-    serializedVersion: 2
-    offset: 0
-    size: 0
-    path: 
 --- !u!1 &1178440225 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8278632060264761764, guid: b9dff2ffa5142b94d92fb0655c744eb0,
@@ -153871,54 +153823,6 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 1293599574}
   m_PrefabAsset: {fileID: 0}
---- !u!28 &1294526874
-Texture2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  m_ImageContentsHash:
-    serializedVersion: 2
-    Hash: 00000000000000000000000000000000
-  m_ForcedFallbackFormat: 4
-  m_DownscaleFallback: 0
-  m_IsAlphaChannelOptional: 0
-  serializedVersion: 2
-  m_Width: 10
-  m_Height: 2
-  m_CompleteImageSize: 112
-  m_MipsStripped: 0
-  m_TextureFormat: 4
-  m_MipCount: 4
-  m_IsReadable: 1
-  m_IsPreProcessed: 0
-  m_IgnoreMipmapLimit: 0
-  m_MipmapLimitGroupName: 
-  m_StreamingMipmaps: 0
-  m_StreamingMipmapsPriority: 0
-  m_VTOnly: 0
-  m_AlphaIsTransparency: 0
-  m_ImageCount: 1
-  m_TextureDimension: 2
-  m_TextureSettings:
-    serializedVersion: 2
-    m_FilterMode: 1
-    m_Aniso: 1
-    m_MipBias: 0
-    m_WrapU: 0
-    m_WrapV: 0
-    m_WrapW: 0
-  m_LightmapFormat: 0
-  m_ColorSpace: 1
-  m_PlatformBlob: 
-  image data: 112
-  _typelessdata: ffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffcc
-  m_StreamData:
-    serializedVersion: 2
-    offset: 0
-    size: 0
-    path: 
 --- !u!114 &1294994035
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -154548,7 +154452,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1311200374}
   - component: {fileID: 1311200373}
-  - component: {fileID: 1311200372}
   m_Layer: 0
   m_Name: Track
   m_TagString: Untagged
@@ -154556,37 +154459,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1311200372
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1311200371}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bc5c8dba903b54e49ad7ebc069448a8b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  samplesPerUnit: 1
-  laneOffsets:
-  - -3
-  - 0
-  - 3
-  drawBoundaries: 1
-  laneLineMaterial: {fileID: 2100000, guid: 8e95798c156b78547b800cf5b15c1d76, type: 2}
-  laneLineWidth: 0.04
-  laneLineColor: {r: 1, g: 1, b: 1, a: 1}
-  boundaryLineMaterial: {fileID: 2100000, guid: 85bfcf0fc14f0c44799f1d851f95772f,
-    type: 2}
-  boundaryLineWidth: 0.1
-  boundaryLineColor: {r: 1, g: 1, b: 1, a: 1}
-  drivableSurface:
-    serializedVersion: 2
-    m_Bits: 64
-  raycastHeight: 7
-  groundCheckDistance: 2
-  lineHeightOffset: 0.1
 --- !u!114 &1311200373
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -159898,7 +159770,7 @@ MonoBehaviour:
   seatMgr: {fileID: 2111085467219387262}
   passengerPrefab: {fileID: 1174060323843766397, guid: 1affddbe7cc426c459549db87f7e1926,
     type: 3}
-  quickStartSingleDriver: 0
+  quickStartSingleDriver: 1
   driverPrefabOverride: {fileID: 5583802586414202164, guid: 5b262494d1427d94f89a6f1fca36eff5,
     type: 3}
   lobbyCountdownSeconds: 10
@@ -190540,6 +190412,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 701e9e2042d148b46ae22740ddf4f2f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  debugLogs: 1
+  debugLogCooldown: 1
+  allowSpawnWithoutGroundHit: 1
+  spawnsPerTick: 2
   obstacleTypes:
   - prefab: {fileID: 7672455924554361787, guid: f3d8c4f25e901c242af89358687896d5,
       type: 3}
@@ -190558,22 +190434,18 @@ MonoBehaviour:
     damage: 38
     spawnWeight: 10
   poolSize: 100
-  spawnInterval: 2
-  useSeparateLaneSplines: 1
-  laneContainers:
-  - {fileID: 1602611789}
-  - {fileID: 1775033746}
-  - {fileID: 81702316}
-  laneVis: {fileID: 1311200372}
+  spawnInterval: 5
+  allowPoolGrowth: 1
+  poolGrowBatch: 2
+  maxPoolPerPrefab: 128
+  laneVis: {fileID: 1775033747}
   minSeparation: 10
   maxPlacementAttempts: 15
-  useLaneVisualizerOffsets: 0
-  fallbackLaneOffsetDistance: 3.5
   initialMaxActive: 5
   maxActiveCap: 40
   increaseInterval: 20
   increaseAmount: 2
-  raycastHeight: 10
+  raycastHeight: 7
   groundMask:
     serializedVersion: 2
     m_Bits: 64
@@ -190732,6 +190604,84 @@ MonoBehaviour:
   playerSafeBehindMeters: 6
   minCrossSeparationMeters: 3
   player: {fileID: 2111085467219387259}
+  trackSpline: {fileID: 1775033746}
+  spawnAheadMinMeters: 22
+  spawnAheadMaxMeters: 85
+  strategicShareBySpawnPressure:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.15
+      inSlope: 0
+      outSlope: 0.4
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0.55
+      inSlope: 0.4
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  guardSuppressionByRewardBias:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: -0.65
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0.35
+      inSlope: -0.65
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  guardBeforeProbBySpawnPressure:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.25
+      inSlope: 0
+      outSlope: 0.5
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0.75
+      inSlope: 0.5
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  guardCooldownSeconds: 2
+  guardRadiusMeters: 9
+  maxGuardsNearOneCollectible: 1
 --- !u!114 &1639027662
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -190744,21 +190694,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c678af36123cf2e40b56ce4d23c7e257, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  debugLogs: 1
+  debugLogCooldown: 1
   autoMissAfterSeconds: 12
   collectablePrefab: {fileID: 7260588083317533168, guid: 6b936ddf8587928478ec042578ba7da0,
     type: 3}
   maxActive: 10
-  spawnInterval: 10
-  useSeparateLaneSplines: 1
-  laneContainers:
-  - {fileID: 1602611789}
-  - {fileID: 1775033746}
-  - {fileID: 81702316}
-  laneVis: {fileID: 1311200372}
+  spawnInterval: 5
+  laneVis: {fileID: 1775033747}
   minSeparation: 4
   maxPlacementAttempts: 15
-  useLaneVisualizerOffsets: 1
-  fallbackLaneOffsetDistance: 2
   rayHeight: 7
   floatHeight: 1
   groundMask:
@@ -190842,11 +190787,14 @@ MonoBehaviour:
   playerSafeAheadMeters: 14
   playerSafeBehindMeters: 5
   minCrossSeparationMeters: 3
+  spawnAheadMinMeters: 50
+  spawnAheadMaxMeters: 90
   player: {fileID: 2111085467219387259}
   obstacleMgr: {fileID: 1639027661}
   despawnBehindMeters: 10
   protectAheadMeters: 45
   hardMaxLifetimeSeconds: 30
+  trackSpline: {fileID: 1775033746}
 --- !u!114 &1639027663
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -193622,7 +193570,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: -641.6561, w: 0}
+  m_margin: {x: 0, y: 0, z: -558.60394, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -200215,6 +200163,49 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  rampUpPerSecond: 0.45
+  rampDownPerSecond: 1.1
+  enableDriverTenure: 1
+  tenureStepSeconds: 15
+  tenureMaxSteps: 8
+  tenureGraceSeconds: 0
+  tenureCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 1
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 1
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spawnPressureBoostAtMaxTenure: 0.404
+  rewardBiasPenaltyAtMaxTenure: 0.404
+  precisionBoostAtMaxTenure: 0.1
+  punishmentBoostAtMaxTenure: 0.12
+  scaleTenureByAdvantage: 1
+  advantageBias: 0.06
+  advantageRange: 0.35
+  minAdvantageMultiplier: 0.25
+  scaleTenureByDriverSkill: 0.65
+  currentDriverTenureSeconds: 0
+  currentDriverTenureSteps: 0
+  currentDriverTenure01: 0
+  currentDriverAdvantage01: 0
 --- !u!4 &1740066733
 Transform:
   m_ObjectHideFlags: 0
@@ -202274,6 +202265,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1775033745}
   - component: {fileID: 1775033746}
+  - component: {fileID: 1775033747}
   m_Layer: 0
   m_Name: Spline_Lane_1
   m_TagString: Untagged
@@ -204416,6 +204408,37 @@ MonoBehaviour:
       m_Data: []
   m_Knots:
     m_KnotsLink: []
+--- !u!114 &1775033747
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1775033744}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc5c8dba903b54e49ad7ebc069448a8b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  samplesPerUnit: 1
+  laneOffsets:
+  - -5
+  - 0
+  - 5
+  drawBoundaries: 1
+  laneLineMaterial: {fileID: 2100000, guid: 8e95798c156b78547b800cf5b15c1d76, type: 2}
+  laneLineWidth: 0.04
+  laneLineColor: {r: 1, g: 1, b: 1, a: 1}
+  boundaryLineMaterial: {fileID: 2100000, guid: 85bfcf0fc14f0c44799f1d851f95772f,
+    type: 2}
+  boundaryLineWidth: 0.1
+  boundaryLineColor: {r: 1, g: 1, b: 1, a: 1}
+  drivableSurface:
+    serializedVersion: 2
+    m_Bits: 64
+  raycastHeight: 7
+  groundCheckDistance: 2
+  lineHeightOffset: 0.1
 --- !u!1 &1775862448 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2407263378355264676, guid: b9dff2ffa5142b94d92fb0655c744eb0,
@@ -207180,6 +207203,54 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.5, y: 3, z: 10}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!28 &1828716963
+Texture2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_ForcedFallbackFormat: 4
+  m_DownscaleFallback: 0
+  m_IsAlphaChannelOptional: 0
+  serializedVersion: 2
+  m_Width: 2
+  m_Height: 2
+  m_CompleteImageSize: 20
+  m_MipsStripped: 0
+  m_TextureFormat: 4
+  m_MipCount: 2
+  m_IsReadable: 1
+  m_IsPreProcessed: 0
+  m_IgnoreMipmapLimit: 0
+  m_MipmapLimitGroupName: 
+  m_StreamingMipmaps: 0
+  m_StreamingMipmapsPriority: 0
+  m_VTOnly: 0
+  m_AlphaIsTransparency: 0
+  m_ImageCount: 1
+  m_TextureDimension: 2
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 1
+    m_MipBias: 0
+    m_WrapU: 0
+    m_WrapV: 0
+    m_WrapW: 0
+  m_LightmapFormat: 0
+  m_ColorSpace: 1
+  m_PlatformBlob: 
+  image data: 20
+  _typelessdata: 414141ff414141ff414141ff414141ff414141ff
+  m_StreamData:
+    serializedVersion: 2
+    offset: 0
+    size: 0
+    path: 
 --- !u!1 &1829072159
 GameObject:
   m_ObjectHideFlags: 0
@@ -210067,6 +210138,54 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -2432090755550338912, guid: 6082e0aafd351ec48945013503a94fd6, type: 3}
+--- !u!28 &1883453259
+Texture2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_ForcedFallbackFormat: 4
+  m_DownscaleFallback: 0
+  m_IsAlphaChannelOptional: 0
+  serializedVersion: 2
+  m_Width: 2
+  m_Height: 2
+  m_CompleteImageSize: 20
+  m_MipsStripped: 0
+  m_TextureFormat: 4
+  m_MipCount: 2
+  m_IsReadable: 1
+  m_IsPreProcessed: 0
+  m_IgnoreMipmapLimit: 0
+  m_MipmapLimitGroupName: 
+  m_StreamingMipmaps: 0
+  m_StreamingMipmapsPriority: 0
+  m_VTOnly: 0
+  m_AlphaIsTransparency: 0
+  m_ImageCount: 1
+  m_TextureDimension: 2
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 1
+    m_MipBias: 0
+    m_WrapU: 0
+    m_WrapV: 0
+    m_WrapW: 0
+  m_LightmapFormat: 0
+  m_ColorSpace: 1
+  m_PlatformBlob: 
+  image data: 20
+  _typelessdata: 383838ff383838ff383838ff383838ff383838ff
+  m_StreamData:
+    serializedVersion: 2
+    offset: 0
+    size: 0
+    path: 
 --- !u!1 &1885425122
 GameObject:
   m_ObjectHideFlags: 0
@@ -216995,54 +217114,6 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 1941865419}
   m_PrefabAsset: {fileID: 0}
---- !u!28 &1941898655
-Texture2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  m_ImageContentsHash:
-    serializedVersion: 2
-    Hash: 00000000000000000000000000000000
-  m_ForcedFallbackFormat: 4
-  m_DownscaleFallback: 0
-  m_IsAlphaChannelOptional: 0
-  serializedVersion: 2
-  m_Width: 2
-  m_Height: 2
-  m_CompleteImageSize: 20
-  m_MipsStripped: 0
-  m_TextureFormat: 4
-  m_MipCount: 2
-  m_IsReadable: 1
-  m_IsPreProcessed: 0
-  m_IgnoreMipmapLimit: 0
-  m_MipmapLimitGroupName: 
-  m_StreamingMipmaps: 0
-  m_StreamingMipmapsPriority: 0
-  m_VTOnly: 0
-  m_AlphaIsTransparency: 0
-  m_ImageCount: 1
-  m_TextureDimension: 2
-  m_TextureSettings:
-    serializedVersion: 2
-    m_FilterMode: 1
-    m_Aniso: 1
-    m_MipBias: 0
-    m_WrapU: 0
-    m_WrapV: 0
-    m_WrapW: 0
-  m_LightmapFormat: 0
-  m_ColorSpace: 1
-  m_PlatformBlob: 
-  image data: 20
-  _typelessdata: 4d4d4dff4d4d4dff4d4d4dff4d4d4dff4d4d4dff
-  m_StreamData:
-    serializedVersion: 2
-    offset: 0
-    size: 0
-    path: 
 --- !u!1 &1942600522
 GameObject:
   m_ObjectHideFlags: 0
@@ -231742,6 +231813,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 701e9e2042d148b46ae22740ddf4f2f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  debugLogs: 0
+  debugLogCooldown: 1
+  allowSpawnWithoutGroundHit: 1
+  spawnsPerTick: 2
   obstacleTypes:
   - prefab: {fileID: 7672455924554361787, guid: f3d8c4f25e901c242af89358687896d5,
       type: 3}
@@ -231761,16 +231836,12 @@ MonoBehaviour:
     spawnWeight: 10
   poolSize: 50
   spawnInterval: 2
-  useSeparateLaneSplines: 1
-  laneContainers:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  allowPoolGrowth: 1
+  poolGrowBatch: 2
+  maxPoolPerPrefab: 128
   laneVis: {fileID: 2061689030}
   minSeparation: 10
   maxPlacementAttempts: 15
-  useLaneVisualizerOffsets: 1
-  fallbackLaneOffsetDistance: 2
   initialMaxActive: 5
   maxActiveCap: 40
   increaseInterval: 20
@@ -231934,6 +232005,84 @@ MonoBehaviour:
   playerSafeBehindMeters: 6
   minCrossSeparationMeters: 3
   player: {fileID: 2111085467219387259}
+  trackSpline: {fileID: 0}
+  spawnAheadMinMeters: 22
+  spawnAheadMaxMeters: 85
+  strategicShareBySpawnPressure:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.15
+      inSlope: 0
+      outSlope: 0.4
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0.55
+      inSlope: 0.4
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  guardSuppressionByRewardBias:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: -0.65
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0.35
+      inSlope: -0.65
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  guardBeforeProbBySpawnPressure:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.25
+      inSlope: 0
+      outSlope: 0.5
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0.75
+      inSlope: 0.5
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  guardCooldownSeconds: 2
+  guardRadiusMeters: 9
+  maxGuardsNearOneCollectible: 1
 --- !u!114 &2061689029
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -231946,21 +232095,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c678af36123cf2e40b56ce4d23c7e257, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  debugLogs: 0
+  debugLogCooldown: 1
   autoMissAfterSeconds: 12
   collectablePrefab: {fileID: 7260588083317533168, guid: 6b936ddf8587928478ec042578ba7da0,
     type: 3}
   maxActive: 10
   spawnInterval: 10
-  useSeparateLaneSplines: 1
-  laneContainers:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
   laneVis: {fileID: 2061689030}
   minSeparation: 4
   maxPlacementAttempts: 15
-  useLaneVisualizerOffsets: 1
-  fallbackLaneOffsetDistance: 2
   rayHeight: 7
   floatHeight: 1
   groundMask:
@@ -232044,11 +232188,14 @@ MonoBehaviour:
   playerSafeAheadMeters: 14
   playerSafeBehindMeters: 5
   minCrossSeparationMeters: 3
+  spawnAheadMinMeters: 18
+  spawnAheadMaxMeters: 45
   player: {fileID: 0}
   obstacleMgr: {fileID: 0}
   despawnBehindMeters: 10
   protectAheadMeters: 45
   hardMaxLifetimeSeconds: 30
+  trackSpline: {fileID: 0}
 --- !u!114 &2061689030
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -233339,6 +233486,54 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 242498387}
   m_PrefabAsset: {fileID: 0}
+--- !u!28 &2071163553
+Texture2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_ForcedFallbackFormat: 4
+  m_DownscaleFallback: 0
+  m_IsAlphaChannelOptional: 0
+  serializedVersion: 2
+  m_Width: 10
+  m_Height: 2
+  m_CompleteImageSize: 112
+  m_MipsStripped: 0
+  m_TextureFormat: 4
+  m_MipCount: 4
+  m_IsReadable: 1
+  m_IsPreProcessed: 0
+  m_IgnoreMipmapLimit: 0
+  m_MipmapLimitGroupName: 
+  m_StreamingMipmaps: 0
+  m_StreamingMipmapsPriority: 0
+  m_VTOnly: 0
+  m_AlphaIsTransparency: 0
+  m_ImageCount: 1
+  m_TextureDimension: 2
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 1
+    m_MipBias: 0
+    m_WrapU: 0
+    m_WrapV: 0
+    m_WrapW: 0
+  m_LightmapFormat: 0
+  m_ColorSpace: 1
+  m_PlatformBlob: 
+  image data: 112
+  _typelessdata: ffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffcc
+  m_StreamData:
+    serializedVersion: 2
+    offset: 0
+    size: 0
+    path: 
 --- !u!1001 &2071830388
 PrefabInstance:
   m_ObjectHideFlags: 0

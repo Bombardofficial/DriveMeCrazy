@@ -1,4 +1,4 @@
-// SkillEstimator.cs — production-ready, event-based EMA + trajectory + smoothed skill
+// SkillEstimator.cs — production-ready: event-decayed EMAs + trajectory EMA + smoothed skill
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -17,7 +17,7 @@ public class SkillEstimator : MonoBehaviour
     public float windowObstacle = 40f;
 
     [Tooltip("Approx. number of recent MINI-GAME events that influence the EMA strongly.")]
-    public float windowMiniGame = 20f;   // mini-game learning window (events)
+    public float windowMiniGame = 20f;
 
     [Header("Trajectory smoothing (seconds)")]
     [Tooltip("Smoothing window (seconds) for continuous trajectory samples " +
@@ -26,13 +26,13 @@ public class SkillEstimator : MonoBehaviour
 
     [Header("Weights -> score (before logistic)")]
     [Range(0f, 3f)] public float wCollect = 1.0f;   // higher is better
-    [Range(0f, 3f)] public float wMiss = 0.7f;    // subtracts
-    [Range(0f, 3f)] public float wHit = 1.3f;    // subtracts
+    [Range(0f, 3f)] public float wMiss = 0.7f;      // subtracts
+    [Range(0f, 3f)] public float wHit = 1.3f;       // subtracts
 
     [Header("Mini-game weights")]
-    [Range(0f, 3f)] public float wMgPass = 1.0f;   // good
-    [Range(0f, 3f)] public float wMgPerfect = 1.5f;   // very good
-    [Range(0f, 3f)] public float wMgFail = 1.2f;   // bad
+    [Range(0f, 3f)] public float wMgPass = 1.0f;
+    [Range(0f, 3f)] public float wMgPerfect = 1.5f;
+    [Range(0f, 3f)] public float wMgFail = 1.2f;
 
     [Header("Mini-game fail severity multipliers")]
     [Tooltip("How much a full crash counts compared to a simple stumble.")]
@@ -65,45 +65,42 @@ public class SkillEstimator : MonoBehaviour
     public bool writeTotals = true;
 
     [Header("Confidence")]
-    [Tooltip("Effective sample mass (EMA sum) where confidence ~= 1.0.\n" +
-             "A good starting point is windowCollect + windowObstacle + windowMiniGame.")]
+    [Tooltip("EMA mass where confidence ~= 1.0.\n" +
+             "Good starting point: windowCollect + windowObstacle + windowMiniGame.")]
     public float confidenceEventsForFull = 100f;
 
     // ===== Per-player profile =====
     public sealed class Profile
     {
-        // EMAs: collectibles & obstacles (event-based mass)
+        // --- Event-decayed EMAs (these ARE NOT totals, they decay) ---
+        // Collectibles
         public float colOppEMA, colGotEMA, colMissEMA;
+        // Obstacles
         public float obsOppEMA, obsHitEMA;
-
-        // EMAs: mini-game (event-based mass)
+        // Mini-game
         public float mgOppEMA, mgPassEMA, mgPerfectEMA, mgFailEMA;
 
-        // EMAs: trajectory (continuous 0..1 signals)
-        // cornerSmoothEMA: 0..1, HIGH = good (ideal speed in corners)
-        // laneJitterEMA:   0..1, HIGH = bad (much pointless steering), will be a penalty
-        // overspeedCtrlEMA:0..1, HIGH = good (keeps speed near/below limit)
-        public float cornerSmoothEMA;
-        public float laneJitterEMA;
-        public float overspeedControlEMA;
+        // --- Trajectory time-based EMAs (0..1) ---
+        public float cornerSmoothEMA;        // HIGH = good
+        public float laneJitterEMA;          // HIGH = bad
+        public float overspeedControlEMA;    // HIGH = good
 
-        // Totals (optional, for logging)
+        // Totals (optional, for debug / telemetry)
         public int colOppTotal, colGotTotal, colMissTotal;
         public int obsOppTotal, obsHitTotal;
         public int mgOppTotal, mgPassTotal, mgPerfectTotal, mgFailTotal;
         public int trajSamplesTotal;
 
-        // Derived (existing)
+        // Derived rates
         public float CollectSuccessRate => SafeRatio(colGotEMA, colOppEMA);
         public float CollectMissRate => SafeRatio(colMissEMA, colOppEMA);
         public float ObstacleHitRate => SafeRatio(obsHitEMA, obsOppEMA);
 
-        // Derived (mini-game)
         public float MiniGamePassRate => SafeRatio(mgPassEMA, mgOppEMA);
         public float MiniGamePerfectRate => SafeRatio(mgPerfectEMA, mgOppEMA);
         public float MiniGameFailRate => SafeRatio(mgFailEMA, mgOppEMA);
 
-        // Expose trajectory metrics (for debug/plots later)
+        // Trajectory exposures
         public float CornerSmoothness => Mathf.Clamp01(cornerSmoothEMA);
         public float LaneJitter => Mathf.Clamp01(laneJitterEMA);
         public float OverspeedControl => Mathf.Clamp01(overspeedControlEMA);
@@ -111,142 +108,158 @@ public class SkillEstimator : MonoBehaviour
         public float Skill01 { get; private set; } = 0.5f;
 
         readonly SkillEstimator _root;
-
         public Profile(SkillEstimator root) { _root = root; }
 
+        // Confidence is based on *recent* effective mass (EMA), not totals
         public float Confidence
         {
             get
             {
-                // mass ~ "how many effective events were seen recently"
-                float mass = colOppTotal + obsOppTotal + mgOppTotal;
+                float mass = colOppEMA + obsOppEMA + mgOppEMA;
                 return Mathf.Clamp01(mass / Mathf.Max(1f, _root.confidenceEventsForFull));
             }
         }
 
+        // --- Core tick (smooth skill) ---
         public void Tick(float dt)
         {
             float score = 0f;
 
-            // === Collectibles & obstacles ===
+            // Collectibles & obstacles
             score += _root.wCollect * CollectSuccessRate;
             score -= _root.wMiss * CollectMissRate;
             score -= _root.wHit * ObstacleHitRate;
 
-            // === Mini-game ===
+            // Mini-game
             score += _root.wMgPass * MiniGamePassRate;
             score += _root.wMgPerfect * MiniGamePerfectRate;
             score -= _root.wMgFail * MiniGameFailRate;
 
-            // === Trajectory ===
-            // CornerSmoothness: HIGH=good -> plusz pont
+            // Trajectory
             score += _root.wCorner * CornerSmoothness;
-            // LaneJitter: HIGH=rossz -> mínusz pont
             score -= _root.wLaneJitter * LaneJitter;
-            // OverspeedControl: HIGH=jó (jól tartja a limitet) -> plusz pont
             score += _root.wOverspeedControl * OverspeedControl;
 
-            // Logistic squash 0..1-be (raw -> target)
+            // Logistic squash
             float x = _root.slope * (score + _root.bias);
             float target = 1f / (1f + Mathf.Exp(-x));
 
-            // Time-based smoothing: exponential toward target
+            // Smooth toward target
             float alphaSkill = AlphaTime(_root.skillSmoothSeconds, dt);
             Skill01 = Mathf.Lerp(Skill01, target, alphaSkill);
         }
 
-        // ---------- Alpha helpers ----------
+        // ===== Helpers =====
 
-        // DISCRETE event EMA: window = events
-        float AlphaEvent(float windowEvents)
+        // Event-decay factor: after 1 "event", remaining mass = exp(-1/windowEvents)
+        float DecayFactorEvents(float windowEvents)
         {
             float w = Mathf.Max(1f, windowEvents);
-            return 1f - Mathf.Exp(-1f / w);
+            return Mathf.Exp(-1f / w);
         }
 
-        // CONTINUOUS signal EMA: window = seconds
+        // Time-based EMA alpha: 63% response at windowSeconds
         float AlphaTime(float windowSeconds, float dt)
         {
             float w = Mathf.Max(0.001f, windowSeconds);
             return 1f - Mathf.Exp(-dt / w);
         }
 
-        // ---------- Collectibles (event-based EMAs) ----------
+        void DecayCollect()
+        {
+            float d = DecayFactorEvents(_root.windowCollect);
+            colOppEMA *= d; colGotEMA *= d; colMissEMA *= d;
+        }
+
+        void DecayObstacle()
+        {
+            float d = DecayFactorEvents(_root.windowObstacle);
+            obsOppEMA *= d; obsHitEMA *= d;
+        }
+
+        void DecayMiniGame()
+        {
+            float d = DecayFactorEvents(_root.windowMiniGame);
+            mgOppEMA *= d; mgPassEMA *= d; mgPerfectEMA *= d; mgFailEMA *= d;
+        }
+
+        static float SafeRatio(float num, float den)
+            => (den <= 1e-4f) ? 0f : Mathf.Clamp01(num / den);
+
+        // ===== Event API (Collectibles) =====
         public void OnCollectibleSpawned()
         {
-            float a = AlphaEvent(_root.windowCollect);
-            colOppEMA = Mathf.Lerp(colOppEMA, colOppEMA + 1f, a);
+            DecayCollect();
+            colOppEMA += 1f;
             if (_root.writeTotals) colOppTotal++;
         }
 
         public void OnCollectibleCollected()
         {
-            float a = AlphaEvent(_root.windowCollect);
-            colGotEMA = Mathf.Lerp(colGotEMA, colGotEMA + 1f, a);
+            DecayCollect();
+            colGotEMA += 1f;
             if (_root.writeTotals) colGotTotal++;
         }
 
         public void OnCollectibleMissed()
         {
-            float a = AlphaEvent(_root.windowCollect);
-            colMissEMA = Mathf.Lerp(colMissEMA, colMissEMA + 1f, a);
+            DecayCollect();
+            colMissEMA += 1f;
             if (_root.writeTotals) colMissTotal++;
         }
 
-        // ---------- Obstacles ----------
+        // ===== Event API (Obstacles) =====
         public void OnObstacleSpawned()
         {
-            float a = AlphaEvent(_root.windowObstacle);
-            obsOppEMA = Mathf.Lerp(obsOppEMA, obsOppEMA + 1f, a);
+            DecayObstacle();
+            obsOppEMA += 1f;
             if (_root.writeTotals) obsOppTotal++;
         }
 
         public void OnObstacleHit()
         {
-            float a = AlphaEvent(_root.windowObstacle);
-            obsHitEMA = Mathf.Lerp(obsHitEMA, obsHitEMA + 1f, a);
+            DecayObstacle();
+            obsHitEMA += 1f;
             if (_root.writeTotals) obsHitTotal++;
         }
 
-        // ---------- Mini-game ----------
+        // ===== Event API (Mini-game) =====
         public void OnMiniGameStarted()
         {
-            float a = AlphaEvent(_root.windowMiniGame);
-            mgOppEMA = Mathf.Lerp(mgOppEMA, mgOppEMA + 1f, a);
+            DecayMiniGame();
+            mgOppEMA += 1f;
             if (_root.writeTotals) mgOppTotal++;
         }
 
         public void OnMiniGamePass()
         {
-            float a = AlphaEvent(_root.windowMiniGame);
-            mgPassEMA = Mathf.Lerp(mgPassEMA, mgPassEMA + 1f, a);
+            DecayMiniGame();
+            mgPassEMA += 1f;
             if (_root.writeTotals) mgPassTotal++;
         }
 
         public void OnMiniGamePerfect()
         {
-            float a = AlphaEvent(_root.windowMiniGame);
-            mgPerfectEMA = Mathf.Lerp(mgPerfectEMA, mgPerfectEMA + 1f, a);
+            DecayMiniGame();
+            mgPerfectEMA += 1f;
             if (_root.writeTotals) mgPerfectTotal++;
         }
 
         public void OnMiniGameFail(bool fullCrash)
         {
-            float a = AlphaEvent(_root.windowMiniGame);
-            float w = fullCrash ? _root.mgFailWeightCrash : _root.mgFailWeightStumble;   // severity
-            mgFailEMA = Mathf.Lerp(mgFailEMA, mgFailEMA + w, a);
+            DecayMiniGame();
+            float w = fullCrash ? _root.mgFailWeightCrash : _root.mgFailWeightStumble;
+            mgFailEMA += w;
             if (_root.writeTotals) mgFailTotal++;
         }
 
-        // ---------- Trajectory (continuous, time-based EMA) ----------
-        /// <param name="cornerSmooth01">0..1, HIGH=good, -1 = ignore</param>
-        /// <param name="laneJitter01">0..1, HIGH=bad (több jitter), -1 = ignore</param>
-        /// <param name="overspeedControl01">0..1, HIGH=good, -1 = ignore</param>
+        // ===== Trajectory samples (time-based EMA) =====
         public void OnTrajectorySample(
             float cornerSmooth01,
             float laneJitter01,
             float overspeedControl01,
-            float windowSeconds, float dt)
+            float windowSeconds,
+            float dt)
         {
             float a = AlphaTime(windowSeconds, dt);
 
@@ -264,28 +277,21 @@ public class SkillEstimator : MonoBehaviour
                 if (_root.writeTotals) trajSamplesTotal++;
             }
         }
-
-        static float SafeRatio(float num, float den)
-            => (den <= 1e-4f) ? 0f : Mathf.Clamp01(num / den);
     }
 
     // ===== Runtime state =====
     readonly Dictionary<Passenger, Profile> _profiles = new();
-    Profile _active;
+    Profile _active;                 // null if no active driver
     Passenger _activePassenger;
 
     public Profile Global { get; private set; }
-    public Profile Active => _active ?? Global;
+    public Profile Active => _active; // NOTE: can be null (intentionally)
     public IReadOnlyDictionary<Passenger, Profile> Profiles => _profiles;
     public Passenger ActivePassenger => _activePassenger;
 
     void Awake()
     {
-        if (Instance && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
+        if (Instance && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
         Global = new Profile(this);
     }
@@ -293,30 +299,41 @@ public class SkillEstimator : MonoBehaviour
     void OnEnable()
     {
         PlayerManager.OnDriverChanged += HandleDriverChanged;
+
         if (PlayerManager.Instance && PlayerManager.Instance.CurrentDriver)
             SetActiveDriver(PlayerManager.Instance.CurrentDriver);
     }
 
-    void OnDisable() => PlayerManager.OnDriverChanged -= HandleDriverChanged;
+    void OnDisable()
+    {
+        PlayerManager.OnDriverChanged -= HandleDriverChanged;
+    }
 
     void HandleDriverChanged(Passenger oldP, Passenger newP) => SetActiveDriver(newP);
 
     void SetActiveDriver(Passenger p)
     {
         _activePassenger = p;
-        if (p == null) { _active = null; return; }
+
+        if (p == null)
+        {
+            _active = null;
+            return;
+        }
 
         if (!_profiles.TryGetValue(p, out var prof))
         {
             prof = new Profile(this);
             _profiles.Add(p, prof);
         }
+
         _active = prof;
     }
 
     void Update()
     {
         float dt = Time.deltaTime;
+
         Global?.Tick(dt);
         foreach (var kv in _profiles)
             kv.Value.Tick(dt);
@@ -325,69 +342,65 @@ public class SkillEstimator : MonoBehaviour
     // ===== Public API: collectibles =====
     public void OnCollectibleSpawned()
     {
-        Global.OnCollectibleSpawned();
-        Active?.OnCollectibleSpawned();
+        Global?.OnCollectibleSpawned();
+        _active?.OnCollectibleSpawned();
     }
 
     public void OnCollectibleCollected()
     {
-        Global.OnCollectibleCollected();
-        Active?.OnCollectibleCollected();
+        Global?.OnCollectibleCollected();
+        _active?.OnCollectibleCollected();
     }
 
     public void OnCollectibleMissed()
     {
-        Global.OnCollectibleMissed();
-        Active?.OnCollectibleMissed();
+        Global?.OnCollectibleMissed();
+        _active?.OnCollectibleMissed();
     }
 
     // ===== Public API: obstacles =====
     public void OnObstacleSpawned()
     {
-        Global.OnObstacleSpawned();
-        Active?.OnObstacleSpawned();
+        Global?.OnObstacleSpawned();
+        _active?.OnObstacleSpawned();
     }
 
     public void OnObstacleHit()
     {
-        Global.OnObstacleHit();
-        Active?.OnObstacleHit();
+        Global?.OnObstacleHit();
+        _active?.OnObstacleHit();
     }
 
     // ===== Public API: mini-game =====
     public void OnMiniGameStarted()
     {
-        Global.OnMiniGameStarted();
-        Active?.OnMiniGameStarted();
+        Global?.OnMiniGameStarted();
+        _active?.OnMiniGameStarted();
     }
 
     public void OnMiniGamePass()
     {
-        Global.OnMiniGamePass();
-        Active?.OnMiniGamePass();
+        Global?.OnMiniGamePass();
+        _active?.OnMiniGamePass();
     }
 
     public void OnMiniGamePerfect()
     {
-        Global.OnMiniGamePerfect();
-        Active?.OnMiniGamePerfect();
+        Global?.OnMiniGamePerfect();
+        _active?.OnMiniGamePerfect();
     }
 
     public void OnMiniGameFail(bool fullCrash)
     {
-        Global.OnMiniGameFail(fullCrash);
-        Active?.OnMiniGameFail(fullCrash);
+        Global?.OnMiniGameFail(fullCrash);
+        _active?.OnMiniGameFail(fullCrash);
     }
 
     // ===== Public API: trajectory =====
-    /// <summary>
-    /// Continuous per-frame trajectory sample from the car controller.
-    /// Values -1..1: pass -1 to "ignore" that channel this frame.
-    /// </summary>
     public void OnTrajectorySample(float cornerSmooth01, float laneJitter01, float overspeedControl01)
     {
         float dt = Time.deltaTime;
-        Global.OnTrajectorySample(cornerSmooth01, laneJitter01, overspeedControl01, windowTrajectory, dt);
-        Active?.OnTrajectorySample(cornerSmooth01, laneJitter01, overspeedControl01, windowTrajectory, dt);
+        Global?.OnTrajectorySample(cornerSmooth01, laneJitter01, overspeedControl01, windowTrajectory, dt);
+        _active?.OnTrajectorySample(cornerSmooth01, laneJitter01, overspeedControl01, windowTrajectory, dt);
     }
 }
