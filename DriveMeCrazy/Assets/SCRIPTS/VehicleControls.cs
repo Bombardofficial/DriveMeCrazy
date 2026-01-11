@@ -382,6 +382,155 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""CoopTask"",
+            ""id"": ""e8a178bd-fbe0-4e6f-9755-255ca5ae8c93"",
+            ""actions"": [
+                {
+                    ""name"": ""Task"",
+                    ""type"": ""Button"",
+                    ""id"": ""a5707eeb-416c-4115-8ab7-3b434ad3f129"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": ""Press(behavior=2)"",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""06085367-82a3-45eb-99ba-8095969ac0f4"",
+                    ""path"": ""<Gamepad>/buttonEast"",
+                    ""interactions"": ""Press(behavior=2)"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Task"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""d7c48dfa-d7d2-44af-9e4a-c7445dcfb44a"",
+                    ""path"": ""<Gamepad>/buttonNorth"",
+                    ""interactions"": ""Press(behavior=2)"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Task"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""ba70029a-8a35-4741-9194-860f48bcd022"",
+                    ""path"": ""<Gamepad>/buttonSouth"",
+                    ""interactions"": ""Press(behavior=2)"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Task"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""3ffd99b0-b4ee-4210-b7f1-0981b9fc1ffb"",
+                    ""path"": ""<Gamepad>/buttonWest"",
+                    ""interactions"": ""Press(behavior=2)"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Task"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f3223ebc-9b22-44b7-ab52-a4df9a71abc0"",
+                    ""path"": ""<Gamepad>/dpad/down"",
+                    ""interactions"": ""Press(behavior=2)"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Task"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""bcceb7fb-d9be-4c13-94a7-fbc2c80b0922"",
+                    ""path"": ""<Gamepad>/dpad/left"",
+                    ""interactions"": ""Press(behavior=2)"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Task"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f9d915a7-9abb-4a6e-949c-3ecd49c67706"",
+                    ""path"": ""<Gamepad>/dpad/right"",
+                    ""interactions"": ""Press(behavior=2)"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Task"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""5e62bbeb-b74c-4a3c-8c18-eb9d65aa6b55"",
+                    ""path"": ""<Gamepad>/dpad/up"",
+                    ""interactions"": ""Press(behavior=2)"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Task"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a7eac3b9-d080-42ba-afbd-621d6361bc6e"",
+                    ""path"": ""<Gamepad>/leftShoulder"",
+                    ""interactions"": ""Press(behavior=2)"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Task"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""111f225d-e6a2-47e5-9af2-f2602119e964"",
+                    ""path"": ""<Gamepad>/leftTrigger"",
+                    ""interactions"": ""Press(behavior=2)"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Task"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f03115a0-826d-4052-a2c5-5599d5d4c6f1"",
+                    ""path"": ""<Gamepad>/rightShoulder"",
+                    ""interactions"": ""Press(behavior=2)"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Task"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e00b8e57-3eab-42e5-b1e5-8538b76b1c1c"",
+                    ""path"": ""<Gamepad>/rightTrigger"",
+                    ""interactions"": ""Press(behavior=2)"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Task"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": [
@@ -423,6 +572,9 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
         // Lobby
         m_Lobby = asset.FindActionMap("Lobby", throwIfNotFound: true);
         m_Lobby_Join = m_Lobby.FindAction("Join", throwIfNotFound: true);
+        // CoopTask
+        m_CoopTask = asset.FindActionMap("CoopTask", throwIfNotFound: true);
+        m_CoopTask_Task = m_CoopTask.FindAction("Task", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -658,6 +810,52 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
         }
     }
     public LobbyActions @Lobby => new LobbyActions(this);
+
+    // CoopTask
+    private readonly InputActionMap m_CoopTask;
+    private List<ICoopTaskActions> m_CoopTaskActionsCallbackInterfaces = new List<ICoopTaskActions>();
+    private readonly InputAction m_CoopTask_Task;
+    public struct CoopTaskActions
+    {
+        private @VehicleControls m_Wrapper;
+        public CoopTaskActions(@VehicleControls wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Task => m_Wrapper.m_CoopTask_Task;
+        public InputActionMap Get() { return m_Wrapper.m_CoopTask; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(CoopTaskActions set) { return set.Get(); }
+        public void AddCallbacks(ICoopTaskActions instance)
+        {
+            if (instance == null || m_Wrapper.m_CoopTaskActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_CoopTaskActionsCallbackInterfaces.Add(instance);
+            @Task.started += instance.OnTask;
+            @Task.performed += instance.OnTask;
+            @Task.canceled += instance.OnTask;
+        }
+
+        private void UnregisterCallbacks(ICoopTaskActions instance)
+        {
+            @Task.started -= instance.OnTask;
+            @Task.performed -= instance.OnTask;
+            @Task.canceled -= instance.OnTask;
+        }
+
+        public void RemoveCallbacks(ICoopTaskActions instance)
+        {
+            if (m_Wrapper.m_CoopTaskActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(ICoopTaskActions instance)
+        {
+            foreach (var item in m_Wrapper.m_CoopTaskActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_CoopTaskActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public CoopTaskActions @CoopTask => new CoopTaskActions(this);
     private int m_KeyboardSchemeIndex = -1;
     public InputControlScheme KeyboardScheme
     {
@@ -692,5 +890,9 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
     public interface ILobbyActions
     {
         void OnJoin(InputAction.CallbackContext context);
+    }
+    public interface ICoopTaskActions
+    {
+        void OnTask(InputAction.CallbackContext context);
     }
 }
