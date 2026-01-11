@@ -48,13 +48,13 @@ public class EngineOverloadManager : MonoBehaviour
     private Dictionary<int, int> _playerToButton = new();
 
     // External references
-    private PlayerManager _playerManager;
-    private OverloadUIController _uiController;
+    public PlayerManager _playerManager;
+    public OverloadUIController _uiController;
 
     void Awake()
     {
-        _playerManager = FindObjectOfType<PlayerManager>();
-        _uiController = FindObjectOfType<OverloadUIController>();
+        //_playerManager = FindObjectOfType<PlayerManager>();
+        //_uiController = FindObjectOfType<OverloadUIController>();
     }
 
     public void TriggerOverload(List<Passenger> passengers)
@@ -170,8 +170,10 @@ public class EngineOverloadManager : MonoBehaviour
 
         _playerManager.AwardAllPassengers(_successPointBonus);
 
-        Cleanup();
-        // TODO: Success feedback
+        // Success feedback
+        _uiController.PlaySuccess();
+
+        Invoke(nameof(Cleanup), 0.6f);
     }
 
     private void ResolveFailure()
@@ -180,8 +182,10 @@ public class EngineOverloadManager : MonoBehaviour
 
         _playerManager.AwardAllPassengers(-_failurePointPenalty);
 
-        Cleanup();
-        // TODO: Failure feedback
+        // Failure feedback
+        _uiController.PlayFailure();
+
+        Invoke(nameof(Cleanup), 0.8f);
     }
 
     private void Cleanup()
