@@ -9,12 +9,15 @@ public class GameUIManager : MonoBehaviour
     [Header("UI References")]
     [Tooltip("The UI Text element for displaying car health.")]
     [SerializeField] private TextMeshProUGUI carDamageText;
+    [SerializeField] private TextMeshProUGUI carDamageNumber;
 
     [Tooltip("A list of UI Text elements for player scores. Assign these in the Inspector.")]
     [SerializeField] private List<TextMeshProUGUI> playerScoreTexts;
+    [SerializeField] private List<TextMeshProUGUI> playerScoreNumbers;
 
     [Tooltip("A list of UI Text elements for player scores. Assign these in the Inspector.")]
     [SerializeField] private TextMeshProUGUI pointMultiplierText;
+    [SerializeField] private TextMeshProUGUI pointMultiplierNumber;
 
     [Header("Game Component References")]
     [Tooltip("Drag the GameObject with the Damageable script here.")]
@@ -50,15 +53,19 @@ public class GameUIManager : MonoBehaviour
 
         // ---- NEW ----
         // Store the original color of the health text at the start.
-        if (carDamageText != null)
+        if (carDamageNumber != null)
         {
-            _defaultHealthColor = carDamageText.color;
+            _defaultHealthColor = carDamageNumber.color;
         }
         // -------------
 
         foreach (var scoreText in playerScoreTexts)
         {
             scoreText.gameObject.SetActive(false);
+        }
+        foreach (var scoreNumber in playerScoreNumbers)
+        {
+            scoreNumber.gameObject.SetActive(false);
         }
 
         PlayerManager.OnDriverChanged += HandleDriverChange;
@@ -132,33 +139,33 @@ public class GameUIManager : MonoBehaviour
     // This entire method has been updated for the new health display.
     void UpdateDamageUI()
     {
-        if (carDamageText == null) return;
+        if (carDamageNumber == null) return;
 
         // Calculate health as a percentage from 100 down to 0.
         float healthPercent = (carDamageable.Health / carDamageable.maxHealth) * 100f;
 
         // Update the text to show "Car Health" and the new value.
-        carDamageText.text = $"Car Health: {healthPercent:F0}%";
+        carDamageNumber.text = $"{healthPercent:F0}%";
 
         // Logic to smoothly change the color based on the current health percentage.
         if (healthPercent > 50f)
         {
             // Health is good, use the default color.
-            carDamageText.color = _defaultHealthColor;
+            carDamageNumber.color = _defaultHealthColor;
         }
         else if (healthPercent > 25f)
         {
             // Health is between 50% and 25%. We smoothly interpolate from default to orange.
             // 't' will go from 0 (at 50% health) to 1 (at 25% health).
             float t = 1.0f - ((healthPercent - 25f) / 25f);
-            carDamageText.color = Color.Lerp(_defaultHealthColor, _cautionColor, t);
+            carDamageNumber.color = Color.Lerp(_defaultHealthColor, _cautionColor, t);
         }
         else // Health is 25% or lower.
         {
             // Health is critical. We smoothly interpolate from orange to red.
             // 't' will go from 0 (at 25% health) to 1 (at 0% health).
             float t = 1.0f - (healthPercent / 25f);
-            carDamageText.color = Color.Lerp(_cautionColor, _dangerColor, t);
+            carDamageNumber.color = Color.Lerp(_cautionColor, _dangerColor, t);
         }
     }
     // --------------------
@@ -180,12 +187,18 @@ public class GameUIManager : MonoBehaviour
             tx.gameObject.SetActive(true);
 
             string driverTag = (p == playerManager.CurrentDriver) ? " (Driver)" : "";
-            tx.text = $"Player {p.PlayerNumber}{driverTag}: {p.Points} Points";
+            tx.text = $"Player {p.PlayerNumber}{driverTag}";
+            tx.color = PlayerColors.Get(p.PlayerNumber);
+
+            var numtx = playerScoreTexts[slot];
+            numtx.gameObject.SetActive(true);
+
+            numtx.text = $"{p.Points} Points";
         }
     }
 
     void UpdatePointMultiplierUI()
     {
-        pointMultiplierText.text = $"Multiplier: {playerManager.PointMultiplier}";
+        pointMultiplierNumber.text = $"{playerManager.PointMultiplier}";
     }
 }
