@@ -23,6 +23,7 @@ public class PlayerManager : MonoBehaviour
     /* -------- private -------- */
     readonly List<Passenger> _passengers = new();
     CarSeatManager _seats;
+    public Passenger _lastSabotage;
 
     /* ===== life-cycle ===== */
     void Awake()
@@ -69,6 +70,36 @@ public class PlayerManager : MonoBehaviour
         int curIdx = _passengers.IndexOf(CurrentDriver);
         _passengers[curIdx] = newDriver;
         _passengers[idx] = CurrentDriver;
+
+        ApplySeatPlacements();
+        SetDriver(newDriver);
+    }
+
+    public void SwapDriver()
+    {
+        int curNum = CurrentDriver.PlayerNumber;
+        int nextNum = (curNum + 1) % _passengers.Count;
+
+        if (nextNum < 0 || nextNum >= _passengers.Count) return;
+        var newDriver = GetPassengerByNumber(nextNum);
+        if (newDriver == CurrentDriver) return;
+        int nextDriverIdx = _passengers.IndexOf(newDriver);
+        int oldDriverIdx = _passengers.IndexOf(CurrentDriver);
+        _passengers[oldDriverIdx] = newDriver;
+        _passengers[nextDriverIdx] = CurrentDriver;
+
+        ApplySeatPlacements();
+        SetDriver(newDriver);
+    }
+
+    public void SwapDriverSabotage()
+    {
+        var newDriver = _lastSabotage;
+        if (newDriver == CurrentDriver) return;
+        int nextDriverIdx = _passengers.IndexOf(newDriver);
+        int oldDriverIdx = _passengers.IndexOf(CurrentDriver);
+        _passengers[oldDriverIdx] = newDriver;
+        _passengers[nextDriverIdx] = CurrentDriver;
 
         ApplySeatPlacements();
         SetDriver(newDriver);

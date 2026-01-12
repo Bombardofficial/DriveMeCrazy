@@ -30,12 +30,15 @@ public class Damageable : MonoBehaviour
         if (_health > 0 || !_pm) return;
 
         // pick the NEXT passenger in list order, wrap-around at the end
-        int curIdx = _pm.GetSeatIndex(_pm.CurrentDriver);
-        int nextIdx = (curIdx + 1) % _pm.Passengers.Count;
+        //int curIdx = _pm.GetSeatIndex(_pm.CurrentDriver);
+        //int nextIdx = (curIdx + 1) % _pm.Passengers.Count;
 
         // only swap if we actually have another passenger
-        if (nextIdx != curIdx)
-            _pm.SwapWithDriver(nextIdx);
+        //if (nextIdx != curIdx)
+            //_pm.SwapWithDriver(nextIdx);
+
+        _pm.SwapDriverSabotage();
+        
         _health = maxHealth;
     }
 }

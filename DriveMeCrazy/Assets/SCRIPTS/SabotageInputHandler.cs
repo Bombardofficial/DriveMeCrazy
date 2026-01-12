@@ -144,6 +144,7 @@ namespace ArcadeVP
             if (IsCurrentDriver || Time.time < _lastBlock + _blockingSabotageCooldown) return;
 
             _lastBlock = Time.time;
+            PlayerManager.Instance._lastSabotage = _passenger;
 
             float randomValue = Random.value;
             if (randomValue < 0.3f) { InputManager_ArcadeVP.FireBlockGasSabotage(_passenger); _iconHandler.ShowActionIcon(GetCurrentIconAnchor(), 4); Debug.Log("BlockGasSabotage Fired!"); }
@@ -156,6 +157,7 @@ namespace ArcadeVP
             if (IsCurrentDriver || Time.time < _lastDisrupt + _disruptingSabotageCooldown) return;
 
             _lastDisrupt = Time.time;
+            PlayerManager.Instance._lastSabotage = _passenger;
             
             float randomValue = Random.value;
             if (randomValue < 0.3f) { InputManager_ArcadeVP.FireLeftSteerSabotage(_passenger); _iconHandler.ShowActionIcon(GetCurrentIconAnchor(), 1); Debug.Log("LeftSteerSabotage Fired!"); }
