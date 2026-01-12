@@ -59,6 +59,10 @@ public class PlayerJoinManager : MonoBehaviour
     [SerializeField] TextMeshProUGUI transitionText;
     [SerializeField] TextMeshProUGUI countdownGametext;
 
+    [Header("Controlls")]
+    [SerializeField] GameObject driverControlls;
+    [SerializeField] GameObject passengerControlls;
+
     [Header("Lobby Music Bus")]
     [SerializeField] AudioReverbFilter musicReverb;
     [SerializeField] AudioSource lobbyMusic;
@@ -74,7 +78,7 @@ public class PlayerJoinManager : MonoBehaviour
 
     /* ????????????? NEW  Lap / Finish / Result Fields ????????????? */
     [Header("Lap System")]
-    [SerializeField] private TextMeshProUGUI lapsText;       // “Laps: 0/10”
+    [SerializeField] private TextMeshProUGUI lapsText;       // ï¿½Laps: 0/10ï¿½
     [SerializeField] private int lapsToFinish = 10;          // finish after X
     [Tooltip("OPTIONAL.  Leave empty if this script is placed ON the LapGate")]
     [SerializeField] private Collider lapGateTrigger;        // start/finish
@@ -85,7 +89,7 @@ public class PlayerJoinManager : MonoBehaviour
     [SerializeField] CanvasGroup resultsPanel;       // parent group
     [SerializeField] TextMeshProUGUI resultsText;    // tall TMP for list
     [SerializeField] TextMeshProUGUI winnerText;     // big banner
-    [SerializeField] TextMeshProUGUI autoReturnText;   // “Returning in …”
+    [SerializeField] TextMeshProUGUI autoReturnText;   // ï¿½Returning in ï¿½ï¿½
     [SerializeField] Image blackFadeImage;          // full-screen image
 
     public CanvasGroup fadeintoLobby;
@@ -119,11 +123,12 @@ public class PlayerJoinManager : MonoBehaviour
         gameplayMusicTargetVol = gameplayMusic.volume;
         lobbyMusicTargetVol = lobbyMusic ? lobbyMusic.volume : 1f;
 
-        // Hook lap trigger (if this script isn’t placed on the gate)
+        // Hook lap trigger (if this script isnï¿½t placed on the gate)
         if (lapGateTrigger) lapGateTrigger.isTrigger = true;
 
         startPos = winnerText.rectTransform.anchoredPosition;
 
+        HideControllsImmediate();
         PrepareLobbyState();
     }
 
@@ -247,7 +252,7 @@ public class PlayerJoinManager : MonoBehaviour
             car.enabled = false;
             foreach (var d in playerDummies) if (d) d.SetActive(false);
             PlayerInputManager.instance.playerJoinedEvent.AddListener(OnPlayerJoined);
-            if (countdownText) countdownText.text = "WAITING FOR DRIVER…";
+            if (countdownText) countdownText.text = "WAITING FOR DRIVERï¿½";
             RefreshUI();
         }
     }
@@ -389,6 +394,9 @@ public class PlayerJoinManager : MonoBehaviour
         StartCoroutine(ShowTransitionTextDelayed(3f));
         StartCoroutine(ShowCountdownText(introClip.length - 3f));
 
+        StartCoroutine(ShowControlls(fadeOutDuration + 0.1f));
+        StartCoroutine(HideControlls(introClip.length - 3f));
+
         float clipLen = introClip.length / cameraAnimator.speed;
         float hudDelay = Mathf.Max(0f, clipLen - hudFadeDuration);
 
@@ -466,7 +474,7 @@ public class PlayerJoinManager : MonoBehaviour
         driverInput.enabled = false;
         gameplayHUD.alpha = 0;
 
-        /* Music – gameplay OUT, lobby IN */
+        /* Music ï¿½ gameplay OUT, lobby IN */
         if (gameplayReverb) gameplayReverb.enabled = true;
         StartCoroutine(FadeReverbDryLevel(gameplayReverb, 0, -10000, 3f));
         StartCoroutine(FadeAudio(gameplayMusic, gameplayMusicTargetVol, 0f, 3f));
@@ -534,7 +542,7 @@ public class PlayerJoinManager : MonoBehaviour
         yield return new WaitForSeconds(1f);
         StartCoroutine(AutoReturnCountdown(10));
 
-        // Finished – now idling on results screen
+        // Finished ï¿½ now idling on results screen
     }
 
     IEnumerator FadeAndLoad(string scene)
@@ -560,7 +568,7 @@ public class PlayerJoinManager : MonoBehaviour
             lapsText.text = $"Laps: {currentLap}/{lapsToFinish}";
     }
 
-    /* ?????????????? HELPERS – Fades & Waiters ?????????????? */
+    /* ?????????????? HELPERS ï¿½ Fades & Waiters ?????????????? */
     IEnumerator FadeCanvas(CanvasGroup cg, float from, float to, float dur, float delay = 0)
     {
         if (!cg) yield break;
@@ -690,6 +698,28 @@ public class PlayerJoinManager : MonoBehaviour
 
             countdownGametext.gameObject.SetActive(false);
         }
+    }
+
+    IEnumerator ShowControlls(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        driverControlls.gameObject.SetActive(true);
+        passengerControlls.gameObject.SetActive(true);
+        yield return null;
+    }
+
+    IEnumerator HideControlls(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        driverControlls.gameObject.SetActive(false);
+        passengerControlls.gameObject.SetActive(false);
+        yield return null;
+    }
+
+    void HideControllsImmediate()
+    {
+        driverControlls.gameObject.SetActive(false);
+        passengerControlls.gameObject.SetActive(false);
     }
 
     /* ??????????????? CLEAN-UP ??????????????? */
