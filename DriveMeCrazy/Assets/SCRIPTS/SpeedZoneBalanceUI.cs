@@ -13,6 +13,8 @@ namespace ArcadeVP
         public RectTransform bar;          // background / white panel
         public RectTransform greenZone;
         public RectTransform pointer;
+        public Image arrowUp;
+        public Image arrowDown;
 
         [Header("Outcome Label (optional)")]
         public TextMeshProUGUI outcomeText;   // place this where you want in the layout
@@ -54,12 +56,12 @@ namespace ArcadeVP
 
         float barHalfWidth;
         float zoneHalfWidth;    // px
-        float zoneCentre;       // px (±barHalfWidth)
+        float zoneCentre;       // px (ï¿½barHalfWidth)
         float elapsed;
 
         CanvasGroup cg;
 
-        // baselines to avoid “scale creep”
+        // baselines to avoid ï¿½scale creepï¿½
         Vector2 baseBarPos;
         Quaternion baseBarRot;
         Vector3 baseBarScale = Vector3.one;
@@ -68,6 +70,8 @@ namespace ArcadeVP
         Vector3 baseOutcomeScale = Vector3.one;
         Vector2 baseOutcomePos;
         Color baseGreenColor = Color.white;
+
+        Color arrowBaseColor;
 
         public float NormalizedError { get; private set; }  // 0=center, 1=edge
 
@@ -101,6 +105,7 @@ namespace ArcadeVP
                 outcomeText.gameObject.SetActive(false);
                 outcomeText.text = string.Empty;   // NEW
             }
+            if (arrowUp) arrowBaseColor = arrowUp.color;
         }
 
         /* ================== API ================== */
@@ -154,7 +159,7 @@ namespace ArcadeVP
             ApplyZoneVisual();
             RecomputeError();
 
-            // background jiggle (bar only) – reset on fade-out
+            // background jiggle (bar only) ï¿½ reset on fade-out
             if (jiggleEnabled && bar)
             {
                 float err = Mathf.Clamp01(NormalizedError);
@@ -173,6 +178,13 @@ namespace ArcadeVP
         public void SetPointer(float t)
         {
             t = Mathf.Clamp(t, -1f, 1f);
+
+            arrowUp.color = arrowBaseColor;
+            arrowDown.color = arrowBaseColor;
+
+            if (t > 0f) arrowUp.color = Color.white;
+            if (t < 0f) arrowDown.color = Color.white;
+            
             pointer.anchoredPosition = new Vector2(t * barHalfWidth, 0f);
             RecomputeError();
         }

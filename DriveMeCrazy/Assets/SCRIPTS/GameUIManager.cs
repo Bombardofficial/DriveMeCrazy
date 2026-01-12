@@ -3,6 +3,8 @@ using UnityEngine;
 using TMPro; // Required for TextMeshPro UI elements
 using System.Collections.Generic;
 using System.Collections;
+using Microsoft.Unity.VisualStudio.Editor;
+using UnityEngine.UI;
 
 public class GameUIManager : MonoBehaviour
 {
@@ -14,10 +16,14 @@ public class GameUIManager : MonoBehaviour
     [Tooltip("A list of UI Text elements for player scores. Assign these in the Inspector.")]
     [SerializeField] private List<TextMeshProUGUI> playerScoreTexts;
     [SerializeField] private List<TextMeshProUGUI> playerScoreNumbers;
+    [SerializeField] private List<UnityEngine.UI.Image> playerScoreBackgrounds;
 
-    [Tooltip("A list of UI Text elements for player scores. Assign these in the Inspector.")]
+    [Tooltip("A list of UI Text elements for Point Mulitplier. Assign these in the Inspector.")]
     [SerializeField] private TextMeshProUGUI pointMultiplierText;
     [SerializeField] private TextMeshProUGUI pointMultiplierNumber;
+
+    [Tooltip("A list of UI Text elements for player scores. Assign these in the Inspector.")]
+    [SerializeField] private CanvasGroup canvasGroup;
 
     [Header("Game Component References")]
     [Tooltip("Drag the GameObject with the Damageable script here.")]
@@ -66,6 +72,10 @@ public class GameUIManager : MonoBehaviour
         foreach (var scoreNumber in playerScoreNumbers)
         {
             scoreNumber.gameObject.SetActive(false);
+        }
+        foreach (var scoreBack in playerScoreBackgrounds)
+        {
+            scoreBack.gameObject.SetActive(false);
         }
 
         PlayerManager.OnDriverChanged += HandleDriverChange;
@@ -176,6 +186,8 @@ public class GameUIManager : MonoBehaviour
 
         // 1. hide everything first
         foreach (var tx in playerScoreTexts) tx.gameObject.SetActive(false);
+        foreach (var num in playerScoreNumbers) num.gameObject.SetActive(false);
+        foreach (var back in playerScoreTexts) back.gameObject.SetActive(false);
 
         // 2. (re)populate by permanent id ? slot index = PlayerNumber-1
         foreach (var p in passengers)
@@ -190,10 +202,11 @@ public class GameUIManager : MonoBehaviour
             tx.text = $"Player {p.PlayerNumber}{driverTag}";
             tx.color = PlayerColors.Get(p.PlayerNumber);
 
-            var numtx = playerScoreTexts[slot];
+            var numtx = playerScoreNumbers[slot];
             numtx.gameObject.SetActive(true);
-
             numtx.text = $"{p.Points} Points";
+
+            playerScoreBackgrounds[slot].gameObject.SetActive(true);
         }
     }
 

@@ -1010,7 +1010,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: fb294b688b53d1d4e96b82cdc05b9644, type: 2}
+      objectReference: {fileID: 2100000, guid: 6708e4fc089d2474db4e1fb18afcdf46, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2020,7 +2020,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 7439cfccdb760d248b4efb2eaa4e6152, type: 2}
+      objectReference: {fileID: 2100000, guid: 8a1ff0fca820a7045baf758231003424, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2909,8 +2909,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -35, y: -35}
-  m_SizeDelta: {x: 150, y: 100}
+  m_AnchoredPosition: {x: 0, y: -35}
+  m_SizeDelta: {x: 220, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &61977696
 MonoBehaviour:
@@ -3653,7 +3653,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: fb294b688b53d1d4e96b82cdc05b9644, type: 2}
+      objectReference: {fileID: 2100000, guid: 4cd021e49a3e2a6449d11cc422d0093b, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -5987,7 +5987,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: fb294b688b53d1d4e96b82cdc05b9644, type: 2}
+      objectReference: {fileID: 2100000, guid: 8a1ff0fca820a7045baf758231003424, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -6278,7 +6278,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 7a9dbff11d61faa4689b1c727870b873, type: 2}
+      objectReference: {fileID: 2100000, guid: 4cd021e49a3e2a6449d11cc422d0093b, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -8536,8 +8536,14 @@ MonoBehaviour:
   - {fileID: 1665253838}
   - {fileID: 410267544}
   - {fileID: 1573246165}
+  playerScoreBackgrounds:
+  - {fileID: 61977696}
+  - {fileID: 1835520004}
+  - {fileID: 853180857}
+  - {fileID: 1345448881}
   pointMultiplierText: {fileID: 289178515}
   pointMultiplierNumber: {fileID: 1193963253}
+  canvasGroup: {fileID: 249738596}
   carDamageable: {fileID: 2111085467219387266}
   newDriverText: {fileID: 0}
   announceDuration: 1.5
@@ -9045,7 +9051,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: fb294b688b53d1d4e96b82cdc05b9644, type: 2}
+      objectReference: {fileID: 2100000, guid: 8a1ff0fca820a7045baf758231003424, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -9238,7 +9244,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07db164e725d5834798a33c2386dadc8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  limitValue: 90
+  limitValue: 40
   unit: 1
   signIndex: 5
   targetTag: Driver
@@ -10969,7 +10975,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: fb294b688b53d1d4e96b82cdc05b9644, type: 2}
+      objectReference: {fileID: 2100000, guid: 7439cfccdb760d248b4efb2eaa4e6152, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -11511,7 +11517,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: fb294b688b53d1d4e96b82cdc05b9644, type: 2}
+      objectReference: {fileID: 2100000, guid: 6708e4fc089d2474db4e1fb18afcdf46, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -14126,6 +14132,12 @@ Mesh:
     offset: 0
     size: 0
     path: 
+--- !u!225 &249738596 stripped
+CanvasGroup:
+  m_CorrespondingSourceObject: {fileID: 3355256900189860390, guid: 186d835971b893b46993c4a081eb9ffc,
+    type: 3}
+  m_PrefabInstance: {fileID: 403242315}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &250729778
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -92271,6 +92283,21 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2238995259951975188, guid: 186d835971b893b46993c4a081eb9ffc,
+        type: 3}
+      propertyPath: vehicle
+      value: 
+      objectReference: {fileID: 2111085467219387259}
+    - target: {fileID: 4067221589807922761, guid: 186d835971b893b46993c4a081eb9ffc,
+        type: 3}
+      propertyPath: arrowUp
+      value: 
+      objectReference: {fileID: 962941741}
+    - target: {fileID: 4067221589807922761, guid: 186d835971b893b46993c4a081eb9ffc,
+        type: 3}
+      propertyPath: arrowDown
+      value: 
+      objectReference: {fileID: 1111560747}
     - target: {fileID: 5106340840622421132, guid: 186d835971b893b46993c4a081eb9ffc,
         type: 3}
       propertyPath: m_Name
@@ -92383,6 +92410,14 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 1552042773}
+    - targetCorrespondingSourceObject: {fileID: 4931817194649855164, guid: 186d835971b893b46993c4a081eb9ffc,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 962941739}
+    - targetCorrespondingSourceObject: {fileID: 4931817194649855164, guid: 186d835971b893b46993c4a081eb9ffc,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1111560745}
     - targetCorrespondingSourceObject: {fileID: 2836098011026636931, guid: 186d835971b893b46993c4a081eb9ffc,
         type: 3}
       insertIndex: -1
@@ -94304,7 +94339,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: fb294b688b53d1d4e96b82cdc05b9644, type: 2}
+      objectReference: {fileID: 2100000, guid: 6708e4fc089d2474db4e1fb18afcdf46, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -95452,7 +95487,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07db164e725d5834798a33c2386dadc8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  limitValue: 40
+  limitValue: 50
   unit: 1
   signIndex: 12
   targetTag: Driver
@@ -95642,7 +95677,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07db164e725d5834798a33c2386dadc8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  limitValue: 50
+  limitValue: 80
   unit: 1
   signIndex: 2
   targetTag: Driver
@@ -107015,7 +107050,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: fb294b688b53d1d4e96b82cdc05b9644, type: 2}
+      objectReference: {fileID: 2100000, guid: 4cd021e49a3e2a6449d11cc422d0093b, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -107328,7 +107363,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: fb294b688b53d1d4e96b82cdc05b9644, type: 2}
+      objectReference: {fileID: 2100000, guid: 4cd021e49a3e2a6449d11cc422d0093b, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -114522,7 +114557,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: fb294b688b53d1d4e96b82cdc05b9644, type: 2}
+      objectReference: {fileID: 2100000, guid: 4cd021e49a3e2a6449d11cc422d0093b, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -115224,7 +115259,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 7a9dbff11d61faa4689b1c727870b873, type: 2}
+      objectReference: {fileID: 2100000, guid: 8a1ff0fca820a7045baf758231003424, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -115625,7 +115660,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07db164e725d5834798a33c2386dadc8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  limitValue: 40
+  limitValue: 60
   unit: 1
   signIndex: 11
   targetTag: Driver
@@ -118724,7 +118759,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07db164e725d5834798a33c2386dadc8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  limitValue: 90
+  limitValue: 60
   unit: 1
   signIndex: 1
   targetTag: Driver
@@ -119925,7 +119960,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: fb294b688b53d1d4e96b82cdc05b9644, type: 2}
+      objectReference: {fileID: 2100000, guid: 4cd021e49a3e2a6449d11cc422d0093b, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -120420,7 +120455,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07db164e725d5834798a33c2386dadc8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  limitValue: 80
+  limitValue: 60
   unit: 1
   signIndex: 6
   targetTag: Driver
@@ -121701,7 +121736,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: fb294b688b53d1d4e96b82cdc05b9644, type: 2}
+      objectReference: {fileID: 2100000, guid: 8a1ff0fca820a7045baf758231003424, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -124772,7 +124807,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: fb294b688b53d1d4e96b82cdc05b9644, type: 2}
+      objectReference: {fileID: 2100000, guid: 4cd021e49a3e2a6449d11cc422d0093b, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -125483,7 +125518,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07db164e725d5834798a33c2386dadc8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  limitValue: 40
+  limitValue: 50
   unit: 1
   signIndex: 14
   targetTag: Driver
@@ -127122,8 +127157,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -35, y: -35}
-  m_SizeDelta: {x: 150, y: 100}
+  m_AnchoredPosition: {x: 0, y: -35}
+  m_SizeDelta: {x: 220, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &853180857
 MonoBehaviour:
@@ -128403,7 +128438,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07db164e725d5834798a33c2386dadc8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  limitValue: 40
+  limitValue: 60
   unit: 1
   signIndex: 17
   targetTag: Driver
@@ -134529,7 +134564,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07db164e725d5834798a33c2386dadc8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  limitValue: 90
+  limitValue: 70
   unit: 1
   signIndex: 18
   targetTag: Driver
@@ -142471,7 +142506,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: fb294b688b53d1d4e96b82cdc05b9644, type: 2}
+      objectReference: {fileID: 2100000, guid: 8a1ff0fca820a7045baf758231003424, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -142648,6 +142683,81 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 961662194}
   m_Mesh: {fileID: 783720081}
+--- !u!1 &962941738
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 962941739}
+  - component: {fileID: 962941740}
+  - component: {fileID: 962941741}
+  m_Layer: 5
+  m_Name: ArrowUp
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &962941739
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 962941738}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 403242321}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 130, y: 0}
+  m_SizeDelta: {x: 40, y: 50}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &962941740
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 962941738}
+  m_CullTransparentMesh: 1
+--- !u!114 &962941741
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 962941738}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.5882353}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: 317affdb2356460459f1fe6040ee67af, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
 --- !u!1 &963807766
 GameObject:
   m_ObjectHideFlags: 0
@@ -143835,7 +143945,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: fb294b688b53d1d4e96b82cdc05b9644, type: 2}
+      objectReference: {fileID: 2100000, guid: 4cd021e49a3e2a6449d11cc422d0093b, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -149611,6 +149721,81 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -2432090755550338912, guid: 6082e0aafd351ec48945013503a94fd6, type: 3}
+--- !u!1 &1111560744
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1111560745}
+  - component: {fileID: 1111560746}
+  - component: {fileID: 1111560747}
+  m_Layer: 5
+  m_Name: ArrowDown
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1111560745
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1111560744}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 403242321}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -130, y: 0}
+  m_SizeDelta: {x: 40, y: 50}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &1111560746
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1111560744}
+  m_CullTransparentMesh: 1
+--- !u!114 &1111560747
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1111560744}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.5882353}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: 1e97ebbdc6529924e90efbdf27ac27b4, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
 --- !u!1 &1111825930 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4015093430867299586, guid: b9dff2ffa5142b94d92fb0655c744eb0,
@@ -151150,7 +151335,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 4cd021e49a3e2a6449d11cc422d0093b, type: 2}
+      objectReference: {fileID: 2100000, guid: 7a9dbff11d61faa4689b1c727870b873, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -151792,7 +151977,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 7a9dbff11d61faa4689b1c727870b873, type: 2}
+      objectReference: {fileID: 2100000, guid: 8a1ff0fca820a7045baf758231003424, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -154255,7 +154440,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: fb294b688b53d1d4e96b82cdc05b9644, type: 2}
+      objectReference: {fileID: 2100000, guid: 8a1ff0fca820a7045baf758231003424, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -156709,7 +156894,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: fb294b688b53d1d4e96b82cdc05b9644, type: 2}
+      objectReference: {fileID: 2100000, guid: 6708e4fc089d2474db4e1fb18afcdf46, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -160369,7 +160554,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 4cd021e49a3e2a6449d11cc422d0093b, type: 2}
+      objectReference: {fileID: 2100000, guid: 7a9dbff11d61faa4689b1c727870b873, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -164072,8 +164257,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -35, y: -35}
-  m_SizeDelta: {x: 150, y: 100}
+  m_AnchoredPosition: {x: 0, y: -35}
+  m_SizeDelta: {x: 220, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1345448881
 MonoBehaviour:
@@ -167317,7 +167502,7 @@ MonoBehaviour:
   seatMgr: {fileID: 2111085467219387262}
   passengerPrefab: {fileID: 1174060323843766397, guid: 1affddbe7cc426c459549db87f7e1926,
     type: 3}
-  quickStartSingleDriver: 0
+  quickStartSingleDriver: 1
   driverPrefabOverride: {fileID: 5583802586414202164, guid: 5b262494d1427d94f89a6f1fca36eff5,
     type: 3}
   lobbyCountdownSeconds: 10
@@ -167332,7 +167517,7 @@ MonoBehaviour:
   lobbyAnimator: {fileID: 1386248077}
   lobbyAnimTrigger: LobbyStart
   fadeOutCanvas: {fileID: 1282004345}
-  gameplayHUD: {fileID: 0}
+  gameplayHUD: {fileID: 249738596}
   fadeOutDuration: 1.25
   hudFadeDuration: 2
   carenginesound: {fileID: 540116800}
@@ -167912,7 +168097,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07db164e725d5834798a33c2386dadc8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  limitValue: 40
+  limitValue: 50
   unit: 1
   signIndex: 22
   targetTag: Driver
@@ -173527,7 +173712,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: fb294b688b53d1d4e96b82cdc05b9644, type: 2}
+      objectReference: {fileID: 2100000, guid: 4cd021e49a3e2a6449d11cc422d0093b, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -175371,7 +175556,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07db164e725d5834798a33c2386dadc8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  limitValue: 40
+  limitValue: 50
   unit: 1
   signIndex: 21
   targetTag: Driver
@@ -175468,7 +175653,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 7439cfccdb760d248b4efb2eaa4e6152, type: 2}
+      objectReference: {fileID: 2100000, guid: fb294b688b53d1d4e96b82cdc05b9644, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -175947,7 +176132,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 420, y: 120}
+  m_SizeDelta: {x: 620, y: 120}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1552042774
 MonoBehaviour:
@@ -177825,7 +178010,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07db164e725d5834798a33c2386dadc8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  limitValue: 40
+  limitValue: 50
   unit: 1
   signIndex: 26
   targetTag: Driver
@@ -198345,7 +198530,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07db164e725d5834798a33c2386dadc8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  limitValue: 40
+  limitValue: 50
   unit: 1
   signIndex: 24
   targetTag: Driver
@@ -199697,7 +199882,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07db164e725d5834798a33c2386dadc8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  limitValue: 40
+  limitValue: 70
   unit: 1
   signIndex: 16
   targetTag: Driver
@@ -215800,7 +215985,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07db164e725d5834798a33c2386dadc8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  limitValue: 40
+  limitValue: 60
   unit: 1
   signIndex: 25
   targetTag: Driver
@@ -216774,7 +216959,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: fb294b688b53d1d4e96b82cdc05b9644, type: 2}
+      objectReference: {fileID: 2100000, guid: 4cd021e49a3e2a6449d11cc422d0093b, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -218224,7 +218409,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: fb294b688b53d1d4e96b82cdc05b9644, type: 2}
+      objectReference: {fileID: 2100000, guid: 8a1ff0fca820a7045baf758231003424, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -218283,7 +218468,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07db164e725d5834798a33c2386dadc8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  limitValue: 80
+  limitValue: 50
   unit: 1
   signIndex: 0
   targetTag: Driver
@@ -218889,7 +219074,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 7439cfccdb760d248b4efb2eaa4e6152, type: 2}
+      objectReference: {fileID: 2100000, guid: 8a1ff0fca820a7045baf758231003424, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -218935,8 +219120,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -35, y: -35}
-  m_SizeDelta: {x: 150, y: 100}
+  m_AnchoredPosition: {x: 0, y: -35}
+  m_SizeDelta: {x: 220, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1835520004
 MonoBehaviour:
@@ -220178,7 +220363,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 7a9dbff11d61faa4689b1c727870b873, type: 2}
+      objectReference: {fileID: 2100000, guid: 4cd021e49a3e2a6449d11cc422d0093b, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -220372,7 +220557,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: fb294b688b53d1d4e96b82cdc05b9644, type: 2}
+      objectReference: {fileID: 2100000, guid: 4cd021e49a3e2a6449d11cc422d0093b, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -221105,7 +221290,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: fb294b688b53d1d4e96b82cdc05b9644, type: 2}
+      objectReference: {fileID: 2100000, guid: 4cd021e49a3e2a6449d11cc422d0093b, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -221245,7 +221430,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: fb294b688b53d1d4e96b82cdc05b9644, type: 2}
+      objectReference: {fileID: 2100000, guid: 8a1ff0fca820a7045baf758231003424, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -221737,7 +221922,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07db164e725d5834798a33c2386dadc8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  limitValue: 40
+  limitValue: 60
   unit: 1
   signIndex: 3
   targetTag: Driver
@@ -222652,7 +222837,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: fb294b688b53d1d4e96b82cdc05b9644, type: 2}
+      objectReference: {fileID: 2100000, guid: 7439cfccdb760d248b4efb2eaa4e6152, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -235158,6 +235343,30 @@ Transform:
   - {fileID: 1016495235}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+--- !u!114 &1966253326 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4067221589807922761, guid: 186d835971b893b46993c4a081eb9ffc,
+    type: 3}
+  m_PrefabInstance: {fileID: 403242315}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e37aa541c77fcbd45b71c99677a042b2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1966253327 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3472253914198036340, guid: 186d835971b893b46993c4a081eb9ffc,
+    type: 3}
+  m_PrefabInstance: {fileID: 403242315}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cb160d8ebdb3e345a26b37a2bc17ca7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1966918285 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5872225823960323693, guid: b9dff2ffa5142b94d92fb0655c744eb0,
@@ -246103,7 +246312,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: fb294b688b53d1d4e96b82cdc05b9644, type: 2}
+      objectReference: {fileID: 2100000, guid: 4cd021e49a3e2a6449d11cc422d0093b, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -247272,7 +247481,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 7439cfccdb760d248b4efb2eaa4e6152, type: 2}
+      objectReference: {fileID: 2100000, guid: fb294b688b53d1d4e96b82cdc05b9644, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -247868,7 +248077,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: fb294b688b53d1d4e96b82cdc05b9644, type: 2}
+      objectReference: {fileID: 2100000, guid: 8a1ff0fca820a7045baf758231003424, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -252536,6 +252745,7 @@ GameObject:
   - component: {fileID: 2111085467219387259}
   - component: {fileID: 2111085467219387257}
   - component: {fileID: 2111085467219387269}
+  - component: {fileID: 2111085467219387270}
   m_Layer: 7
   m_Name: musclecar_modified
   m_TagString: Driver
@@ -253038,9 +253248,9 @@ MonoBehaviour:
   overshootBrakeDecel: 15
   overshootLockTime: 1.5
   overshootCornerAngle: 10
-  speedLimitUI: {fileID: 0}
+  speedLimitUI: {fileID: 1966253327}
   frictionCoefficient: 200
-  balanceUI: {fileID: 0}
+  balanceUI: {fileID: 1966253326}
   greenMinWidth: 0.25
   greenMaxWidth: 0.45
   balanceDriftSpeed: 0.4
@@ -253227,6 +253437,24 @@ MonoBehaviour:
   currentLane: 0
   targetLane: 0
   blendT: 1
+--- !u!114 &2111085467219387270
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1587454687855622604}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 332246886f7caf349bea5526bb2aa1c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  multiplicationZoneThresholds: 280000003c00000050000000
+  muliplicatorValues:
+  - 1
+  - 1.5
+  - 2
+  - 2.5
 --- !u!1001 &2182490052355805591
 PrefabInstance:
   m_ObjectHideFlags: 0
