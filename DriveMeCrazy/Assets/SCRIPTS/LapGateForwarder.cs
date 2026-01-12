@@ -13,7 +13,7 @@ public class LapGateForwarder : MonoBehaviour
 
     // Tiny helper so we don’t recompute each time
     private int carLayerMask;
-
+    public GameObject fireworks;
     void Awake()
     {
         if (!mgr)
@@ -33,6 +33,8 @@ public class LapGateForwarder : MonoBehaviour
         var col = GetComponent<Collider>();
         if (!col.isTrigger)
             col.isTrigger = true;
+
+        fireworks.SetActive(false);
     }
 
     void OnTriggerEnter(Collider other)
@@ -42,7 +44,7 @@ public class LapGateForwarder : MonoBehaviour
 
         if ((otherMask & carLayerMask) == 0)       // not the player car
             return;
-
+        fireworks.SetActive(true);
         // *** count the lap! ***
         mgr.LapGateCrossed();                      // ? one clean, type-safe call
     }

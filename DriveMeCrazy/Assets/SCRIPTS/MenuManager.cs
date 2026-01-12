@@ -33,6 +33,8 @@ public class MenuManager : MonoBehaviour
     public FlagFadeController flagFadeController;
     void Start()
     {
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
         // Initialize by showing the main menu
         ShowOnlyMenu(mainMenu);
         titles.SetActive(true);

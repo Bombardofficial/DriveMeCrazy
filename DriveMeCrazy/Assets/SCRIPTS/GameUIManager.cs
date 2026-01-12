@@ -3,8 +3,6 @@ using UnityEngine;
 using TMPro; // Required for TextMeshPro UI elements
 using System.Collections.Generic;
 using System.Collections;
-using Microsoft.Unity.VisualStudio.Editor;
-using UnityEngine.UI;
 
 public class GameUIManager : MonoBehaviour
 {
