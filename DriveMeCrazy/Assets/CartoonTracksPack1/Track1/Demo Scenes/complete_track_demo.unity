@@ -8934,7 +8934,7 @@ MonoBehaviour:
   pointMultiplierNumber: {fileID: 1193963253}
   canvasGroup: {fileID: 249738596}
   carDamageable: {fileID: 2111085467219387266}
-  newDriverText: {fileID: 0}
+  newDriverText: {fileID: 2070794364}
   announceDuration: 1.5
   shakeMagnitude: 40
   newDriverAudio: {fileID: 1082871212}
@@ -93444,6 +93444,38 @@ PrefabInstance:
       propertyPath: arrowDown
       value: 
       objectReference: {fileID: 1111560747}
+    - target: {fileID: 4671335633864239459, guid: 186d835971b893b46993c4a081eb9ffc,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4718869220494948121, guid: 186d835971b893b46993c4a081eb9ffc,
+        type: 3}
+      propertyPath: m_text
+      value: 'New Driver:
+
+        Player 2'
+      objectReference: {fileID: 0}
+    - target: {fileID: 4718869220494948121, guid: 186d835971b893b46993c4a081eb9ffc,
+        type: 3}
+      propertyPath: m_fontColor.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4718869220494948121, guid: 186d835971b893b46993c4a081eb9ffc,
+        type: 3}
+      propertyPath: m_fontColor.g
+      value: 0.81560916
+      objectReference: {fileID: 0}
+    - target: {fileID: 4718869220494948121, guid: 186d835971b893b46993c4a081eb9ffc,
+        type: 3}
+      propertyPath: m_fontColor.r
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4718869220494948121, guid: 186d835971b893b46993c4a081eb9ffc,
+        type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4278243583
+      objectReference: {fileID: 0}
     - target: {fileID: 5106340840622421132, guid: 186d835971b893b46993c4a081eb9ffc,
         type: 3}
       propertyPath: m_Name
@@ -93584,7 +93616,19 @@ PrefabInstance:
         type: 3}
       insertIndex: 0
       addedObject: {fileID: 1081461170}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4671335633864239459, guid: 186d835971b893b46993c4a081eb9ffc,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2070794368}
+    - targetCorrespondingSourceObject: {fileID: 4671335633864239459, guid: 186d835971b893b46993c4a081eb9ffc,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2070794367}
+    - targetCorrespondingSourceObject: {fileID: 4671335633864239459, guid: 186d835971b893b46993c4a081eb9ffc,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2070794366}
   m_SourcePrefab: {fileID: 100100000, guid: 186d835971b893b46993c4a081eb9ffc, type: 3}
 --- !u!224 &403242316 stripped
 RectTransform:
@@ -171075,7 +171119,7 @@ MonoBehaviour:
       m_SingletonActionBindings: []
       m_Flags: 0
     m_Reference: {fileID: 0}
-  m_PlayerPrefab: {fileID: 5583802586414202164, guid: 5b262494d1427d94f89a6f1fca36eff5,
+  m_PlayerPrefab: {fileID: 8130422270257158639, guid: bda46582b7d5dd142879b9953dfbee16,
     type: 3}
   m_SplitScreen: 0
   m_MaintainAspectRatioInSplitScreen: 0
@@ -250887,6 +250931,159 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 2067938146}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &2070794362 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4671335633864239459, guid: 186d835971b893b46993c4a081eb9ffc,
+    type: 3}
+  m_PrefabInstance: {fileID: 403242315}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2070794364 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4718869220494948121, guid: 186d835971b893b46993c4a081eb9ffc,
+    type: 3}
+  m_PrefabInstance: {fileID: 403242315}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2070794362}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!82 &2070794366
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2070794362}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_PlayOnAwake: 1
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+--- !u!225 &2070794367
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2070794362}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
+--- !u!114 &2070794368
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2070794362}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c8b6f4460c9729429f15c77d493502c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bannerText: {fileID: 2070794364}
+  canvasGroup: {fileID: 2070794367}
+  line1: 'New Driver:'
+  line2Prefix: 'Player '
+  fadeInDuration: 0.18
+  popDuration: 0.22
+  holdDuration: 1.4
+  fadeOutDuration: 0.35
+  startScale: 0.85
+  overshootScale: 1.12
+  endScale: 1
+  sfxSource: {fileID: 2070794366}
+  newDriverClip: {fileID: 8300000, guid: 86bad6b6e391b8d45a0243bcd3ab8790, type: 3}
+  sfxVolume: 1
+  tintByDriverColor: 1
 --- !u!4 &2071160800 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8018039438428509861, guid: 146a70e72cd9b154ab821e36a14b0bfc,
