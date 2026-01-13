@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,6 +12,10 @@ public class OverloadUIController : MonoBehaviour
     public Image timerFill;
     public Color successColor;
     public Color failureColor;
+    public TMP_Text successMessage;
+    public TMP_Text failureMessage;
+    public TMP_Text overheatMessage;
+    public TMP_Text holdMessage;
 
     private CanvasGroup overloadUICanvas;
     private Dictionary<int, OverloadUIButton> uiButtons = new();
@@ -42,6 +47,9 @@ public class OverloadUIController : MonoBehaviour
         
         timerFill.color = Color.white;
         timerFill.fillAmount = 1f;
+
+        overheatMessage.gameObject.SetActive(true);
+        holdMessage.gameObject.SetActive(true);
     }
 
     public void UpdateTimer(float ratio)
@@ -68,6 +76,7 @@ public class OverloadUIController : MonoBehaviour
     public void HideImmediate()
     {
         overloadUICanvas.alpha = 0f;
+        Clear();
         gameObject.SetActive(false);
     }
 
@@ -77,6 +86,10 @@ public class OverloadUIController : MonoBehaviour
         {
             button.PlaySuccessFlash();
         }
+
+        overheatMessage.gameObject.SetActive(false);
+        holdMessage.gameObject.SetActive(false);
+        successMessage.gameObject.SetActive(true);
 
         timerFill.color = successColor;
 
@@ -90,6 +103,10 @@ public class OverloadUIController : MonoBehaviour
             button.PlayFailureFlash();
         }
 
+        overheatMessage.gameObject.SetActive(false);
+        holdMessage.gameObject.SetActive(false);
+        failureMessage.gameObject.SetActive(true);
+
         timerFill.color = failureColor;
 
         //pointsPopup.Show($"-{failurePoints}", failureColor);
@@ -101,6 +118,11 @@ public class OverloadUIController : MonoBehaviour
             Destroy(child.gameObject);
 
         uiButtons.Clear();
+
+        successMessage.gameObject.SetActive(false);
+        failureMessage.gameObject.SetActive(false);
+        overheatMessage.gameObject.SetActive(false);
+        holdMessage.gameObject.SetActive(false);
     }
 }
 

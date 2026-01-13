@@ -6,10 +6,13 @@ public class OverloadTrigger : MonoBehaviour
 {
     [Header("Debug")]
     [SerializeField] private bool oneShot = true;
+    [SerializeField] public int _maxOverloads = 3;
 
-    private bool _triggered;
+    private bool _triggered = false;
 
     private EngineOverloadManager _overloadManager;
+
+    private static int _overloadCount = 0;
 
     void Awake()
     {
@@ -18,7 +21,12 @@ public class OverloadTrigger : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (_triggered && oneShot)
+        if (!_triggered && oneShot)
+            return;
+        
+        _triggered = true;
+
+        if (Random.Range(0f, 1f) > 0.5 ||_overloadCount >= _maxOverloads)
             return;
 
         Debug.Log($"[OverloadTrigger] Hit with {other.gameObject}");
@@ -36,7 +44,8 @@ public class OverloadTrigger : MonoBehaviour
 
         _overloadManager.TriggerOverload(passengers);
 
-        _triggered = true;
+        ++_overloadCount;
+
         gameObject.SetActive(false);
     }
 

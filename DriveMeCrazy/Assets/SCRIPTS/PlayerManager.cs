@@ -18,12 +18,12 @@ public class PlayerManager : MonoBehaviour
     [Tooltip("Index 0 => Player 1, Index 1 => Player 2, etc.")]
     [SerializeField]
     private Color[] playerColors = new Color[4]
-{
+    {
         new Color(0.2f, 1f, 0.2f),   // P1 green-ish
         new Color(1f, 0.9f, 0.2f),   // P2 yellow-ish
         new Color(0.2f, 0.8f, 1f),   // P3 cyan-ish
         new Color(1f, 0.2f, 0.8f)    // P4 magenta-ish
-};
+    };
 
     [Tooltip("Optional: force a shader property if your material doesn't use _BaseColor/_Color.")]
     [SerializeField] private string forcedColorProperty = "";
@@ -113,6 +113,12 @@ public class PlayerManager : MonoBehaviour
     public void SwapDriverSabotage()
     {
         var newDriver = _lastSabotage;
+        if (newDriver == null)
+            if (_passengers.Count <= 1)
+                newDriver = CurrentDriver;
+            else
+                newDriver = _passengers[UnityEngine.Random.Range(1, _passengers.Count - 1)];
+        
         if (newDriver == CurrentDriver) return;
         int nextDriverIdx = _passengers.IndexOf(newDriver);
         int oldDriverIdx = _passengers.IndexOf(CurrentDriver);
