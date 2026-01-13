@@ -14,6 +14,23 @@ public class PlayerManager : MonoBehaviour
     int _nextPlayerNumber = 1;
     public Passenger CurrentDriver { get; private set; }
 
+    [Header("Player Colors (by PlayerNumber)")]
+    [Tooltip("Index 0 => Player 1, Index 1 => Player 2, etc.")]
+    [SerializeField]
+    private Color[] playerColors = new Color[4]
+{
+        new Color(0.2f, 1f, 0.2f),   // P1 green-ish
+        new Color(1f, 0.9f, 0.2f),   // P2 yellow-ish
+        new Color(0.2f, 0.8f, 1f),   // P3 cyan-ish
+        new Color(1f, 0.2f, 0.8f)    // P4 magenta-ish
+};
+
+    [Tooltip("Optional: force a shader property if your material doesn't use _BaseColor/_Color.")]
+    [SerializeField] private string forcedColorProperty = "";
+    public string ForcedColorProperty => forcedColorProperty;
+
+
+
     [Tooltip("Points awarded when you call AwardDriver().")]
     public int pointIncrement = 100;
     float pointMultiplier = 1f;
@@ -39,6 +56,7 @@ public class PlayerManager : MonoBehaviour
     {
         if (!p || _passengers.Contains(p)) return;
         p.PlayerNumber = _nextPlayerNumber++;
+        ApplyColorForPassenger(p);
         /* decide where in the list he goes -------------------- */
         seatIdx = (seatIdx < 0) ? _passengers.Count :          // append
                   Mathf.Clamp(seatIdx, 0, _passengers.Count);  // insert
@@ -148,4 +166,39 @@ public class PlayerManager : MonoBehaviour
         CurrentDriver = newDriver;
         OnDriverChanged?.Invoke(old, newDriver);
     }
+
+    public Color GetColorForPlayerNumber(int playerNumber)
+    {
+        int idx = playerNumber - 1;
+        if (playerColors == null || idx < 0 || idx >= playerColors.Length)
+            return Color.white;
+
+        return playerColors[idx];
+    }
+
+    void ApplyColorForPassenger(Passenger p)
+    {
+        if (!p) return;
+
+        Color c = GetColorForPlayerNumber(p.PlayerNumber);
+        string prop = string.IsNullOrEmpty(forcedColorProperty) ? null : forcedColorProperty;
+
+        p.ApplyPlayerColor(c, prop);
+    }
+
+    [ContextMenu("Reapply Player Colors")]
+    public void ReapplyPlayerColors()
+    {
+        foreach (var p in _passengers)
+            ApplyColorForPassenger(p);
+    }
+
+#if UNITY_EDITOR
+    void OnValidate()
+    {
+        if (playerColors == null) playerColors = new Color[4];
+        if (playerColors.Length != 4) System.Array.Resize(ref playerColors, 4);
+    }
+#endif
+
 }

@@ -6,6 +6,7 @@ using TMPro;
 using System.Collections;
 using System.Linq;
 using ArcadeVP;
+using System;
 
 public class PlayerJoinManager : MonoBehaviour
 {
@@ -21,6 +22,23 @@ public class PlayerJoinManager : MonoBehaviour
     [SerializeField] GameObject[] playerDummies; // 4
     [SerializeField] ArcadeVP.ArcadeVehicleController car;
     [SerializeField] CarSeatManager seatMgr;
+
+    [Header("Lobby Player Colors (Dummies)")]
+    [SerializeField] bool tintLobbyDummies = true;
+
+    [Tooltip("Optional override. If empty, uses PlayerManager.ForcedColorProperty. If that is also empty, auto-tries _BaseColor/_Color/_TintColor.")]
+    [SerializeField] string lobbyForcedColorProperty = "";
+
+    [Tooltip("Tried if no forced property is provided.")]
+    [SerializeField] string[] lobbyColorPropertyCandidates = new[] { "_BaseColor", "_Color", "_TintColor" };
+
+    [Tooltip("If true, seat icon color will use the same per-player color instead of takenCol.")]
+    [SerializeField] bool tintSeatIconsWithPlayerColors = true;
+
+    // --- runtime caches for dummies ---
+    Renderer[][] _dummyRenderers;
+    MaterialPropertyBlock[] _dummyMpbs;
+    int[] _dummyColorPropIds; // -1 = not found
 
     [Header("Prefabs & Options")]
     [SerializeField] GameObject passengerPrefab;
@@ -129,6 +147,8 @@ public class PlayerJoinManager : MonoBehaviour
         startPos = winnerText.rectTransform.anchoredPosition;
 
         HideControllsImmediate();
+        CacheLobbyDummyTintData();
+        ResetLobbyDummies();
         PrepareLobbyState();
     }
 
@@ -184,7 +204,7 @@ public class PlayerJoinManager : MonoBehaviour
             if (countdownGametext) countdownGametext.gameObject.SetActive(false);
             if (countdownText) countdownText.gameObject.SetActive(false);
             if (lobbyPanel) lobbyPanel.SetActive(false);
-            foreach (var d in playerDummies) if (d) d.SetActive(false);
+            ResetLobbyDummies();
 
             if (fadeOutCanvas) fadeOutCanvas.alpha = 0f;
             if (resultsPanel) resultsPanel.alpha = 0f;
@@ -308,7 +328,15 @@ public class PlayerJoinManager : MonoBehaviour
             seatIcons[i].gameObject.SetActive(exists);
             if (!exists) continue;
 
-            seatIcons[i].color = taken ? takenCol : freeCol;
+            if (taken && tintSeatIconsWithPlayerColors && PlayerManager.Instance != null)
+            {
+                // In lobby, join order maps to PlayerNumber => i+1
+                seatIcons[i].color = PlayerManager.Instance.GetColorForPlayerNumber(i + 1);
+            }
+            else
+            {
+                seatIcons[i].color = taken ? takenCol : freeCol;
+            }
             seatTexts[i].text = taken ? $"PLAYER {i + 1}" : "PRESS GAS TO JOIN";
         }
 
@@ -368,7 +396,16 @@ public class PlayerJoinManager : MonoBehaviour
         }
 
         if (seatIdx < playerDummies.Length && playerDummies[seatIdx])
+        {
             playerDummies[seatIdx].SetActive(true);
+
+            // player identity = Passenger.PlayerNumber (NOT seat)
+            if (tintLobbyDummies && passenger != null && PlayerManager.Instance != null)
+            {
+                Color c = PlayerManager.Instance.GetColorForPlayerNumber(passenger.PlayerNumber);
+                ApplyColorToLobbyDummy(seatIdx, c);
+            }
+        }
 
         joinCount++;
         RefreshUI();
@@ -531,7 +568,7 @@ public class PlayerJoinManager : MonoBehaviour
             float a = t / dur;
             winnerText.alpha = a;
 
-            Vector2 shake = Random.insideUnitCircle * shakeMag * (1f - a * .7f);
+            Vector2 shake = UnityEngine.Random.insideUnitCircle * shakeMag * (1f - a * .7f);
             winnerText.rectTransform.anchoredPosition = startPos + shake;
             yield return null;
         }
@@ -543,6 +580,117 @@ public class PlayerJoinManager : MonoBehaviour
         StartCoroutine(AutoReturnCountdown(10));
 
         // Finished � now idling on results screen
+    }
+    void CacheLobbyDummyTintData()
+    {
+        int n = (playerDummies != null) ? playerDummies.Length : 0;
+        if (n <= 0) return;
+
+        _dummyRenderers = new Renderer[n][];
+        _dummyMpbs = new MaterialPropertyBlock[n];
+        _dummyColorPropIds = new int[n];
+
+        for (int i = 0; i < n; i++)
+        {
+            _dummyColorPropIds[i] = -1;
+
+            if (!playerDummies[i])
+            {
+                _dummyRenderers[i] = Array.Empty<Renderer>();
+                continue;
+            }
+
+            _dummyRenderers[i] = playerDummies[i].GetComponentsInChildren<Renderer>(true);
+            _dummyMpbs[i] = new MaterialPropertyBlock();
+            _dummyColorPropIds[i] = ResolveColorPropertyForRenderers(_dummyRenderers[i]);
+        }
+    }
+
+    void ResetLobbyDummies()
+    {
+        if (playerDummies == null) return;
+
+        for (int i = 0; i < playerDummies.Length; i++)
+        {
+            if (!playerDummies[i]) continue;
+
+            // Reset to white so lobby starts clean
+            if (tintLobbyDummies) ApplyColorToLobbyDummy(i, Color.white);
+            playerDummies[i].SetActive(false);
+        }
+    }
+
+    void ApplyColorToLobbyDummy(int seatIdx, Color c)
+    {
+        if (!tintLobbyDummies) return;
+        if (_dummyRenderers == null || _dummyMpbs == null || _dummyColorPropIds == null) return;
+        if (seatIdx < 0 || seatIdx >= _dummyRenderers.Length) return;
+
+        var rends = _dummyRenderers[seatIdx];
+        if (rends == null || rends.Length == 0) return;
+
+        int propId = _dummyColorPropIds[seatIdx];
+        if (propId == -1) return;
+
+        var mpb = _dummyMpbs[seatIdx] ?? (_dummyMpbs[seatIdx] = new MaterialPropertyBlock());
+
+        for (int i = 0; i < rends.Length; i++)
+        {
+            var r = rends[i];
+            if (!r) continue;
+
+            r.GetPropertyBlock(mpb);
+            mpb.SetColor(propId, c);
+            r.SetPropertyBlock(mpb);
+        }
+    }
+
+    int ResolveColorPropertyForRenderers(Renderer[] renderers)
+    {
+        if (renderers == null || renderers.Length == 0) return -1;
+
+        // 1) prefer explicit override on PlayerJoinManager
+        string forced = lobbyForcedColorProperty;
+
+        // 2) if empty, use PlayerManager's forced property (same as gameplay)
+        if (string.IsNullOrEmpty(forced) && PlayerManager.Instance != null)
+            forced = PlayerManager.Instance.ForcedColorProperty;
+
+        if (!string.IsNullOrEmpty(forced))
+        {
+            int id = Shader.PropertyToID(forced);
+            if (AnyHasProperty(renderers, id)) return id;
+        }
+
+        // 3) try common candidates
+        if (lobbyColorPropertyCandidates != null)
+        {
+            for (int i = 0; i < lobbyColorPropertyCandidates.Length; i++)
+            {
+                string name = lobbyColorPropertyCandidates[i];
+                if (string.IsNullOrEmpty(name)) continue;
+
+                int id = Shader.PropertyToID(name);
+                if (AnyHasProperty(renderers, id)) return id;
+            }
+        }
+
+        Debug.LogWarning("[PlayerJoinManager] Lobby dummy shader has no _BaseColor/_Color/_TintColor. Set lobbyForcedColorProperty (or PlayerManager forcedColorProperty).");
+        return -1;
+    }
+
+    bool AnyHasProperty(Renderer[] renderers, int propId)
+    {
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            var r = renderers[i];
+            if (!r) continue;
+
+            var mat = r.sharedMaterial;
+            if (mat && mat.HasProperty(propId))
+                return true;
+        }
+        return false;
     }
 
     IEnumerator FadeAndLoad(string scene)
