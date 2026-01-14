@@ -186,8 +186,6 @@ GameObject:
   m_Component:
   - component: {fileID: 6902726954672174040}
   - component: {fileID: 593556253527251213}
-  - component: {fileID: 664103913568935280}
-  - component: {fileID: 5443246043617255266}
   - component: {fileID: 6136213808937722042}
   m_Layer: 5
   m_Name: SpeedLimit
@@ -230,67 +228,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1547536258711322999}
   m_CullTransparentMesh: 1
---- !u!114 &664103913568935280
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1547536258711322999}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3cb160d8ebdb3e345a26b37a2bc17ca7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  signObjects:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 4028527546233625551}
-  sfx: {fileID: 0}
-  preCueBeep: {fileID: 8300000, guid: 6eb8c54eaff424f45a7e6523ca358c12, type: 3}
-  preCueScale: 1.15
---- !u!114 &5443246043617255266
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1547536258711322999}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e37aa541c77fcbd45b71c99677a042b2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  bar: {fileID: 780212822165090109}
-  greenZone: {fileID: 6772562100426322205}
-  pointer: {fileID: 7632747835079514832}
-  arrowUp: {fileID: 6722824955955494257}
-  arrowDown: {fileID: 1946830961869250057}
-  outcomeText: {fileID: 0}
-  perfectText: PERFECT!
-  passText: PASS
-  failText: FAIL
-  oscillationAmplitude: 0.3
-  oscillationFreq: 0.45
-  shrinkRate: 0.08
-  minZoneWidthPx: 40
-  jiggleEnabled: 1
-  jiggleAmplitudePx: 2.86
-  jiggleFreqHz: 3.56
-  jiggleRotDegrees: 0.75
-  fadeInSpeed: 12
-  fadeOutSpeed: 12
-  sfx: {fileID: 0}
-  readySfx: {fileID: 8300000, guid: f50c59438fb48e943b006628613ea233, type: 3}
-  passSfx: {fileID: 8300000, guid: f50c59438fb48e943b006628613ea233, type: 3}
-  perfectSfx: {fileID: 8300000, guid: f50c59438fb48e943b006628613ea233, type: 3}
-  failSfx: {fileID: 8300000, guid: edb00d7ecce89a743ada6bd1694204be, type: 3}
-  readyScale: 1.08
-  readyPulseTime: 0.18
-  outcomePulseScale: 1.1
-  outcomePulseTime: 0.22
 --- !u!225 &6136213808937722042
 CanvasGroup:
   m_ObjectHideFlags: 0

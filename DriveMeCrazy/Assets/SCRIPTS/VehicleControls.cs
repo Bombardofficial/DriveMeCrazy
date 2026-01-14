@@ -345,6 +345,33 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""SkipTutorial"",
+                    ""type"": ""Button"",
+                    ""id"": ""49e9d46e-3227-45b4-84fd-cd07713a7f17"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""BackTutorial"",
+                    ""type"": ""Button"",
+                    ""id"": ""12e1e80b-72ef-4abb-8902-5c4dfe5431c4"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""NextTutorial"",
+                    ""type"": ""Button"",
+                    ""id"": ""35c0aa9a-6543-45ee-a202-ee04afa5974b"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -378,6 +405,39 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": ""Gamepad"",
                     ""action"": ""Join"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""8d76a30c-10bb-49f6-b0b6-3f60800a881f"",
+                    ""path"": ""<Gamepad>/buttonWest"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""SkipTutorial"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""8956fb3a-7554-44ff-800d-365369abc96b"",
+                    ""path"": ""<Gamepad>/buttonEast"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""BackTutorial"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b41b8162-c689-42ce-a8c4-e318d26bc7f3"",
+                    ""path"": ""<Gamepad>/buttonSouth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""NextTutorial"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -572,6 +632,9 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
         // Lobby
         m_Lobby = asset.FindActionMap("Lobby", throwIfNotFound: true);
         m_Lobby_Join = m_Lobby.FindAction("Join", throwIfNotFound: true);
+        m_Lobby_SkipTutorial = m_Lobby.FindAction("SkipTutorial", throwIfNotFound: true);
+        m_Lobby_BackTutorial = m_Lobby.FindAction("BackTutorial", throwIfNotFound: true);
+        m_Lobby_NextTutorial = m_Lobby.FindAction("NextTutorial", throwIfNotFound: true);
         // CoopTask
         m_CoopTask = asset.FindActionMap("CoopTask", throwIfNotFound: true);
         m_CoopTask_Task = m_CoopTask.FindAction("Task", throwIfNotFound: true);
@@ -769,11 +832,17 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
     private readonly InputActionMap m_Lobby;
     private List<ILobbyActions> m_LobbyActionsCallbackInterfaces = new List<ILobbyActions>();
     private readonly InputAction m_Lobby_Join;
+    private readonly InputAction m_Lobby_SkipTutorial;
+    private readonly InputAction m_Lobby_BackTutorial;
+    private readonly InputAction m_Lobby_NextTutorial;
     public struct LobbyActions
     {
         private @VehicleControls m_Wrapper;
         public LobbyActions(@VehicleControls wrapper) { m_Wrapper = wrapper; }
         public InputAction @Join => m_Wrapper.m_Lobby_Join;
+        public InputAction @SkipTutorial => m_Wrapper.m_Lobby_SkipTutorial;
+        public InputAction @BackTutorial => m_Wrapper.m_Lobby_BackTutorial;
+        public InputAction @NextTutorial => m_Wrapper.m_Lobby_NextTutorial;
         public InputActionMap Get() { return m_Wrapper.m_Lobby; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -786,6 +855,15 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
             @Join.started += instance.OnJoin;
             @Join.performed += instance.OnJoin;
             @Join.canceled += instance.OnJoin;
+            @SkipTutorial.started += instance.OnSkipTutorial;
+            @SkipTutorial.performed += instance.OnSkipTutorial;
+            @SkipTutorial.canceled += instance.OnSkipTutorial;
+            @BackTutorial.started += instance.OnBackTutorial;
+            @BackTutorial.performed += instance.OnBackTutorial;
+            @BackTutorial.canceled += instance.OnBackTutorial;
+            @NextTutorial.started += instance.OnNextTutorial;
+            @NextTutorial.performed += instance.OnNextTutorial;
+            @NextTutorial.canceled += instance.OnNextTutorial;
         }
 
         private void UnregisterCallbacks(ILobbyActions instance)
@@ -793,6 +871,15 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
             @Join.started -= instance.OnJoin;
             @Join.performed -= instance.OnJoin;
             @Join.canceled -= instance.OnJoin;
+            @SkipTutorial.started -= instance.OnSkipTutorial;
+            @SkipTutorial.performed -= instance.OnSkipTutorial;
+            @SkipTutorial.canceled -= instance.OnSkipTutorial;
+            @BackTutorial.started -= instance.OnBackTutorial;
+            @BackTutorial.performed -= instance.OnBackTutorial;
+            @BackTutorial.canceled -= instance.OnBackTutorial;
+            @NextTutorial.started -= instance.OnNextTutorial;
+            @NextTutorial.performed -= instance.OnNextTutorial;
+            @NextTutorial.canceled -= instance.OnNextTutorial;
         }
 
         public void RemoveCallbacks(ILobbyActions instance)
@@ -890,6 +977,9 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
     public interface ILobbyActions
     {
         void OnJoin(InputAction.CallbackContext context);
+        void OnSkipTutorial(InputAction.CallbackContext context);
+        void OnBackTutorial(InputAction.CallbackContext context);
+        void OnNextTutorial(InputAction.CallbackContext context);
     }
     public interface ICoopTaskActions
     {
