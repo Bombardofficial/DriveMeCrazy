@@ -16,6 +16,18 @@ public class ObstacleType
 [RequireComponent(typeof(SplineContainer))]
 public class ObstacleManager : MonoBehaviour
 {
+    [System.Serializable]
+    public struct ObstacleMeta
+    {
+        public GameObject go;
+        public float t;         // 0..1 position on spline
+        public int lane;        // lane index (for debug / future)
+        public float spawnTime; // Time.time at spawn
+    }
+
+    public IReadOnlyList<ObstacleMeta> ActiveMetas => _activeMeta;
+    readonly List<ObstacleMeta> _activeMeta = new();
+
     [Header("Debug")]
     public bool debugLogs = false;
     public float debugLogCooldown = 1.0f;
@@ -117,6 +129,28 @@ public class ObstacleManager : MonoBehaviour
     public float guardRadiusMeters = 9f;
     public int maxGuardsNearOneCollectible = 1;
 
+    // ===================== NEW: EXPIRY / CLEANUP (THIS FIXES YOUR “NO SPAWN AFTER HALF” BUG) =====================
+    [Header("Fairness • track-relative expiry (OBSTACLES)")]
+    [Tooltip("Meters behind the player at which an obstacle is despawned (returned to pool).")]
+    public float despawnBehindMeters = 14f;
+
+    [Tooltip("While the obstacle is within this many meters AHEAD of the player, never expire it due to age.")]
+    public float protectAheadMeters = 60f;
+
+    [Tooltip("Hard cleanup: if older than this AND far away (ahead or behind), despawn (no skill event).")]
+    public float hardMaxLifetimeSeconds = 35f;
+
+    [Header("Density safety (prevents first-corner overfill)")]
+    [Tooltip("Clamps effective maxActive to what fits INSIDE the spawn window. Strongly recommended ON.")]
+    public bool clampMaxActiveToSpawnWindow = true;
+
+    [Tooltip("0.65 -> ~65% of the theoretical max packing in the spawn window.")]
+    [Range(0.1f, 1f)] public float windowCapMultiplier = 0.65f;
+
+    [Tooltip("Minimum effective cap (so it never becomes too empty).")]
+    [Min(1)] public int minWindowCap = 4;
+    // ============================================================================================================
+
     readonly Dictionary<int, float> _lastGuardTimeByCollectibleId = new();
 
     float[] _liveWeights;
@@ -124,31 +158,13 @@ public class ObstacleManager : MonoBehaviour
     float _curSeparation;
     float _curMaxActive;
 
-    // ---------- PATCH #1: prune active list so _active.Count is truthful ----------
-    void PruneActiveList()
+    static readonly List<GameObject> _tmpActivePrune = new();
+
+    bool IsSplineLooped()
     {
-        for (int i = _active.Count - 1; i >= 0; --i)
-        {
-            var g = _active[i];
-            if (!g || !g.activeInHierarchy)
-                _active.RemoveAt(i);
-        }
-    }
-
-    float PickSpawnT(float len)
-    {
-        if (!player || len < 0.1f) return UnityEngine.Random.value;
-
-        float tCar = Mathf.Repeat(player.TrackTNormalized, 1f);
-
-        float minA = Mathf.Max(playerSafeAheadMeters + 0.5f, spawnAheadMinMeters);
-        float maxA = Mathf.Max(minA + 1.0f, spawnAheadMaxMeters);
-
-        float dtMin = Mathf.Clamp(minA / len, 0.01f, 0.49f);
-        float dtMax = Mathf.Clamp(maxA / len, 0.02f, 0.49f);
-
-        float dt = UnityEngine.Random.Range(dtMin, dtMax);
-        return Mathf.Repeat(tCar + dt, 1f);
+        // Unity Splines: Spline.Closed == loop track
+        if (!_spline || _spline.Spline == null) return true; // safe default: treat as loop
+        return _spline.Spline.Closed;
     }
 
     float ArcLen()
@@ -171,19 +187,200 @@ public class ObstacleManager : MonoBehaviour
         return (_spline && _spline.Spline != null && _spline.Spline.GetLength() >= 0.1f);
     }
 
+    // ---------- KEEP LISTS CONSISTENT ----------
+    void PruneLists()
+    {
+        // meta -> also remove from _active if dead/inactive
+        for (int i = _activeMeta.Count - 1; i >= 0; --i)
+        {
+            var go = _activeMeta[i].go;
+            if (!go || !go.activeInHierarchy)
+            {
+                if (go) _active.Remove(go);
+                _activeMeta.RemoveAt(i);
+            }
+        }
+
+        // active (belt & suspenders)
+        for (int i = _active.Count - 1; i >= 0; --i)
+        {
+            var g = _active[i];
+            if (!g || !g.activeInHierarchy)
+                _active.RemoveAt(i);
+        }
+    }
+
+    void DeactivateAndUntrack(GameObject go)
+    {
+        if (!go) return;
+
+        go.SetActive(false);
+        _active.Remove(go);
+
+        for (int i = _activeMeta.Count - 1; i >= 0; --i)
+            if (_activeMeta[i].go == go) { _activeMeta.RemoveAt(i); break; }
+
+        if (go.TryGetComponent(out Obstacle obs))
+            obs.ResetState();
+    }
+
+    void GetAheadBehindMeters(float playerT, float itemT, float len, bool looped, out float aheadMeters, out float behindMeters, out bool isBehind)
+    {
+        aheadMeters = 999999f;
+        behindMeters = 999999f;
+        isBehind = false;
+
+        if (len < 0.1f) return;
+
+        if (looped)
+        {
+            float dtForward = Mathf.Repeat(itemT - playerT, 1f); // 0..1 forward distance from player to item
+            isBehind = (dtForward > 0.5f);
+
+            if (isBehind)
+                behindMeters = (1f - dtForward) * len;
+            else
+                aheadMeters = dtForward * len;
+        }
+        else
+        {
+            // Open track: no wrap. If itemT < playerT -> behind.
+            float d = itemT - playerT;
+            if (d < 0f)
+            {
+                isBehind = true;
+                behindMeters = (-d) * len;
+            }
+            else
+            {
+                aheadMeters = d * len;
+            }
+        }
+    }
+
+    int ComputeWindowCap(float len)
+    {
+        float windowLen = Mathf.Max(1f, spawnAheadMaxMeters - spawnAheadMinMeters);
+        int lanes = (laneVis && laneVis.laneOffsets != null && laneVis.laneOffsets.Length > 0) ? laneVis.laneOffsets.Length : 1;
+
+        float sep = Mathf.Max(2f, minSeparation);
+        int perLane = Mathf.Max(1, Mathf.FloorToInt(windowLen / sep));
+
+        int theoretical = perLane * lanes;
+        int capped = Mathf.RoundToInt(theoretical * windowCapMultiplier);
+
+        return Mathf.Max(minWindowCap, capped);
+    }
+
+    void ExpireObstacles(float len)
+    {
+        if (!player) return;
+        if (!EnsureSplineRef()) return;
+
+        bool looped = IsSplineLooped();
+        float pT = looped ? Mathf.Repeat(player.TrackTNormalized, 1f) : Mathf.Clamp01(player.TrackTNormalized);
+
+        for (int i = _activeMeta.Count - 1; i >= 0; --i)
+        {
+            var m = _activeMeta[i];
+
+            if (!m.go || !m.go.activeInHierarchy)
+            {
+                if (m.go) _active.Remove(m.go);
+                _activeMeta.RemoveAt(i);
+                continue;
+            }
+
+            float age = Time.time - m.spawnTime;
+
+            GetAheadBehindMeters(pT, m.t, len, looped, out float ahead, out float behind, out bool isBehind);
+
+            bool withinProtectAhead = (!isBehind && ahead <= protectAheadMeters);
+
+            // (1) Main rule: despawn if clearly behind
+            if (isBehind && behind >= despawnBehindMeters)
+            {
+                DeactivateAndUntrack(m.go);
+                continue;
+            }
+
+            // (2) Hard cleanup: very old AND far (don’t count as hit/miss)
+            if (hardMaxLifetimeSeconds > 0f && age > hardMaxLifetimeSeconds && !withinProtectAhead)
+            {
+                bool farAhead = (!isBehind && ahead > protectAheadMeters);
+                bool farBehind = (isBehind && behind > despawnBehindMeters);
+
+                if (farAhead || farBehind)
+                {
+                    DeactivateAndUntrack(m.go);
+                    continue;
+                }
+            }
+        }
+    }
+
+    float PickSpawnT(float len)
+    {
+        if (!player || len < 0.1f) return UnityEngine.Random.value;
+
+        bool looped = IsSplineLooped();
+        float tCar = looped ? Mathf.Repeat(player.TrackTNormalized, 1f) : Mathf.Clamp01(player.TrackTNormalized);
+
+        float minA = Mathf.Max(playerSafeAheadMeters + 0.5f, spawnAheadMinMeters);
+        float maxA = Mathf.Max(minA + 1.0f, spawnAheadMaxMeters);
+
+        float dtMin = minA / len;
+        float dtMax = maxA / len;
+
+        if (looped)
+        {
+            // keep “always ahead” within half lap
+            dtMin = Mathf.Clamp(dtMin, 0.01f, 0.49f);
+            dtMax = Mathf.Clamp(dtMax, 0.02f, 0.49f);
+
+            if (dtMax <= dtMin + 0.0005f)
+                return UnityEngine.Random.value;
+
+            float dt = UnityEngine.Random.Range(dtMin, dtMax);
+            return Mathf.Repeat(tCar + dt, 1f);
+        }
+        else
+        {
+            // Open track: NO WRAP. If not enough room, return -1 => no spawn.
+            dtMin = Mathf.Max(0.0005f, dtMin);
+            dtMax = Mathf.Max(dtMin + 0.0005f, dtMax);
+
+            float tMin = tCar + dtMin;
+            if (tMin >= 1f) return -1f;
+
+            float tMax = Mathf.Min(1f, tCar + dtMax);
+            if (tMax <= tMin) tMax = Mathf.Min(1f, tMin + 0.01f);
+
+            return UnityEngine.Random.Range(tMin, tMax);
+        }
+    }
+
     bool IsClearOfPlayer(float candidateT)
     {
         if (!player) return true;
+
         float len = ArcLen();
         if (len < 0.1f) return true;
 
-        float tCar = Mathf.Repeat(player.TrackTNormalized, 1f);
-        float dtForward = Mathf.Repeat(candidateT - tCar, 1f);
-        float ahead = dtForward * len;
-        float behind = (1f - dtForward) * len;
+        bool looped = IsSplineLooped();
+        float pT = looped ? Mathf.Repeat(player.TrackTNormalized, 1f) : Mathf.Clamp01(player.TrackTNormalized);
+
+        GetAheadBehindMeters(pT, candidateT, len, looped, out float ahead, out float behind, out bool isBehind);
+
+        // On open track: never allow behind spawns
+        if (!looped && isBehind) return false;
+
+        // On loop track: if it wrapped behind, reject (or at least require behind safe)
+        if (isBehind) return false;
 
         if (ahead < playerSafeAheadMeters) return false;
         if (behind < playerSafeBehindMeters) return false;
+
         return true;
     }
 
@@ -203,7 +400,7 @@ public class ObstacleManager : MonoBehaviour
         return true;
     }
 
-    // ---------- PATCH #2: ignore the target collectible when placing a guard ----------
+    // ignore the target collectible when placing a guard
     bool IsFarFromCollectiblesExcept(Vector3 p, GameObject ignoreGo)
     {
         if (!collectableMgr) return true;
@@ -219,6 +416,15 @@ public class ObstacleManager : MonoBehaviour
 
             if ((go.transform.position - p).sqrMagnitude < minSq) return false;
         }
+        return true;
+    }
+
+    bool IsFarEnough(Vector3 p)
+    {
+        float minSq = minSeparation * minSeparation;
+        foreach (var g in _active)
+            if (g && g.activeInHierarchy && (g.transform.position - p).sqrMagnitude < minSq)
+                return false;
         return true;
     }
 
@@ -280,19 +486,28 @@ public class ObstacleManager : MonoBehaviour
             yield return null;
         }
 
-        DLog($"ObstacleManager: START. Spline='{_spline.name}' len={ArcLen():F2}, groundMask={groundMask.value}");
+        DLog($"ObstacleManager: START. Spline='{_spline.name}' len={ArcLen():F2}, groundMask={groundMask.value}, looped={IsSplineLooped()}");
 
         while (enabled && PlayerJoinManager.IsRaceStarted)
         {
-            // PATCH #1: keep active list clean every tick
-            PruneActiveList();
+            PruneLists();
 
             float spawnPressure = DifficultyDirector.Instance ? DifficultyDirector.Instance.Current.spawnPressure : 0.5f;
             float rewardBias = DifficultyDirector.Instance ? DifficultyDirector.Instance.Current.rewardBias : 0.5f;
 
             ApplyDifficulty(spawnPressure, Time.deltaTime);
 
-            int missing = Mathf.Max(0, _currentMaxActive - _active.Count);
+            float len = ArcLen();
+
+            // NEW: expire behind/old obstacles so they can't "eat the cap" forever
+            ExpireObstacles(len);
+
+            // NEW: density clamp so the first corner can't get mega-stuffed
+            int effectiveCap = _currentMaxActive;
+            if (clampMaxActiveToSpawnWindow)
+                effectiveCap = Mathf.Min(effectiveCap, ComputeWindowCap(len));
+
+            int missing = Mathf.Max(0, effectiveCap - _active.Count);
             int budget = Mathf.Min(missing, Mathf.Max(1, spawnsPerTick));
 
             float strategicShare = Mathf.Clamp01(strategicShareBySpawnPressure.Evaluate(spawnPressure));
@@ -302,10 +517,8 @@ public class ObstacleManager : MonoBehaviour
             {
                 bool didStrategic = false;
 
-                // csak bizonyos arányban próbálunk strategikust
                 if (collectableMgr && UnityEngine.Random.value < strategicShare)
                 {
-                    // guardP még rá van szorozva a rewardBias suppression-re
                     float guardP = Mathf.Clamp01(guardProbByDiff.Evaluate(spawnPressure)) * guardSupp;
                     if (UnityEngine.Random.value < guardP)
                         didStrategic = TrySpawnStrategic(spawnPressure);
@@ -329,12 +542,10 @@ public class ObstacleManager : MonoBehaviour
         if (metas == null || metas.Count == 0) return false;
         if (!EnsureSplineRef()) return false;
 
-        // safety: lane offsets
         if (collectableMgr.laneVis == null || collectableMgr.laneVis.laneOffsets == null || collectableMgr.laneVis.laneOffsets.Length == 0)
             return false;
 
-        // PATCH #1: prune before scanning for near guards
-        PruneActiveList();
+        PruneLists();
 
         int start = UnityEngine.Random.Range(0, metas.Count);
         Spline spline = _spline.Spline;
@@ -345,15 +556,11 @@ public class ObstacleManager : MonoBehaviour
             if (!m.go || !m.go.activeInHierarchy) continue;
             if (Time.time - m.spawnTime > maxGuardAge) continue;
 
-            // ---- cooldown per collectible ----
             int cid = m.go.GetInstanceID();
             if (_lastGuardTimeByCollectibleId.TryGetValue(cid, out float lastT))
-            {
                 if (Time.time - lastT < guardCooldownSeconds)
                     continue;
-            }
 
-            // ---- don't over-guard the same collectible area ----
             int near = 0;
             float r2 = guardRadiusMeters * guardRadiusMeters;
 
@@ -369,15 +576,20 @@ public class ObstacleManager : MonoBehaviour
             if (near >= maxGuardsNearOneCollectible)
                 continue;
 
-            // ---- pick offset around collectible ----
             float meters = UnityEngine.Random.Range(guardOffsetRangeMeters.x, guardOffsetRangeMeters.y);
 
-            // ---- beforeProb from curve ----
             float beforeProb = Mathf.Clamp01(guardBeforeProbBySpawnPressure.Evaluate(diff));
             bool before = UnityEngine.Random.value < beforeProb;
 
             float dt = DtFromMeters(spline, meters) * (before ? -1f : +1f);
             float t2 = Mathf.Repeat(m.t + dt, 1f);
+
+            // If open track, don't allow wrap guards either
+            if (!IsSplineLooped())
+            {
+                float pT = player ? Mathf.Clamp01(player.TrackTNormalized) : 0f;
+                if (t2 < pT) continue;
+            }
 
             SplineUtility.Evaluate(spline, t2, out float3 lp2, out float3 lt2, out _);
 
@@ -409,7 +621,6 @@ public class ObstacleManager : MonoBehaviour
             if (!IsClearOfPlayer(t2)) continue;
             if (!IsFarEnough(finalPos)) continue;
 
-            // PATCH #2: allow being near the target collectible (ignore it in cross-sep)
             if (!IsFarFromCollectiblesExcept(finalPos, m.go)) continue;
 
             ObstacleType type = GetRandomObstacleType(diff);
@@ -419,8 +630,8 @@ public class ObstacleManager : MonoBehaviour
             go.transform.SetPositionAndRotation(finalPos, Quaternion.LookRotation(wt2, Vector3.up));
             go.SetActive(true);
             _active.Add(go);
+            _activeMeta.Add(new ObstacleMeta { go = go, t = t2, lane = lane, spawnTime = Time.time });
 
-            // mark this collectible as "recently guarded"
             _lastGuardTimeByCollectibleId[cid] = Time.time;
 
             if (SkillEstimator.Instance) SkillEstimator.Instance.OnObstacleSpawned();
@@ -485,7 +696,6 @@ public class ObstacleManager : MonoBehaviour
         }
     }
 
-    // ---------- PATCH #3: pool auto-grow per prefab ----------
     bool TryGrowPool(GameObject prefab, int count)
     {
         if (!allowPoolGrowth || !prefab) return false;
@@ -499,7 +709,6 @@ public class ObstacleManager : MonoBehaviour
         int canAdd = Mathf.Min(count, Mathf.Max(0, maxPoolPerPrefab - subPool.Count));
         if (canAdd <= 0) return false;
 
-        // Try to find obstacleType config for this prefab (damage etc.)
         ObstacleType typeConfig = null;
         for (int i = 0; i < obstacleTypes.Length; i++)
             if (obstacleTypes[i].prefab == prefab) { typeConfig = obstacleTypes[i]; break; }
@@ -526,8 +735,7 @@ public class ObstacleManager : MonoBehaviour
     readonly List<Vector3> _tmp = new();
     public List<Vector3> GetActiveWorldPositions()
     {
-        // keep clean for cross-checks
-        PruneActiveList();
+        PruneLists();
 
         _tmp.Clear();
         for (int i = 0; i < _active.Count; i++)
@@ -546,7 +754,6 @@ public class ObstacleManager : MonoBehaviour
                 if (subPool[i] && !subPool[i].activeInHierarchy) return subPool[i];
         }
 
-        // PATCH #3: try grow + retry
         if (TryGrowPool(prefab, poolGrowBatch) && _pool.TryGetValue(prefab, out var grown))
         {
             for (int i = 0; i < grown.Count; i++)
@@ -611,8 +818,7 @@ public class ObstacleManager : MonoBehaviour
         if (!EnsureSplineRef()) return;
         if (laneVis.laneOffsets == null || laneVis.laneOffsets.Length == 0) return;
 
-        // keep clean so Count logic stays correct
-        PruneActiveList();
+        PruneLists();
 
         ObstacleType typeToSpawn = GetRandomObstacleType(diff);
         var go = NextPooled(typeToSpawn.prefab);
@@ -622,11 +828,12 @@ public class ObstacleManager : MonoBehaviour
         float len = spline.GetLength();
         if (len < 0.1f) return;
 
-        int failRay = 0, failPlayer = 0, failSep = 0, failColl = 0;
+        int failRay = 0, failPlayer = 0, failSep = 0, failColl = 0, failNoRoom = 0;
 
         for (int attempt = 0; attempt < maxPlacementAttempts; ++attempt)
         {
             float t = PickSpawnT(len);
+            if (t < 0f) { failNoRoom++; break; } // open track: no fair room ahead
 
             SplineUtility.Evaluate(spline, t, out float3 lp, out float3 lt, out _);
 
@@ -662,6 +869,7 @@ public class ObstacleManager : MonoBehaviour
             go.transform.SetPositionAndRotation(finalPos, Quaternion.LookRotation(wt, Vector3.up));
             go.SetActive(true);
             _active.Add(go);
+            _activeMeta.Add(new ObstacleMeta { go = go, t = t, lane = laneIdx, spawnTime = Time.time });
 
             if (SkillEstimator.Instance) SkillEstimator.Instance.OnObstacleSpawned();
             if (drawAttemptGizmos) DebugDraw(finalPos, Color.magenta);
@@ -669,23 +877,19 @@ public class ObstacleManager : MonoBehaviour
             return;
         }
 
-        DLog($"Obstacle SPAWN FAIL: attempts={maxPlacementAttempts}, failRay={failRay}, failPlayer={failPlayer}, failSep={failSep}, failColl={failColl}, active={_active.Count}/{_currentMaxActive}");
-    }
-
-    bool IsFarEnough(Vector3 p)
-    {
-        float minSq = minSeparation * minSeparation;
-        foreach (var g in _active)
-            if (g && g.activeInHierarchy && (g.transform.position - p).sqrMagnitude < minSq)
-                return false;
-        return true;
+        DLog($"Obstacle SPAWN FAIL: attempts={maxPlacementAttempts}, failNoRoom={failNoRoom}, failRay={failRay}, failPlayer={failPlayer}, failSep={failSep}, failColl={failColl}, active={_active.Count}/{_currentMaxActive}");
     }
 
     public void ReturnObstacleToPool(GameObject g)
     {
         if (!g) return;
+
         g.SetActive(false);
         _active.Remove(g);
+
+        for (int i = _activeMeta.Count - 1; i >= 0; --i)
+            if (_activeMeta[i].go == g) { _activeMeta.RemoveAt(i); break; }
+
         if (g.TryGetComponent(out Obstacle obs)) obs.ResetState();
     }
 

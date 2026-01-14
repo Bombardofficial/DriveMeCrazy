@@ -1272,6 +1272,7 @@ MonoBehaviour:
   limitValue: 60
   unit: 1
   signIndex: 1
+  signSprite: {fileID: 0}
   targetTag: Driver
 --- !u!65 &27231423
 BoxCollider:
@@ -7277,6 +7278,7 @@ MonoBehaviour:
   limitValue: 50
   unit: 1
   signIndex: 15
+  signSprite: {fileID: 21300000, guid: a3cc8cd4bb6fd88438ba8a31a7fd708e, type: 3}
   targetTag: Driver
 --- !u!65 &118948589
 BoxCollider:
@@ -9793,6 +9795,7 @@ MonoBehaviour:
   limitValue: 60
   unit: 1
   signIndex: 5
+  signSprite: {fileID: 21300000, guid: 4d9886e401556ac4eb60849353d988b0, type: 3}
   targetTag: Driver
 --- !u!65 &163577840
 BoxCollider:
@@ -93912,6 +93915,11 @@ PrefabInstance:
       propertyPath: vehicle
       value: 
       objectReference: {fileID: 2111085467219387259}
+    - target: {fileID: 2757424729844056611, guid: 186d835971b893b46993c4a081eb9ffc,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3414506408291329950, guid: 186d835971b893b46993c4a081eb9ffc,
         type: 3}
       propertyPath: m_SizeDelta.y
@@ -93963,6 +93971,26 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: GameplayCanvas
+      objectReference: {fileID: 0}
+    - target: {fileID: 5134058612717372056, guid: 186d835971b893b46993c4a081eb9ffc,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7261727829955354269, guid: 186d835971b893b46993c4a081eb9ffc,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8050774565098873928, guid: 186d835971b893b46993c4a081eb9ffc,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8277670470893704580, guid: 186d835971b893b46993c4a081eb9ffc,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8875569709684037914, guid: 186d835971b893b46993c4a081eb9ffc,
         type: 3}
@@ -94064,7 +94092,8 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 3472253914198036340, guid: 186d835971b893b46993c4a081eb9ffc, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 4931817194649855164, guid: 186d835971b893b46993c4a081eb9ffc,
@@ -94104,6 +94133,14 @@ PrefabInstance:
       insertIndex: 0
       addedObject: {fileID: 1081461170}
     m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8104897972647791447, guid: 186d835971b893b46993c4a081eb9ffc,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1188535662}
+    - targetCorrespondingSourceObject: {fileID: 8104897972647791447, guid: 186d835971b893b46993c4a081eb9ffc,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1188535661}
     - targetCorrespondingSourceObject: {fileID: 4671335633864239459, guid: 186d835971b893b46993c4a081eb9ffc,
         type: 3}
       insertIndex: -1
@@ -97314,6 +97351,7 @@ MonoBehaviour:
   limitValue: 70
   unit: 1
   signIndex: 12
+  signSprite: {fileID: 21300000, guid: b42c7cbdc45164e4f8a2f848e6faeadd, type: 3}
   targetTag: Driver
 --- !u!65 &452280447
 BoxCollider:
@@ -97504,6 +97542,7 @@ MonoBehaviour:
   limitValue: 80
   unit: 1
   signIndex: 2
+  signSprite: {fileID: 21300000, guid: ce896703f04bac14f91dd71a0b813ada, type: 3}
   targetTag: Driver
 --- !u!65 &454246497
 BoxCollider:
@@ -107799,6 +107838,7 @@ MonoBehaviour:
   limitValue: 100
   unit: 1
   signIndex: 9
+  signSprite: {fileID: 21300000, guid: 42eda9326e67c2d43a930a9f78ee7639, type: 3}
   targetTag: Driver
 --- !u!65 &534380247
 BoxCollider:
@@ -116127,6 +116167,7 @@ MonoBehaviour:
   limitValue: 60
   unit: 1
   signIndex: 20
+  signSprite: {fileID: 21300000, guid: 4d9886e401556ac4eb60849353d988b0, type: 3}
   targetTag: Driver
 --- !u!65 &590254810
 BoxCollider:
@@ -116554,6 +116595,7 @@ MonoBehaviour:
   limitValue: 60
   unit: 1
   signIndex: 2
+  signSprite: {fileID: 0}
   targetTag: Driver
 --- !u!65 &593847216
 BoxCollider:
@@ -118023,6 +118065,7 @@ MonoBehaviour:
   limitValue: 90
   unit: 1
   signIndex: 11
+  signSprite: {fileID: 21300000, guid: 5f66d5d621cbad64891e4b41668e6abc, type: 3}
   targetTag: Driver
 --- !u!65 &633999773
 BoxCollider:
@@ -121324,6 +121367,7 @@ MonoBehaviour:
   limitValue: 70
   unit: 1
   signIndex: 1
+  signSprite: {fileID: 21300000, guid: b42c7cbdc45164e4f8a2f848e6faeadd, type: 3}
   targetTag: Driver
 --- !u!65 &689774351
 BoxCollider:
@@ -123218,6 +123262,7 @@ MonoBehaviour:
   limitValue: 90
   unit: 1
   signIndex: 6
+  signSprite: {fileID: 21300000, guid: 5f66d5d621cbad64891e4b41668e6abc, type: 3}
   targetTag: Driver
 --- !u!65 &721520003
 BoxCollider:
@@ -127389,6 +127434,7 @@ MonoBehaviour:
   limitValue: 60
   unit: 1
   signIndex: 8
+  signSprite: {fileID: 21300000, guid: 4d9886e401556ac4eb60849353d988b0, type: 3}
   targetTag: Driver
 --- !u!65 &798997494
 BoxCollider:
@@ -128750,6 +128796,7 @@ MonoBehaviour:
   limitValue: 60
   unit: 1
   signIndex: 14
+  signSprite: {fileID: 21300000, guid: 4d9886e401556ac4eb60849353d988b0, type: 3}
   targetTag: Driver
 --- !u!65 &831869550
 BoxCollider:
@@ -131873,6 +131920,7 @@ MonoBehaviour:
   limitValue: 90
   unit: 1
   signIndex: 17
+  signSprite: {fileID: 21300000, guid: 5f66d5d621cbad64891e4b41668e6abc, type: 3}
   targetTag: Driver
 --- !u!65 &867382116
 BoxCollider:
@@ -138114,6 +138162,7 @@ MonoBehaviour:
   limitValue: 90
   unit: 1
   signIndex: 18
+  signSprite: {fileID: 21300000, guid: 5f66d5d621cbad64891e4b41668e6abc, type: 3}
   targetTag: Driver
 --- !u!65 &886066330
 BoxCollider:
@@ -149374,6 +149423,7 @@ MonoBehaviour:
   limitValue: 60
   unit: 1
   signIndex: 2
+  signSprite: {fileID: 0}
   targetTag: Driver
 --- !u!65 &1016495237
 BoxCollider:
@@ -154451,6 +154501,7 @@ MonoBehaviour:
   limitValue: 50
   unit: 1
   signIndex: 23
+  signSprite: {fileID: 21300000, guid: a3cc8cd4bb6fd88438ba8a31a7fd708e, type: 3}
   targetTag: Driver
 --- !u!65 &1121195930
 BoxCollider:
@@ -156304,6 +156355,7 @@ MonoBehaviour:
   limitValue: 60
   unit: 1
   signIndex: 2
+  signSprite: {fileID: 0}
   targetTag: Driver
 --- !u!65 &1151118311
 BoxCollider:
@@ -159062,6 +159114,55 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -2432090755550338912, guid: 6082e0aafd351ec48945013503a94fd6, type: 3}
+--- !u!114 &1188535659 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2623437824460867042, guid: 186d835971b893b46993c4a081eb9ffc,
+    type: 3}
+  m_PrefabInstance: {fileID: 403242315}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!1 &1188535660 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8104897972647791447, guid: 186d835971b893b46993c4a081eb9ffc,
+    type: 3}
+  m_PrefabInstance: {fileID: 403242315}
+  m_PrefabAsset: {fileID: 0}
+--- !u!225 &1188535661
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1188535660}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
+--- !u!114 &1188535662
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1188535660}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cb160d8ebdb3e345a26b37a2bc17ca7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  signImage: {fileID: 1188535659}
+  canvasGroup: {fileID: 1188535661}
+  fadeInSeconds: 0.12
+  fadeOutSeconds: 0.12
+  sfx: {fileID: 0}
+  preCueBeep: {fileID: 0}
+  preCueScale: 1.15
 --- !u!1 &1192646792
 GameObject:
   m_ObjectHideFlags: 0
@@ -173689,6 +173790,7 @@ MonoBehaviour:
   limitValue: 70
   unit: 1
   signIndex: 22
+  signSprite: {fileID: 21300000, guid: b42c7cbdc45164e4f8a2f848e6faeadd, type: 3}
   targetTag: Driver
 --- !u!65 &1390734512
 BoxCollider:
@@ -182607,6 +182709,7 @@ MonoBehaviour:
   limitValue: 70
   unit: 1
   signIndex: 21
+  signSprite: {fileID: 21300000, guid: b42c7cbdc45164e4f8a2f848e6faeadd, type: 3}
   targetTag: Driver
 --- !u!65 &1540064740
 BoxCollider:
@@ -182852,6 +182955,7 @@ MonoBehaviour:
   limitValue: 60
   unit: 1
   signIndex: 7
+  signSprite: {fileID: 21300000, guid: 4d9886e401556ac4eb60849353d988b0, type: 3}
   targetTag: Driver
 --- !u!65 &1543589701
 BoxCollider:
@@ -185290,6 +185394,7 @@ MonoBehaviour:
   limitValue: 60
   unit: 1
   signIndex: 26
+  signSprite: {fileID: 21300000, guid: 4d9886e401556ac4eb60849353d988b0, type: 3}
   targetTag: Driver
 --- !u!65 &1593428790
 BoxCollider:
@@ -204308,10 +204413,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 701e9e2042d148b46ae22740ddf4f2f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  debugLogs: 0
+  debugLogs: 1
   debugLogCooldown: 1
   allowSpawnWithoutGroundHit: 1
-  spawnsPerTick: 3
+  spawnsPerTick: 2
   obstacleTypes:
   - prefab: {fileID: 7672455924554361787, guid: f3d8c4f25e901c242af89358687896d5,
       type: 3}
@@ -204496,13 +204601,13 @@ MonoBehaviour:
     m_RotationOrder: 4
   maxGuardAge: 8
   fallbackToRandomIfBlocked: 1
-  playerSafeAheadMeters: 18
+  playerSafeAheadMeters: 28
   playerSafeBehindMeters: 6
   minCrossSeparationMeters: 3
   player: {fileID: 2111085467219387259}
   trackSpline: {fileID: 1775033746}
-  spawnAheadMinMeters: 22
-  spawnAheadMaxMeters: 85
+  spawnAheadMinMeters: 60
+  spawnAheadMaxMeters: 100
   strategicShareBySpawnPressure:
     serializedVersion: 2
     m_Curve:
@@ -204578,6 +204683,12 @@ MonoBehaviour:
   guardCooldownSeconds: 2
   guardRadiusMeters: 9
   maxGuardsNearOneCollectible: 1
+  despawnBehindMeters: 14
+  protectAheadMeters: 60
+  hardMaxLifetimeSeconds: 35
+  clampMaxActiveToSpawnWindow: 1
+  windowCapMultiplier: 0.65
+  minWindowCap: 4
 --- !u!114 &1639027662
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -204590,7 +204701,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c678af36123cf2e40b56ce4d23c7e257, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  debugLogs: 0
+  debugLogs: 1
   debugLogCooldown: 1
   autoMissAfterSeconds: 12
   collectablePrefab: {fileID: 7260588083317533168, guid: 6b936ddf8587928478ec042578ba7da0,
@@ -205873,6 +205984,7 @@ MonoBehaviour:
   limitValue: 60
   unit: 1
   signIndex: 24
+  signSprite: {fileID: 21300000, guid: 4d9886e401556ac4eb60849353d988b0, type: 3}
   targetTag: Driver
 --- !u!65 &1670603233
 BoxCollider:
@@ -207136,6 +207248,7 @@ MonoBehaviour:
   limitValue: 80
   unit: 1
   signIndex: 16
+  signSprite: {fileID: 21300000, guid: ce896703f04bac14f91dd71a0b813ada, type: 3}
   targetTag: Driver
 --- !u!65 &1692182509
 BoxCollider:
@@ -223165,6 +223278,7 @@ MonoBehaviour:
   limitValue: 80
   unit: 1
   signIndex: 25
+  signSprite: {fileID: 21300000, guid: ce896703f04bac14f91dd71a0b813ada, type: 3}
   targetTag: Driver
 --- !u!65 &1791786312
 BoxCollider:
@@ -226186,6 +226300,7 @@ MonoBehaviour:
   limitValue: 60
   unit: 1
   signIndex: 0
+  signSprite: {fileID: 21300000, guid: 4d9886e401556ac4eb60849353d988b0, type: 3}
   targetTag: Driver
 --- !u!65 &1824819004
 BoxCollider:
@@ -229652,6 +229767,7 @@ MonoBehaviour:
   limitValue: 80
   unit: 1
   signIndex: 3
+  signSprite: {fileID: 21300000, guid: ce896703f04bac14f91dd71a0b813ada, type: 3}
   targetTag: Driver
 --- !u!65 &1885425125
 BoxCollider:
@@ -243853,18 +243969,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e37aa541c77fcbd45b71c99677a042b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &1966253327 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 3472253914198036340, guid: 186d835971b893b46993c4a081eb9ffc,
-    type: 3}
-  m_PrefabInstance: {fileID: 403242315}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3cb160d8ebdb3e345a26b37a2bc17ca7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1966918285 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5872225823960323693, guid: b9dff2ffa5142b94d92fb0655c744eb0,
@@ -252991,6 +253095,7 @@ MonoBehaviour:
   limitValue: 60
   unit: 1
   signIndex: 3
+  signSprite: {fileID: 21300000, guid: 4d9886e401556ac4eb60849353d988b0, type: 3}
   targetTag: Driver
 --- !u!65 &2057687703
 BoxCollider:
@@ -253516,6 +253621,12 @@ MonoBehaviour:
   guardCooldownSeconds: 2
   guardRadiusMeters: 9
   maxGuardsNearOneCollectible: 1
+  despawnBehindMeters: 14
+  protectAheadMeters: 60
+  hardMaxLifetimeSeconds: 35
+  clampMaxActiveToSpawnWindow: 1
+  windowCapMultiplier: 0.65
+  minWindowCap: 4
 --- !u!114 &2061689029
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -261945,7 +262056,7 @@ MonoBehaviour:
   overshootBrakeDecel: 15
   overshootLockTime: 1.5
   overshootCornerAngle: 10
-  speedLimitUI: {fileID: 1966253327}
+  speedLimitUI: {fileID: 0}
   frictionCoefficient: 200
   balanceUI: {fileID: 1966253326}
   greenMinWidth: 0.25
