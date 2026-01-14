@@ -5,32 +5,19 @@ using UnityEngine;
 public class BlockBrakeSabotageSabotage : MonoBehaviour
 {
     [Tooltip("Duration for blocking of brake")]
-    [SerializeField] float duration = 1.5f;
-
-    [Tooltip("Cooldown for ability use per player")]
-    [SerializeField] float cooldown = 6f;
-
-    //private Dictionary<Passenger, float> _onCooldowns = new();
-
-    Coroutine _co;
+    [SerializeField] float duration = 2;
 
     void OnEnable() => ArcadeVP.InputManager_ArcadeVP.OnBlockBrakeSabotageTriggered += Fire;
     void OnDisable() => ArcadeVP.InputManager_ArcadeVP.OnBlockBrakeSabotageTriggered -= Fire;
 
     void Fire(Passenger passenger)
     {
-        /*if (!_onCooldowns.ContainsKey(passenger) || Time.time >= _onCooldowns[passenger])
-        {
-            StartCoroutine(Run(passenger));
-        }*/
-
         StartCoroutine(Run(passenger));
     }
 
     IEnumerator Run(Passenger passenger)
     {
         float t = 0f;
-        //_onCooldowns[passenger] = Time.time + cooldown;
 
         ArcadeVP.VehicleInputMixer.BlockBrake();
         Debug.Log("Brake blocked!");
@@ -43,8 +30,5 @@ public class BlockBrakeSabotageSabotage : MonoBehaviour
 
         ArcadeVP.VehicleInputMixer.UnBlockBrake();
         Debug.Log("Brake unblocked!");
-
-        
-        _co = null;
     }
 }

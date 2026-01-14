@@ -13,23 +13,11 @@ public class SteeringSabotage : MonoBehaviour
     [Tooltip("How quick the wheel oscillates (Hz).")]
     [SerializeField] float wobbleFrequency = 4f;
 
-    [Tooltip("Cooldown for ability use per player")]
-    [SerializeField] float cooldown = 3f;
-
-    private Dictionary<Passenger, float> _onCooldowns = new();
-
-    Coroutine _co;
-
     void OnEnable() => ArcadeVP.InputManager_ArcadeVP.OnSteeringSabotageTriggered += Fire;
     void OnDisable() => ArcadeVP.InputManager_ArcadeVP.OnSteeringSabotageTriggered -= Fire;
 
     void Fire(Passenger passenger)
     {
-        /*if (!_onCooldowns.ContainsKey(passenger) || Time.time >= _onCooldowns[passenger])
-        {
-            StartCoroutine(Run(passenger));
-        }*/
-
         StartCoroutine(Run(passenger));
     }
 
@@ -38,7 +26,6 @@ public class SteeringSabotage : MonoBehaviour
         // pick a random side so it doesn't always go right
         float sign = Random.value < .5f ? -1 : 1;
         float t = 0f;
-        //_onCooldowns[passenger] = Time.time + cooldown;
 
         while (t < duration)
         {
@@ -50,6 +37,5 @@ public class SteeringSabotage : MonoBehaviour
             t += Time.deltaTime;
             yield return null;
         }
-        _co = null;
     }
 }

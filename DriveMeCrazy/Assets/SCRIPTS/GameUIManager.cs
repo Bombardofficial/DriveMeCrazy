@@ -26,6 +26,8 @@ public class GameUIManager : MonoBehaviour
     [Header("Game Component References")]
     [Tooltip("Drag the GameObject with the Damageable script here.")]
     [SerializeField] private Damageable carDamageable;
+    [Tooltip("Drag the GameObject with the PointMultiplication script here.")]
+    [SerializeField] private PointMultiplication pointMultiplication;
 
     private PlayerManager playerManager;
 
@@ -42,8 +44,15 @@ public class GameUIManager : MonoBehaviour
     [SerializeField] private float announceDuration = 1.5f;  // total time on-screen
     [SerializeField] private float shakeMagnitude = 40f;     // pixels
 
+    [Header("Multiplier Pop Animation")]
+    [SerializeField] private float popFactor = 1.25f;   
+    [SerializeField] private float popDuration = 0.2f;  
+
     public AudioSource newDriverAudio;
     public AudioClip newDriverAudioClip;
+
+    private float lastMultiplier = 0f;
+
     void Start()
     {
         playerManager = PlayerManager.Instance;
@@ -210,6 +219,33 @@ public class GameUIManager : MonoBehaviour
 
     void UpdatePointMultiplierUI()
     {
-        pointMultiplierNumber.text = $"{playerManager.PointMultiplier}";
+        float currentMultiplier = pointMultiplication.GetCurrentMultiplier();
+
+        pointMultiplierNumber.text = $"{currentMultiplier}";
+        pointMultiplierNumber.color = pointMultiplication.GetCurrentMultiplicatorColor();
+        pointMultiplierNumber.fontSize = pointMultiplication.GetCurrentFontSize();
+
+        pointMultiplierText.color = pointMultiplication.GetCurrentMultiplicatorColor();
+
+        if (currentMultiplier != lastMultiplier)
+        {
+            PopUpMultiplier();
+            lastMultiplier = currentMultiplier;
+        }
+    }
+
+    void PopUpMultiplier()
+    {
+        Vector3 originalScale = pointMultiplierNumber.transform.localScale;
+
+        LeanTween.cancel(pointMultiplierNumber.gameObject);
+
+        LeanTween.scale(pointMultiplierNumber.gameObject, originalScale * popFactor, popDuration)
+                 .setEaseOutBack()
+                 .setOnComplete(() =>
+                 {
+                     LeanTween.scale(pointMultiplierNumber.gameObject, originalScale, popDuration * 0.8f)
+                              .setEaseInOutQuad();
+                 });
     }
 }

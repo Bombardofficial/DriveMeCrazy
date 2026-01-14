@@ -13,32 +13,17 @@ public class HandbrakeSabotage : MonoBehaviour
     [Tooltip("Ease-in/out time (seconds).")]
     [SerializeField] float ramp = 0.25f;
 
-    [Tooltip("Cooldown for ability use per player")]
-    [SerializeField] float cooldown = 3f;
-
-    //private Dictionary<Passenger, float> _onCooldowns = new();
-
-    Coroutine _co;
-
     void OnEnable() => ArcadeVP.InputManager_ArcadeVP.OnHandbrakeSabotageTriggered += Fire;
     void OnDisable() => ArcadeVP.InputManager_ArcadeVP.OnHandbrakeSabotageTriggered -= Fire;
 
     void Fire(Passenger passenger)
     {
-        print("Handbrake fired!");
-        /*if (!_onCooldowns.ContainsKey(passenger) || Time.time >= _onCooldowns[passenger])
-        {
-            print("Handbrake started!");
-            StartCoroutine(Run(passenger));
-        }*/
-
         StartCoroutine(Run(passenger));
     }
 
     IEnumerator Run(Passenger passenger)
     {
         float t = 0f;
-        //_onCooldowns[passenger] = Time.time + cooldown;
 
         while (t < duration)
         {
@@ -50,7 +35,5 @@ public class HandbrakeSabotage : MonoBehaviour
             t += Time.deltaTime;
             yield return null;
         }
-        _co = null;
-        
     }
 }

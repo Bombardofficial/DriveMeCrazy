@@ -69,7 +69,7 @@ namespace ArcadeVP
                 _iconHandler.ShowActionIcon(GetCurrentIconAnchor(), 4); 
                 Debug.Log("BlockGasSabotage Fired!"); 
             }
-            else if (randomValue < 0.7f) 
+            else if (randomValue < 0.3f) 
             { 
                 InputManager_ArcadeVP.FireBlockBrakeSabotage(_passenger); 
                 _iconHandler.ShowActionIcon(GetCurrentIconAnchor(), 6); 
@@ -92,29 +92,29 @@ namespace ArcadeVP
             PlayerManager.Instance._lastSabotage = _passenger;
             
             float randomValue = Random.value;
-            if (randomValue < 0.3f) 
+            if (randomValue < 0.35f) 
             { 
                 InputManager_ArcadeVP.FireLeftSteerSabotage(_passenger); 
                 _iconHandler.ShowActionIcon(GetCurrentIconAnchor(), 1); 
                 Debug.Log("LeftSteerSabotage Fired!"); 
             }
-            else if (randomValue < 0.6f) 
+            else if (randomValue < 0.7f) 
             { 
                 InputManager_ArcadeVP.FireRightSteerSabotage(_passenger); 
                 _iconHandler.ShowActionIcon(GetCurrentIconAnchor(), 2); 
                 Debug.Log("RightSteerSabotage Fired!"); 
             }
-            else if (randomValue < 0.8f) 
-            { 
-                InputManager_ArcadeVP.FireHandbrakeSabotage(_passenger); 
-                _iconHandler.ShowActionIcon(GetCurrentIconAnchor(), 5); 
-                Debug.Log("HandbrakeSabotage Fired!"); 
-            }
-            else if (randomValue <= 1f) 
+            else if (randomValue < 0.9f) 
             { 
                 InputManager_ArcadeVP.FireSteeringSabotage(_passenger);
                 _iconHandler.ShowActionIcon(GetCurrentIconAnchor(), 0); 
                 Debug.Log("SteeringSabotage Fired!");
+            }
+            else if (randomValue <= 1f) 
+            { 
+                InputManager_ArcadeVP.FireHandbrakeSabotage(_passenger); 
+                _iconHandler.ShowActionIcon(GetCurrentIconAnchor(), 5); 
+                Debug.Log("HandbrakeSabotage Fired!"); 
             }
         }
 

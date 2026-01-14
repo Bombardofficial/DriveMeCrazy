@@ -8888,6 +8888,81 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 148029083}
   m_CullTransparentMesh: 1
+--- !u!1 &148106817
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 148106818}
+  - component: {fileID: 148106820}
+  - component: {fileID: 148106819}
+  m_Layer: 5
+  m_Name: Background
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &148106818
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 148106817}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1987660188}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 30}
+  m_SizeDelta: {x: 150, y: 110}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &148106819
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 148106817}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.5921569}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &148106820
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 148106817}
+  m_CullTransparentMesh: 1
 --- !u!1001 &148257078
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -9013,9 +9088,12 @@ MonoBehaviour:
   pointMultiplierNumber: {fileID: 1193963253}
   canvasGroup: {fileID: 249738596}
   carDamageable: {fileID: 2111085467219387266}
+  pointMultiplication: {fileID: 2111085467219387270}
   newDriverText: {fileID: 2070794364}
   announceDuration: 1.5
   shakeMagnitude: 40
+  popFactor: 1.25
+  popDuration: 0.25
   newDriverAudio: {fileID: 1082871212}
   newDriverAudioClip: {fileID: 8300000, guid: 86bad6b6e391b8d45a0243bcd3ab8790, type: 3}
 --- !u!4 &148593951
@@ -93814,11 +93892,31 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 626731374099025218, guid: 186d835971b893b46993c4a081eb9ffc,
+        type: 3}
+      propertyPath: m_fontSize
+      value: 52
+      objectReference: {fileID: 0}
+    - target: {fileID: 626731374099025218, guid: 186d835971b893b46993c4a081eb9ffc,
+        type: 3}
+      propertyPath: m_fontSizeBase
+      value: 52
+      objectReference: {fileID: 0}
+    - target: {fileID: 626731374099025218, guid: 186d835971b893b46993c4a081eb9ffc,
+        type: 3}
+      propertyPath: m_VerticalAlignment
+      value: 1024
+      objectReference: {fileID: 0}
     - target: {fileID: 2238995259951975188, guid: 186d835971b893b46993c4a081eb9ffc,
         type: 3}
       propertyPath: vehicle
       value: 
       objectReference: {fileID: 2111085467219387259}
+    - target: {fileID: 3414506408291329950, guid: 186d835971b893b46993c4a081eb9ffc,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 75
+      objectReference: {fileID: 0}
     - target: {fileID: 4067221589807922761, guid: 186d835971b893b46993c4a081eb9ffc,
         type: 3}
       propertyPath: arrowUp
@@ -93981,6 +94079,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 1111560745}
+    - targetCorrespondingSourceObject: {fileID: 4598145539845480144, guid: 186d835971b893b46993c4a081eb9ffc,
+        type: 3}
+      insertIndex: 0
+      addedObject: {fileID: 148106818}
     - targetCorrespondingSourceObject: {fileID: 2836098011026636931, guid: 186d835971b893b46993c4a081eb9ffc,
         type: 3}
       insertIndex: 0
@@ -164724,7 +164826,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1284038829
 RectTransform:
   m_ObjectHideFlags: 0
@@ -180353,7 +180455,6 @@ MonoBehaviour:
   duration: 2
   maxSteer: 0.8
   wobbleFrequency: 4
-  cooldown: 3
 --- !u!114 &1506694783
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -180367,7 +180468,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxSteer: 0.8
-  cooldown: 3
 --- !u!114 &1506694784
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -180381,7 +180481,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxSteer: 0.8
-  cooldown: 3
 --- !u!114 &1506694785
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -180397,7 +180496,6 @@ MonoBehaviour:
   duration: 1.5
   peakSlow: 0.6
   ramp: 0.25
-  cooldown: 3
 --- !u!114 &1506694786
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -180411,7 +180509,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   duration: 1.5
-  cooldown: 6
 --- !u!114 &1506694787
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -180425,7 +180522,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   duration: 1.5
-  cooldown: 6
 --- !u!114 &1506694788
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -180439,7 +180535,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   duration: 1.5
-  cooldown: 6
 --- !u!4 &1509419132 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 160535730619945981, guid: 243a4033fc4deac45936cd8382edcda0,
@@ -244455,6 +244550,12 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8fafc21f40d96fa46ae157a11f9f91c9, type: 3}
+--- !u!224 &1987660188 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 4598145539845480144, guid: 186d835971b893b46993c4a081eb9ffc,
+    type: 3}
+  m_PrefabInstance: {fileID: 403242315}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1988249937 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 435246468091061869, guid: b9dff2ffa5142b94d92fb0655c744eb0,
@@ -254687,7 +254788,6 @@ MonoBehaviour:
   duration: 2
   maxSteer: 0.8
   wobbleFrequency: 4
-  cooldown: 3
 --- !u!114 &2064839994
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -254701,7 +254801,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxSteer: 0.8
-  cooldown: 3
 --- !u!114 &2064839995
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -254715,7 +254814,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxSteer: 0.8
-  cooldown: 3
 --- !u!114 &2064839996
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -254731,7 +254829,6 @@ MonoBehaviour:
   duration: 1.5
   peakSlow: 0.6
   ramp: 0.25
-  cooldown: 3
 --- !u!114 &2064839997
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -254745,7 +254842,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   duration: 1.5
-  cooldown: 6
 --- !u!114 &2064839998
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -254759,7 +254855,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   duration: 1.5
-  cooldown: 6
 --- !u!114 &2064839999
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -254773,7 +254868,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   duration: 1.5
-  cooldown: 6
 --- !u!4 &2065980752 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 160535730619945981, guid: 243a4033fc4deac45936cd8382edcda0,
@@ -262059,12 +262153,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 332246886f7caf349bea5526bb2aa1c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  multiplicationZoneThresholds: 280000003c00000050000000
-  muliplicatorValues:
+  multiplicationZoneThresholds: 14000000280000003c0000005000000064000000
+  multiplicatorValues:
+  - 0.1
+  - 0.5
   - 1
   - 1.5
   - 2
   - 2.5
+  multiplicatorColors:
+  - {r: 0.7058824, g: 0, b: 0, a: 1}
+  - {r: 0.8018868, g: 0.5000697, b: 0, a: 1}
+  - {r: 0.8584906, g: 0.8172011, b: 0.56287825, a: 1}
+  - {r: 0.39130247, g: 0.8584906, b: 0.33610713, a: 1}
+  - {r: 0.020469915, g: 0.8679245, b: 0.64803547, a: 1}
+  - {r: 0, g: 0.5089128, b: 0.764151, a: 1}
+  multiplierFontSizes:
+  - 42
+  - 44
+  - 46
+  - 48
+  - 50
+  - 52
 --- !u!114 &2111085467219387271
 MonoBehaviour:
   m_ObjectHideFlags: 0

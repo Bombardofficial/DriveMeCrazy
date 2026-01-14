@@ -9,7 +9,9 @@ public class PointMultiplication : MonoBehaviour
 {
 
     public List<int> multiplicationZoneThresholds = new() {20, 40, 60, 80, 100};
-    public List<float> muliplicatorValues = new() {0.1f, 0.5f, 1f, 1.5f, 2f, 2.5f};
+    public List<float> multiplicatorValues = new() {0.1f, 0.5f, 1f, 1.5f, 2f, 2.5f};
+    public List<Color> multiplicatorColors;
+    public List<float> multiplierFontSizes;
     float unitsToKmh = 2.4f;
     int currentMultiplicationZone = 0;
     ArcadeVehicleController vehicle;
@@ -19,6 +21,9 @@ public class PointMultiplication : MonoBehaviour
     {
         vehicle = GetComponent<ArcadeVehicleController>();
         playerManager = GetComponent<PlayerManager>();
+
+        if (multiplicatorValues.Count != multiplicatorColors.Count || multiplicatorValues.Count != multiplierFontSizes.Count)
+            Debug.LogWarning("[PointMultiplication] Not the same amount of multiplication zones as colors or font sizes!");
     }
 
     // Update is called once per frame
@@ -37,9 +42,24 @@ public class PointMultiplication : MonoBehaviour
 
         if (nextMultiplicationZone != currentMultiplicationZone)
         {
-            playerManager.SetPointMultiplier(muliplicatorValues[nextMultiplicationZone]);
+            playerManager.SetPointMultiplier(multiplicatorValues[nextMultiplicationZone]);
             currentMultiplicationZone = nextMultiplicationZone;
         }
         
+    }
+
+    public float GetCurrentMultiplier()
+    {
+        return multiplicatorValues[currentMultiplicationZone];
+    }
+
+    public Color GetCurrentMultiplicatorColor()
+    {
+        return multiplicatorColors[currentMultiplicationZone];
+    }
+
+    public float GetCurrentFontSize()
+    {
+        return multiplierFontSizes[currentMultiplicationZone];
     }
 }
