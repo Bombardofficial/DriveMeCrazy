@@ -13561,6 +13561,11 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: -60
       objectReference: {fileID: 0}
+    - target: {fileID: 1184011424531143063, guid: 6448d308caca6ec4e8a1a385318b1491,
+        type: 3}
+      propertyPath: m_text
+      value: prevent steering
+      objectReference: {fileID: 0}
     - target: {fileID: 2725333490284194735, guid: 6448d308caca6ec4e8a1a385318b1491,
         type: 3}
       propertyPath: m_text
@@ -13610,6 +13615,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Color.a
       value: 0.9607843
+      objectReference: {fileID: 0}
+    - target: {fileID: 4412956250129648306, guid: 6448d308caca6ec4e8a1a385318b1491,
+        type: 3}
+      propertyPath: m_text
+      value: forced lane switch left
       objectReference: {fileID: 0}
     - target: {fileID: 4913497921747408856, guid: 6448d308caca6ec4e8a1a385318b1491,
         type: 3}
