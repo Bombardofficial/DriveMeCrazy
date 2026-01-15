@@ -575,7 +575,7 @@ public class PlayerJoinManager : MonoBehaviour
         for (int i = 0; i < passengers.Count; ++i)
         {
             var p = passengers[i];
-            string line = $"Player {PlayerManager.Instance.GetSeatIndex(p) + 1}  -  {p.Points} pts";
+            string line = $"Player {p.PlayerNumber}  -  {p.Points} pts";
             resultsText.text = line + "\n" + resultsText.text;      // prepend
             yield return new WaitForSeconds(0.3f);
         }

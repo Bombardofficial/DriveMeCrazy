@@ -222,7 +222,7 @@ public class GameUIManager : MonoBehaviour
 
             string driverTag = (p == playerManager.CurrentDriver) ? " (Driver)" : "";
             tx.text = $"Player {p.PlayerNumber}{driverTag}";
-            tx.color = PlayerColors.Get(p.PlayerNumber);
+            tx.color = playerManager.GetColorForPlayerNumber(p.PlayerNumber);
 
             var numtx = playerScoreNumbers[slot];
             numtx.gameObject.SetActive(true);

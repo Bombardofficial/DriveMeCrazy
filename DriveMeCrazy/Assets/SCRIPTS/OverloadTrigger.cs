@@ -10,9 +10,9 @@ public class OverloadTrigger : MonoBehaviour
 
     private bool _triggered = false;
 
-    private EngineOverloadManager _overloadManager;
+    [SerializeField] private EngineOverloadManager _overloadManager;
 
-    private static int _overloadCount = 0;
+    [SerializeField] private static int _overloadCount = 0;
 
     void Awake()
     {
@@ -21,19 +21,21 @@ public class OverloadTrigger : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!_triggered && oneShot)
+        if (_triggered && oneShot)
             return;
         
-        _triggered = true;
+        Debug.Log($"[OverloadTrigger] Hit with {other.gameObject}");
+        
+        
 
         if (Random.Range(0f, 1f) > 0.5 ||_overloadCount >= _maxOverloads)
             return;
 
-        Debug.Log($"[OverloadTrigger] Hit with {other.gameObject}");
-
         // Adjust this check to your car setup
         if (!other.CompareTag("Driver"))
             return;
+
+        _triggered = true;
 
         Debug.Log($"[OverloadTrigger] Tag correct {other.gameObject}");
 
