@@ -483,6 +483,8 @@ public class PlayerJoinManager : MonoBehaviour
         // HUD fade
         StartCoroutine(FadeCanvas(gameplayHUD, 0, 1, hudFadeDuration, hudDelay));
 
+        PlayerManager.Instance.ReapplyPlayerColors();
+
         // Wait intro anim
         yield return WaitForClipToEnd(cameraAnimator, introClip.name);
 

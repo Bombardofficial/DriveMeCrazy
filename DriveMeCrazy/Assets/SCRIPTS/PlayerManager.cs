@@ -35,6 +35,10 @@ public class PlayerManager : MonoBehaviour
     public int pointIncrement = 100;
     float pointMultiplier = 1f;
 
+    
+    [Tooltip("Drag the GameObject with the PopupTextManager script here.")]
+    [SerializeField] private PopupTextManager popupTextManager;
+
     public static event Action<Passenger /*old*/, Passenger /*new*/> OnDriverChanged;
 
     /* -------- private -------- */
@@ -67,7 +71,10 @@ public class PlayerManager : MonoBehaviour
         if (!CurrentDriver) SetDriver(p);
     }
 
-    public void AwardDriver() => CurrentDriver?.IncrementPoints((int)(pointIncrement * pointMultiplier));
+    public void AwardDriver() { 
+        popupTextManager.Show($"{(int)(pointIncrement * pointMultiplier)}", popupTextManager.pointsColor);
+        CurrentDriver?.IncrementPoints((int)(pointIncrement * pointMultiplier));
+    }
     public void IncrementDriverPoints() => AwardDriver();      // alias
 
     public void SwapPassengers(int a, int b)
@@ -151,6 +158,11 @@ public class PlayerManager : MonoBehaviour
         }
 
         return new Passenger();
+    }
+
+    public void ShowDamageDone(float damagePercent)
+    {
+        popupTextManager.Show($"{damagePercent}%", popupTextManager.damageColor);
     }
 
     /* ===== helpers ===== */

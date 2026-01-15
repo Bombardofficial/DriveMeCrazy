@@ -3,6 +3,9 @@ using UnityEngine;
 using TMPro; // Required for TextMeshPro UI elements
 using System.Collections.Generic;
 using System.Collections;
+using ArcadeVP;
+using UnityEngine.UI;
+using System;
 
 public class GameUIManager : MonoBehaviour
 {
@@ -15,6 +18,14 @@ public class GameUIManager : MonoBehaviour
     [SerializeField] private List<TextMeshProUGUI> playerScoreTexts;
     [SerializeField] private List<TextMeshProUGUI> playerScoreNumbers;
     [SerializeField] private List<UnityEngine.UI.Image> playerScoreBackgrounds;
+
+    [Tooltip("A list of UI Text elements for sabotage cooldowns. Assign these in the Inspector.")]
+    [SerializeField] private List<Image> blockAbilityIcons;
+    [SerializeField] private List<TextMeshProUGUI> blockCooldownNumbers;
+    [SerializeField] private List<Image> blockCooldownOverlays;
+    [SerializeField] private List<Image> disruptAbilityIcons;
+    [SerializeField] private List<TextMeshProUGUI> disruptCooldownNumbers;
+    [SerializeField] private List<Image> disruptCooldownOverlays;
 
     [Tooltip("A list of UI Text elements for Point Mulitplier. Assign these in the Inspector.")]
     [SerializeField] private TextMeshProUGUI pointMultiplierText;
@@ -47,6 +58,7 @@ public class GameUIManager : MonoBehaviour
     [Header("Multiplier Pop Animation")]
     [SerializeField] private float popFactor = 1.25f;   
     [SerializeField] private float popDuration = 0.2f;  
+    private Vector3 baseMultiplierScale;
 
     public AudioSource newDriverAudio;
     public AudioClip newDriverAudioClip;
@@ -86,6 +98,8 @@ public class GameUIManager : MonoBehaviour
         }
 
         PlayerManager.OnDriverChanged += HandleDriverChange;
+
+        baseMultiplierScale = pointMultiplierNumber.transform.localScale;
     }
 
     void OnDestroy()     // or OnDisable if you prefer
@@ -150,6 +164,7 @@ public class GameUIManager : MonoBehaviour
         UpdateDamageUI();
         UpdatePlayerScoresUI();
         UpdatePointMultiplierUI();
+        UpdateAbilityCooldownsUI();
     }
 
     // ---- MODIFIED ----
@@ -217,6 +232,65 @@ public class GameUIManager : MonoBehaviour
         }
     }
 
+    void UpdateAbilityCooldownsUI()
+    {
+        IReadOnlyList<Passenger> passengers = playerManager.Passengers;
+
+        // 1. hide everything first
+        foreach (var ic in blockAbilityIcons) ic.gameObject.SetActive(false);
+        foreach (var num in blockCooldownNumbers) num.gameObject.SetActive(false);
+        foreach (var ov in blockCooldownOverlays) ov.gameObject.SetActive(false);
+        foreach (var ic in disruptAbilityIcons) ic.gameObject.SetActive(false);
+        foreach (var num in disruptCooldownNumbers) num.gameObject.SetActive(false);
+        foreach (var ov in disruptCooldownOverlays) ov.gameObject.SetActive(false);
+
+        // 2. (re)populate by permanent id ? slot index = PlayerNumber-1
+        foreach (var p in passengers)
+        {
+            int slot = p.PlayerNumber - 1;
+            if (slot < 0 || slot >= playerScoreTexts.Count) continue;
+            if (p.PlayerNumber == playerManager.CurrentDriver.PlayerNumber) continue;
+
+            blockAbilityIcons[slot].gameObject.SetActive(true);
+            blockAbilityIcons[slot].color = new(1f,1f,1f,1f);
+            disruptAbilityIcons[slot].gameObject.SetActive(true);
+            disruptAbilityIcons[slot].color = new(1f,1f,1f,1f);
+
+            SabotageInputHandler inputHandler = p.GetComponent<SabotageInputHandler>();
+
+            float time = Time.time;
+            float blockingCooldownRemain = inputHandler.LastBlock + inputHandler._blockingSabotageCooldown - time;
+            float disruptingCooldownRemain = inputHandler.LastDisrupt + inputHandler._disruptingSabotageCooldown - time;
+            float sabotageCooldownRemain = inputHandler.Lastsabotage + inputHandler._generalSabotageCooldown - time;
+
+            if (blockingCooldownRemain >= 0f)
+            {
+                TextMeshProUGUI text = blockCooldownNumbers[slot];
+                text.gameObject.SetActive(true);
+                text.text = $"{Math.Ceiling(blockingCooldownRemain)}";
+                blockAbilityIcons[slot].color = new(1f,1f,1f,0.7f);
+            }
+
+            if (disruptingCooldownRemain >= 0f)
+            {
+                TextMeshProUGUI text = disruptCooldownNumbers[slot];
+                text.gameObject.SetActive(true);
+                text.text = $"{Math.Ceiling(disruptingCooldownRemain)}";
+                disruptAbilityIcons[slot].color = new(1f,1f,1f,0.7f);
+            }
+
+            if (sabotageCooldownRemain >= 0f)
+            {
+                Image cover = blockCooldownOverlays[slot];
+                cover.gameObject.SetActive(true);
+                cover.fillAmount = sabotageCooldownRemain / inputHandler._generalSabotageCooldown;
+                cover = disruptCooldownOverlays[slot];
+                cover.gameObject.SetActive(true);
+                cover.fillAmount = sabotageCooldownRemain / inputHandler._generalSabotageCooldown;
+            }
+        }
+    }
+
     void UpdatePointMultiplierUI()
     {
         float currentMultiplier = pointMultiplication.GetCurrentMultiplier();
@@ -236,15 +310,16 @@ public class GameUIManager : MonoBehaviour
 
     void PopUpMultiplier()
     {
-        Vector3 originalScale = pointMultiplierNumber.transform.localScale;
 
         LeanTween.cancel(pointMultiplierNumber.gameObject);
 
-        LeanTween.scale(pointMultiplierNumber.gameObject, originalScale * popFactor, popDuration)
+        pointMultiplierNumber.transform.localScale = baseMultiplierScale;
+
+        LeanTween.scale(pointMultiplierNumber.gameObject, baseMultiplierScale * popFactor, popDuration)
                  .setEaseOutBack()
                  .setOnComplete(() =>
                  {
-                     LeanTween.scale(pointMultiplierNumber.gameObject, originalScale, popDuration * 0.8f)
+                     LeanTween.scale(pointMultiplierNumber.gameObject, baseMultiplierScale, popDuration * 0.8f)
                               .setEaseInOutQuad();
                  });
     }

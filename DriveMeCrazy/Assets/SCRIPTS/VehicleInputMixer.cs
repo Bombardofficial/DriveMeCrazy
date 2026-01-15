@@ -51,6 +51,9 @@ namespace ArcadeVP
             float brake = Mathf.Clamp01(_brake);
             float slow = Mathf.Clamp01(_slow + _addSlow);
 
+            if (_isGasBlocked) gas = 0f;
+            if (_isBrakeBlocked) brake = 0f;
+
             // 2. feed car
             _car.ProvideInputs(steer, gas, brake, slow);
 

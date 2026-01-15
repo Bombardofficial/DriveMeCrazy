@@ -16,8 +16,8 @@ namespace ArcadeVP
 
         private InputAction _blockingSabotageAction;
         private InputAction _disruptingSabotageAction;
-        private float _lastBlock = 0f;
-        private float _lastDisrupt = 0f;
+        private float _lastBlock = -6f;
+        private float _lastDisrupt = -4f;
         private float _lastSabotage = 0f;
 
         private Passenger _passenger;
@@ -119,6 +119,10 @@ namespace ArcadeVP
         }
 
         private Transform GetCurrentIconAnchor() => transform.parent.Find("SymbolAnchor");
+
+        public float LastBlock => _lastBlock;
+        public float LastDisrupt => _lastDisrupt;
+        public float Lastsabotage => _lastSabotage;
         
     }
 }
