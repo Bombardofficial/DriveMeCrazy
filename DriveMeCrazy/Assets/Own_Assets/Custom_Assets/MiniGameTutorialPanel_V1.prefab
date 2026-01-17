@@ -611,7 +611,7 @@ GameObject:
   - component: {fileID: 248772622295427240}
   - component: {fileID: 142756392935435671}
   m_Layer: 5
-  m_Name: MiniGameTutorialPanel
+  m_Name: MiniGameTutorialPanel_V1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
