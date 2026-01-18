@@ -476,6 +476,7 @@ public class PlayerJoinManager : MonoBehaviour
         StartCoroutine(FadeCanvas(gameplayHUD, 0, 1, hudFadeDuration, hudDelay));
 
         PlayerManager.Instance.ReapplyPlayerColors();
+        PlayerManager.Instance.InitSabotageHandlers();
 
         // Wait intro anim
         yield return WaitForClipToEnd(cameraAnimator, introClip.name);

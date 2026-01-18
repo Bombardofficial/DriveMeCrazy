@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using ArcadeVP;
+using Unity.VisualScripting;
 using UnityEngine;
 
 [RequireComponent(typeof(CarSeatManager))]
@@ -209,6 +211,14 @@ public class PlayerManager : MonoBehaviour
     {
         foreach (var p in _passengers)
             ApplyColorForPassenger(p);
+    }
+
+    public void InitSabotageHandlers()
+    {
+        foreach (Passenger p in _passengers)
+        {
+            p.GetComponent<SabotageInputHandler>().Init();
+        }
     }
 
 #if UNITY_EDITOR

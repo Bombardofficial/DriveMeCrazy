@@ -259,9 +259,9 @@ public class GameUIManager : MonoBehaviour
             SabotageInputHandler inputHandler = p.GetComponent<SabotageInputHandler>();
 
             float time = Time.time;
-            float blockingCooldownRemain = inputHandler.LastBlock + inputHandler._blockingSabotageCooldown - time;
-            float disruptingCooldownRemain = inputHandler.LastDisrupt + inputHandler._disruptingSabotageCooldown - time;
-            float sabotageCooldownRemain = inputHandler.Lastsabotage + inputHandler._generalSabotageCooldown - time;
+            float blockingCooldownRemain = inputHandler.LastBlock + inputHandler.BlockingSabotageCooldown - time;
+            float disruptingCooldownRemain = inputHandler.LastDisrupt + inputHandler.DisruptingSabotageCooldown - time;
+            float sabotageCooldownRemain = inputHandler.Lastsabotage + inputHandler.GeneralSabotageCooldown - time;
 
             if (blockingCooldownRemain >= 0f)
             {
@@ -283,10 +283,10 @@ public class GameUIManager : MonoBehaviour
             {
                 Image cover = blockCooldownOverlays[slot];
                 cover.gameObject.SetActive(true);
-                cover.fillAmount = sabotageCooldownRemain / inputHandler._generalSabotageCooldown;
+                cover.fillAmount = sabotageCooldownRemain / inputHandler.GeneralSabotageCooldown;
                 cover = disruptCooldownOverlays[slot];
                 cover.gameObject.SetActive(true);
-                cover.fillAmount = sabotageCooldownRemain / inputHandler._generalSabotageCooldown;
+                cover.fillAmount = sabotageCooldownRemain / inputHandler.GeneralSabotageCooldown;
             }
         }
     }

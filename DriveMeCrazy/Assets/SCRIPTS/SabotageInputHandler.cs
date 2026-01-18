@@ -9,9 +9,23 @@ namespace ArcadeVP
     public class SabotageInputHandler : MonoBehaviour
     {
 
-        public float _blockingSabotageCooldown = 6f;
-        public float _disruptingSabotageCooldown = 4f;
-        public float _generalSabotageCooldown = 2f;
+        [Header("Sabotage Cooldown Settings")]
+        [Tooltip("Base Blocking Cooldown Value")]
+        [SerializeField] private float _blockingSabotageBaseCooldown = 5f;
+        [Tooltip("Blocking Cooldown Increment per Player")]
+        [SerializeField] private float _blockingSabotageCooldownIncrement = 2f;
+        [Tooltip("Base Disrupting Cooldown Value")]
+        [SerializeField] private float _disruptingSabotageBaseCooldown = 4f;
+        [Tooltip("Disrupting Cooldown Increment per Player")]
+        [SerializeField] private float _disruptingSabotageCooldownIncrement = 1.5f;
+        [Tooltip("Base General Cooldown Value")]
+        [SerializeField] private float _generalSabotageBaseCooldown = 2f;
+        [Tooltip("General Cooldown Increment per Player")]
+        [SerializeField] private float _generalSabotageCooldownIncrement = 1f;
+
+        private float _blockingSabotageCooldown;
+        private float _disruptingSabotageCooldown;
+        private float _generalSabotageCooldown;
         private PlayerInput _playerInput;
 
         private InputAction _blockingSabotageAction;
@@ -52,6 +66,14 @@ namespace ArcadeVP
         {
             _blockingSabotageAction.performed -= FireBlockingSabotage;
             _disruptingSabotageAction.performed -= FireDisruptingSabotage;
+        }
+
+        public void Init()
+        {
+            float additionalPlayerCount = PlayerManager.Instance.Passengers.Count - 2f;
+            _blockingSabotageCooldown = _blockingSabotageBaseCooldown + additionalPlayerCount * _blockingSabotageCooldownIncrement;
+            _disruptingSabotageCooldown = _disruptingSabotageBaseCooldown + additionalPlayerCount * _disruptingSabotageCooldownIncrement;
+            _generalSabotageCooldown = _generalSabotageBaseCooldown + additionalPlayerCount * _generalSabotageCooldownIncrement;
         }
 
         private void FireBlockingSabotage(InputAction.CallbackContext context)
@@ -123,6 +145,9 @@ namespace ArcadeVP
         public float LastBlock => _lastBlock;
         public float LastDisrupt => _lastDisrupt;
         public float Lastsabotage => _lastSabotage;
+        public float BlockingSabotageCooldown => _blockingSabotageCooldown;
+        public float DisruptingSabotageCooldown => _disruptingSabotageCooldown;
+        public float GeneralSabotageCooldown => _generalSabotageCooldown;
         
     }
 }
