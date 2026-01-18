@@ -82,10 +82,6 @@ public class PlayerJoinManager : MonoBehaviour
     [SerializeField] TextMeshProUGUI transitionText;
     [SerializeField] TextMeshProUGUI countdownGametext;
 
-    [Header("Controlls")]
-    [SerializeField] GameObject driverControlls;
-    [SerializeField] GameObject passengerControlls;
-
     [Header("Lobby Music Bus")]
     [SerializeField] AudioReverbFilter musicReverb;
     [SerializeField] AudioSource lobbyMusic;
@@ -151,7 +147,6 @@ public class PlayerJoinManager : MonoBehaviour
 
         startPos = winnerText.rectTransform.anchoredPosition;
 
-        HideControllsImmediate();
         CacheLobbyDummyTintData();
         ResetLobbyDummies();
         PrepareLobbyState();
@@ -456,9 +451,6 @@ public class PlayerJoinManager : MonoBehaviour
 
         StartCoroutine(ShowTransitionTextDelayed(3f));
         StartCoroutine(ShowCountdownText(introClip.length - 3f));
-
-        StartCoroutine(ShowControlls(fadeOutDuration + 0.1f));
-        StartCoroutine(HideControlls(introClip.length - 3f));
 
         float clipLen = introClip.length / cameraAnimator.speed;
         float hudDelay = Mathf.Max(0f, clipLen - hudFadeDuration);
@@ -874,28 +866,6 @@ public class PlayerJoinManager : MonoBehaviour
 
             countdownGametext.gameObject.SetActive(false);
         }
-    }
-
-    IEnumerator ShowControlls(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        driverControlls.gameObject.SetActive(true);
-        passengerControlls.gameObject.SetActive(true);
-        yield return null;
-    }
-
-    IEnumerator HideControlls(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        driverControlls.gameObject.SetActive(false);
-        passengerControlls.gameObject.SetActive(false);
-        yield return null;
-    }
-
-    void HideControllsImmediate()
-    {
-        driverControlls.gameObject.SetActive(false);
-        passengerControlls.gameObject.SetActive(false);
     }
 
     /* ??????????????? CLEAN-UP ??????????????? */
