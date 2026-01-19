@@ -112350,7 +112350,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &588868784
 Transform:
   m_ObjectHideFlags: 0
@@ -119595,7 +119595,7 @@ HingeJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: 0.0000000037252903, y: 0.32834816, z: 0.043998722}
+  m_ConnectedAnchor: {x: 0, y: 0.32833862, z: 0.043945312}
   serializedVersion: 2
   m_UseSpring: 0
   m_Spring:
@@ -151586,7 +151586,7 @@ Transform:
   m_GameObject: {fileID: 1019152789}
   serializedVersion: 2
   m_LocalRotation: {x: 0.2915152, y: -0, z: -0, w: 0.9565663}
-  m_LocalPosition: {x: -0, y: 6.84, z: -10.180001}
+  m_LocalPosition: {x: 0, y: 6.8399963, z: -10.180054}
   m_LocalScale: {x: 2, y: 2, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -174600,7 +174600,7 @@ MonoBehaviour:
   tintSeatIconsWithPlayerColors: 1
   passengerPrefab: {fileID: 8489609346535448651, guid: 941008c8723fb2c4ea2699c0a7c72689,
     type: 3}
-  quickStartSingleDriver: 0
+  quickStartSingleDriver: 1
   driverPrefabOverride: {fileID: 8130422270257158639, guid: bda46582b7d5dd142879b9953dfbee16,
     type: 3}
   lobbyCountdownSeconds: 10
@@ -206860,8 +206860,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5788490844983555189, guid: d567075c4cb5f804aacdc3f50b0e780b,
         type: 3}
+      propertyPath: orthographic
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5788490844983555189, guid: d567075c4cb5f804aacdc3f50b0e780b,
+        type: 3}
       propertyPath: field of view
       value: 80
+      objectReference: {fileID: 0}
+    - target: {fileID: 5788490844983555189, guid: d567075c4cb5f804aacdc3f50b0e780b,
+        type: 3}
+      propertyPath: m_FocalLength
+      value: 14.3010435
       objectReference: {fileID: 0}
     - target: {fileID: 5788490844983555189, guid: d567075c4cb5f804aacdc3f50b0e780b,
         type: 3}
@@ -206877,6 +206887,11 @@ PrefabInstance:
         type: 3}
       propertyPath: orthographic size
       value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5788490844983555189, guid: d567075c4cb5f804aacdc3f50b0e780b,
+        type: 3}
+      propertyPath: m_projectionMatrixMode
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5819789256223594199, guid: d567075c4cb5f804aacdc3f50b0e780b,
         type: 3}
@@ -207247,6 +207262,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: GameTutorialCanvas (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4742392589939097497, guid: 9629fa062d40cc941960a5286363fb7f,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -211837,7 +211857,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1739467513
 Transform:
   m_ObjectHideFlags: 0
@@ -238391,7 +238411,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1948852401
 Transform:
   m_ObjectHideFlags: 0
@@ -246490,7 +246510,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2013742597
 Transform:
   m_ObjectHideFlags: 0
@@ -261559,7 +261579,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!222 &1096849248140081777
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -262724,8 +262744,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 5.3, y: 3.4, z: 13.81}
-  m_Center: {x: 0, y: 0.61, z: -0}
+  m_Size: {x: 5.3, y: 3.4, z: 10.01}
+  m_Center: {x: 0, y: 0.61, z: -0.56}
 --- !u!114 &2111085467219387262
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -267824,7 +267844,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!23 &7071404591312155713
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -268750,7 +268770,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!23 &7931868821940612579
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -269208,7 +269228,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!33 &8307223727004668023
 MeshFilter:
   m_ObjectHideFlags: 0
