@@ -189419,9 +189419,34 @@ PrefabInstance:
         type: 2}
     - target: {fileID: 149850634755253926, guid: b9dff2ffa5142b94d92fb0655c744eb0,
         type: 3}
+      propertyPath: m_TreeDistance
+      value: 5000
+      objectReference: {fileID: 0}
+    - target: {fileID: 149850634755253926, guid: b9dff2ffa5142b94d92fb0655c744eb0,
+        type: 3}
       propertyPath: m_MaterialTemplate
       value: 
       objectReference: {fileID: 2100000, guid: 2fe478e814573ff43854ae1c916ae1d8, type: 2}
+    - target: {fileID: 149850634755253926, guid: b9dff2ffa5142b94d92fb0655c744eb0,
+        type: 3}
+      propertyPath: m_TreeCrossFadeLength
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 149850634755253926, guid: b9dff2ffa5142b94d92fb0655c744eb0,
+        type: 3}
+      propertyPath: m_DetailObjectDistance
+      value: 80
+      objectReference: {fileID: 0}
+    - target: {fileID: 149850634755253926, guid: b9dff2ffa5142b94d92fb0655c744eb0,
+        type: 3}
+      propertyPath: m_TreeBillboardDistance
+      value: 400
+      objectReference: {fileID: 0}
+    - target: {fileID: 149850634755253926, guid: b9dff2ffa5142b94d92fb0655c744eb0,
+        type: 3}
+      propertyPath: m_TreeMaximumFullLODCount
+      value: 800
+      objectReference: {fileID: 0}
     - target: {fileID: 153917893808173826, guid: b9dff2ffa5142b94d92fb0655c744eb0,
         type: 3}
       propertyPath: m_Materials.Array.data[0]
@@ -268461,7 +268486,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!222 &7604453648802877590
 CanvasRenderer:
   m_ObjectHideFlags: 0
