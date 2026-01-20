@@ -45,6 +45,9 @@ public class Passenger : MonoBehaviour
             var r = tintRenderers[i];
             if (!r) continue;
 
+            if (r.GetComponentInParent<HatSocketMarker>() != null)
+                continue;
+
             r.GetPropertyBlock(_mpb);
             _mpb.SetColor(prop, c);
             r.SetPropertyBlock(_mpb);

@@ -160,6 +160,50 @@ Transform:
   - {fileID: 1038938852745331779}
   m_Father: {fileID: 6486849393121157020}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2353455307861254792
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6129167470699786461}
+  - component: {fileID: 7083508485432863310}
+  m_Layer: 0
+  m_Name: HatSocket
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6129167470699786461
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2353455307861254792}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0, y: 1.22, z: -0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6181273502791894057}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7083508485432863310
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2353455307861254792}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f80d0b3814ce4f442b912cc0c1a8d8a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2703606495862195016
 GameObject:
   m_ObjectHideFlags: 0
@@ -286,6 +330,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3736761526449188305}
+  - {fileID: 6129167470699786461}
   m_Father: {fileID: 7735747953850393451}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3420498481439597515
@@ -994,6 +1039,7 @@ GameObject:
   - component: {fileID: 7288222725335521155}
   - component: {fileID: 1196444326733482586}
   - component: {fileID: 8260394424312557742}
+  - component: {fileID: 1472179148445206570}
   m_Layer: 0
   m_Name: NewCharacterDriverPrefab
   m_TagString: Untagged
@@ -1064,8 +1110,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 88d87c3cd1a013b4f94c2d97f1ce6b53, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _blockingSabotageCooldown: 6
-  _disruptingSabotageCooldown: 4
+  _blockingSabotageBaseCooldown: 5
+  _blockingSabotageCooldownIncrement: 2
+  _disruptingSabotageBaseCooldown: 4
+  _disruptingSabotageCooldownIncrement: 1.5
+  _generalSabotageBaseCooldown: 2
+  _generalSabotageCooldownIncrement: 1
 --- !u!114 &3111666968825813832
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1109,6 +1159,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1f4e8908e5ce5a047a1dac7ce1b334cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  tintRenderers: []
+  colorPropertyCandidates:
+  - _BaseColor
+  - _Color
+  - _TintColor
 --- !u!114 &7288222725335521155
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1163,6 +1218,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0a05ffb1cf47284b8aa42605271a412, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1472179148445206570
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8130422270257158639}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02b9c470e1d42604aac44fbb7c45713a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hatSocket: {fileID: 6129167470699786461}
+  hatPrefab: {fileID: 100000, guid: a0dfaf0497ab5334a99165f16b697e6e, type: 3}
 --- !u!1 &8152611493920131529
 GameObject:
   m_ObjectHideFlags: 0

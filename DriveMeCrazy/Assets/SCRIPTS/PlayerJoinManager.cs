@@ -660,6 +660,9 @@ public class PlayerJoinManager : MonoBehaviour
             var r = rends[i];
             if (!r) continue;
 
+            if (r.GetComponentInParent<HatSocketMarker>() != null)
+                continue;
+
             r.GetPropertyBlock(mpb);
             mpb.SetColor(propId, c);
             r.SetPropertyBlock(mpb);

@@ -112,6 +112,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   carController: {fileID: 6985876312322409215}
+  trailLifeTime: 10
+  trailMinVertexDistance: 0.02
 --- !u!96 &6642785086890124070
 TrailRenderer:
   serializedVersion: 3
@@ -5131,6 +5133,91 @@ MonoBehaviour:
       m_Flags: 0
     m_Reference: {fileID: 1461506389955678125, guid: 2e79e7edeb1eae94f9049da0d825010a,
       type: 3}
+  steeringSabotageAction:
+    m_UseReference: 0
+    m_Action:
+      m_Name: Steering Sabotage
+      m_Type: 0
+      m_ExpectedControlType: 
+      m_Id: ec27a557-2501-4e8b-839d-fd160bc3a282
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+    m_Reference: {fileID: 0}
+  handbrakeSabotageAction:
+    m_UseReference: 0
+    m_Action:
+      m_Name: Handbrake Sabotage
+      m_Type: 0
+      m_ExpectedControlType: 
+      m_Id: 59e42fdd-8f77-4a66-b474-888e19718302
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+    m_Reference: {fileID: 0}
+  leftSteerSabotageAction:
+    m_UseReference: 0
+    m_Action:
+      m_Name: Left Steer Sabotage
+      m_Type: 0
+      m_ExpectedControlType: 
+      m_Id: 83ef1aff-4fc1-49da-822a-b3901b885938
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+    m_Reference: {fileID: 0}
+  rightSteerSabotageAction:
+    m_UseReference: 0
+    m_Action:
+      m_Name: Right Steer Sabotage
+      m_Type: 0
+      m_ExpectedControlType: 
+      m_Id: 4c3e406b-5cc0-46fd-ac05-5c8028a615d2
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+    m_Reference: {fileID: 0}
+  blockBrakeSabotageAction:
+    m_UseReference: 0
+    m_Action:
+      m_Name: Block Brake Sabotage
+      m_Type: 0
+      m_ExpectedControlType: 
+      m_Id: 12442047-0abe-4322-948f-982629f52071
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+    m_Reference: {fileID: 0}
+  blockGasSabotageAction:
+    m_UseReference: 0
+    m_Action:
+      m_Name: Block Gas Sabotage
+      m_Type: 0
+      m_ExpectedControlType: 
+      m_Id: 2cbff159-ced9-41ef-a477-624a4d1d6776
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+    m_Reference: {fileID: 0}
+  blockSteeringSabotageAction:
+    m_UseReference: 0
+    m_Action:
+      m_Name: Block Steering Sabotage
+      m_Type: 0
+      m_ExpectedControlType: 
+      m_Id: c58f073f-36f7-4224-aea2-ee198228625b
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+    m_Reference: {fileID: 0}
+  isDriver: 1
 --- !u!114 &6985876312322409215
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5151,6 +5238,9 @@ MonoBehaviour:
   laneSnapThreshold: 0.05
   laneChangeCooldown: 0.75
   minSpeedFractionForLaneChange: 0.1
+  currentLane: 1
+  useSeparateLaneSplines: 0
+  laneTrackSwitcher: {fileID: 0}
   cornerDetectionLookahead: 10
   cornerAngleThreshold: 15
   minDriftYawAngle: 20
@@ -5161,6 +5251,7 @@ MonoBehaviour:
   driftRollAngle: 10
   driftEntrySpeed: 8
   driftExitSpeed: 5
+  keepForwardDistanceDuringLaneChange: 1
   drivableSurface:
     serializedVersion: 2
     m_Bits: 64
@@ -5174,15 +5265,77 @@ MonoBehaviour:
   airbornePitchAngle: 30
   airbornePitchSpeed: 3
   bodyMesh: {fileID: 8689655326449570793}
+  followGroundMesh: 0
+  groundLostGrace: 0.1
   decelerationRate: 3
   brakeDeceleration: 10
   engineSound: {fileID: 1590859990394989180}
   minPitch: 0.317
   maxPitch: 2
   skidSound: {fileID: 3501158934286824151}
+  skidMaxVolume: 1
+  skidFadeTime: 0.25
   maxPitchChangePerSecond: 2
   skidWidth: 0.13985014
   speedRatioSmoothTime: 0.05
+  speedOvershootTolerance: 0.05
+  overshootBrakeDecel: 15
+  overshootLockTime: 1.5
+  overshootCornerAngle: 10
+  speedLimitUI: {fileID: 0}
+  frictionCoefficient: 200
+  balanceUI: {fileID: 0}
+  greenMinWidth: 0.2
+  greenMaxWidth: 0.5
+  balanceDriftSpeed: 0.4
+  balanceInputPower: 1.3
+  balanceFailThresh: 0.9
+  balanceFailGrace: 1
+  crashYawAngle: 80
+  crashRollAngle: 45
+  crashSpeedPenalty: 0.4
+  crashShakeIntensity: 1.2
+  fullDifficultyAtRatio: 1
+  minOvershootRatioToTrigger: 0.15
+  shrinkEasy: 0.02
+  shrinkHard: 0.15
+  oscAmpEasy: 0.15
+  oscAmpHard: 0.4
+  overspeedTriggerTime: 0.4
+  extraGraceAfterSwap: 1
+  preCueRange: {x: 0.25, y: 0.4}
+  uiAudio: {fileID: 0}
+  perfectCenterThreshold: 0.2
+  perfectHoldTime: 1.25
+  passDuration: 2
+  perfectBonusPoints: 100
+  cornerSlowFactor: 0.55
+  cornerDecel: 12
+  groundSmoothTime: 0.06
+  maxSnapY: 0.75
+  groundProbeRadius: 0.25
+  normalSmoothSpeed: 12
+  maxCrashDamage: 25
+  allowBrakeDuringLock: 1
+  stumbleLockTime: 0.15
+  debugLogs: 1
+  driverChangeGrace: 3
+  stickyExitSeconds: 0.75
+  minRoundVisible: 1
+  instantStartShortWindow: 0.5
+  forceOutcomeOnExit: 1
+  forceFailEdgeThresh: 0.85
+  directorInfluence: 0.6
+  inputPowerRange: {x: 1.1, y: 1.6}
+  driftSpeedEasy: 0.15
+  driftSpeedHard: 0.6
+  zoneFracEasy: 0.6
+  zoneFracHard: 0.18
+  failGraceRange: {x: 1.2, y: 0.6}
+  failEdgeRange: {x: 0.95, y: 0.85}
+  passDurationRange: {x: 1.6, y: 2.3}
+  perfectHoldRange: {x: 1, y: 1.6}
+  perfectCenterRange: {x: 0.28, y: 0.16}
 --- !u!54 &7348292119223376615
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -6114,6 +6267,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   carController: {fileID: 6985876312322409215}
+  trailLifeTime: 10
+  trailMinVertexDistance: 0.02
 --- !u!96 &4107126201474836140
 TrailRenderer:
   serializedVersion: 3
@@ -11017,6 +11172,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   carController: {fileID: 6985876312322409215}
+  trailLifeTime: 10
+  trailMinVertexDistance: 0.02
 --- !u!96 &1970109238223257551
 TrailRenderer:
   serializedVersion: 3
@@ -16099,6 +16256,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   carController: {fileID: 6985876312322409215}
+  trailLifeTime: 10
+  trailMinVertexDistance: 0.02
 --- !u!96 &1261322779967904652
 TrailRenderer:
   serializedVersion: 3

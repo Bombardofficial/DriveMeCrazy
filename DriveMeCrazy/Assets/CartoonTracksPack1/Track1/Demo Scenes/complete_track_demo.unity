@@ -126103,7 +126103,11 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 1822095987}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: d76c6c023703f034697179d14b9b970c,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 754755912}
   m_SourcePrefab: {fileID: 100100000, guid: d76c6c023703f034697179d14b9b970c, type: 3}
 --- !u!4 &754755909 stripped
 Transform:
@@ -126117,6 +126121,20 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 754755908}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &754755912
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 754755910}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02b9c470e1d42604aac44fbb7c45713a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hatSocket: {fileID: 0}
+  hatPrefab: {fileID: 100000, guid: a0dfaf0497ab5334a99165f16b697e6e, type: 3}
 --- !u!1 &755419632
 GameObject:
   m_ObjectHideFlags: 0
@@ -174600,7 +174618,7 @@ MonoBehaviour:
   tintSeatIconsWithPlayerColors: 1
   passengerPrefab: {fileID: 8489609346535448651, guid: 941008c8723fb2c4ea2699c0a7c72689,
     type: 3}
-  quickStartSingleDriver: 1
+  quickStartSingleDriver: 0
   driverPrefabOverride: {fileID: 8130422270257158639, guid: bda46582b7d5dd142879b9953dfbee16,
     type: 3}
   lobbyCountdownSeconds: 10
