@@ -262888,11 +262888,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   splineContainer: {fileID: 1775033746}
   maxSpeed: 50
-  acceleration: 3
+  acceleration: 4
   laneOffsetDistance: 4.8
-  laneChangeSpeed: 10
+  laneChangeSpeed: 13
   laneSnapThreshold: 0.05
-  laneChangeCooldown: 0.75
+  laneChangeCooldown: 0.6
   minSpeedFractionForLaneChange: 0.1
   currentLane: 1
   useSeparateLaneSplines: 0
