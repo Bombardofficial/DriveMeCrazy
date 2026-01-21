@@ -372,6 +372,24 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""CustomizationLeft"",
+                    ""type"": ""Button"",
+                    ""id"": ""ed2273fb-d191-407b-8c40-746a70585785"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""CustomizationRight"",
+                    ""type"": ""Button"",
+                    ""id"": ""66c8b451-2d0c-458e-b4f4-42ddcab97b9f"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -438,6 +456,28 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": ""Gamepad"",
                     ""action"": ""NextTutorial"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""2600047c-3c75-43d7-8fb0-d9746e6853d5"",
+                    ""path"": ""<Gamepad>/dpad/left"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""CustomizationLeft"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""579f818c-c1a3-43ba-95b8-d011589a3703"",
+                    ""path"": ""<Gamepad>/dpad/right"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""CustomizationRight"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -635,6 +675,8 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
         m_Lobby_SkipTutorial = m_Lobby.FindAction("SkipTutorial", throwIfNotFound: true);
         m_Lobby_BackTutorial = m_Lobby.FindAction("BackTutorial", throwIfNotFound: true);
         m_Lobby_NextTutorial = m_Lobby.FindAction("NextTutorial", throwIfNotFound: true);
+        m_Lobby_CustomizationLeft = m_Lobby.FindAction("CustomizationLeft", throwIfNotFound: true);
+        m_Lobby_CustomizationRight = m_Lobby.FindAction("CustomizationRight", throwIfNotFound: true);
         // CoopTask
         m_CoopTask = asset.FindActionMap("CoopTask", throwIfNotFound: true);
         m_CoopTask_Task = m_CoopTask.FindAction("Task", throwIfNotFound: true);
@@ -835,6 +877,8 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_Lobby_SkipTutorial;
     private readonly InputAction m_Lobby_BackTutorial;
     private readonly InputAction m_Lobby_NextTutorial;
+    private readonly InputAction m_Lobby_CustomizationLeft;
+    private readonly InputAction m_Lobby_CustomizationRight;
     public struct LobbyActions
     {
         private @VehicleControls m_Wrapper;
@@ -843,6 +887,8 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
         public InputAction @SkipTutorial => m_Wrapper.m_Lobby_SkipTutorial;
         public InputAction @BackTutorial => m_Wrapper.m_Lobby_BackTutorial;
         public InputAction @NextTutorial => m_Wrapper.m_Lobby_NextTutorial;
+        public InputAction @CustomizationLeft => m_Wrapper.m_Lobby_CustomizationLeft;
+        public InputAction @CustomizationRight => m_Wrapper.m_Lobby_CustomizationRight;
         public InputActionMap Get() { return m_Wrapper.m_Lobby; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -864,6 +910,12 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
             @NextTutorial.started += instance.OnNextTutorial;
             @NextTutorial.performed += instance.OnNextTutorial;
             @NextTutorial.canceled += instance.OnNextTutorial;
+            @CustomizationLeft.started += instance.OnCustomizationLeft;
+            @CustomizationLeft.performed += instance.OnCustomizationLeft;
+            @CustomizationLeft.canceled += instance.OnCustomizationLeft;
+            @CustomizationRight.started += instance.OnCustomizationRight;
+            @CustomizationRight.performed += instance.OnCustomizationRight;
+            @CustomizationRight.canceled += instance.OnCustomizationRight;
         }
 
         private void UnregisterCallbacks(ILobbyActions instance)
@@ -880,6 +932,12 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
             @NextTutorial.started -= instance.OnNextTutorial;
             @NextTutorial.performed -= instance.OnNextTutorial;
             @NextTutorial.canceled -= instance.OnNextTutorial;
+            @CustomizationLeft.started -= instance.OnCustomizationLeft;
+            @CustomizationLeft.performed -= instance.OnCustomizationLeft;
+            @CustomizationLeft.canceled -= instance.OnCustomizationLeft;
+            @CustomizationRight.started -= instance.OnCustomizationRight;
+            @CustomizationRight.performed -= instance.OnCustomizationRight;
+            @CustomizationRight.canceled -= instance.OnCustomizationRight;
         }
 
         public void RemoveCallbacks(ILobbyActions instance)
@@ -980,6 +1038,8 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
         void OnSkipTutorial(InputAction.CallbackContext context);
         void OnBackTutorial(InputAction.CallbackContext context);
         void OnNextTutorial(InputAction.CallbackContext context);
+        void OnCustomizationLeft(InputAction.CallbackContext context);
+        void OnCustomizationRight(InputAction.CallbackContext context);
     }
     public interface ICoopTaskActions
     {
