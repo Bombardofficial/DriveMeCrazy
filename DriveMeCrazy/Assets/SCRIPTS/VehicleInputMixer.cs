@@ -18,7 +18,7 @@ namespace ArcadeVP
         float _addSteer, _addSlow;
 
         /* blockings (sabotages) --------------------------------------------- */
-        static bool _isBrakeBlocked = false, _isGasBlocked = false, _isSteeringBlocked = false;
+        static bool _isBrakeBlocked = false, _isGasBlocked = false, _isSteeringBlocked = false, _isGasPressed = false;
         ArcadeVehicleController _car;
 
         public ArcadeVehicleController Car => _car;
@@ -85,6 +85,8 @@ namespace ArcadeVP
                 Instance._brake = brake;
                 Instance._slow = slow;
             }
+            if (_isGasPressed)
+                Instance._gas = 1f;
         }
 
         public static void AddSteer(float value)
@@ -98,6 +100,9 @@ namespace ArcadeVP
             if (!Instance) return;
             Instance._addSlow = Mathf.Max(Instance._addSlow, value01);
         }
+
+        public static void SabotageGasPress() => _isGasPressed = true;
+        public static void SabotageGasRelease() => _isGasPressed = false;
 
         public static void BlockBrake() => _isBrakeBlocked = true;
         public static void BlockGas() => _isGasBlocked = true;
