@@ -390,6 +390,15 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""CustomizationConfirm"",
+                    ""type"": ""Button"",
+                    ""id"": ""44a1ed9e-ef9f-4f9e-b0e6-90514ef0f92a"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -478,6 +487,17 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": ""Gamepad"",
                     ""action"": ""CustomizationRight"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""4af9d316-d96f-45c0-8450-ad276a844967"",
+                    ""path"": ""<Gamepad>/buttonNorth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""CustomizationConfirm"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -677,6 +697,7 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
         m_Lobby_NextTutorial = m_Lobby.FindAction("NextTutorial", throwIfNotFound: true);
         m_Lobby_CustomizationLeft = m_Lobby.FindAction("CustomizationLeft", throwIfNotFound: true);
         m_Lobby_CustomizationRight = m_Lobby.FindAction("CustomizationRight", throwIfNotFound: true);
+        m_Lobby_CustomizationConfirm = m_Lobby.FindAction("CustomizationConfirm", throwIfNotFound: true);
         // CoopTask
         m_CoopTask = asset.FindActionMap("CoopTask", throwIfNotFound: true);
         m_CoopTask_Task = m_CoopTask.FindAction("Task", throwIfNotFound: true);
@@ -879,6 +900,7 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_Lobby_NextTutorial;
     private readonly InputAction m_Lobby_CustomizationLeft;
     private readonly InputAction m_Lobby_CustomizationRight;
+    private readonly InputAction m_Lobby_CustomizationConfirm;
     public struct LobbyActions
     {
         private @VehicleControls m_Wrapper;
@@ -889,6 +911,7 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
         public InputAction @NextTutorial => m_Wrapper.m_Lobby_NextTutorial;
         public InputAction @CustomizationLeft => m_Wrapper.m_Lobby_CustomizationLeft;
         public InputAction @CustomizationRight => m_Wrapper.m_Lobby_CustomizationRight;
+        public InputAction @CustomizationConfirm => m_Wrapper.m_Lobby_CustomizationConfirm;
         public InputActionMap Get() { return m_Wrapper.m_Lobby; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -916,6 +939,9 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
             @CustomizationRight.started += instance.OnCustomizationRight;
             @CustomizationRight.performed += instance.OnCustomizationRight;
             @CustomizationRight.canceled += instance.OnCustomizationRight;
+            @CustomizationConfirm.started += instance.OnCustomizationConfirm;
+            @CustomizationConfirm.performed += instance.OnCustomizationConfirm;
+            @CustomizationConfirm.canceled += instance.OnCustomizationConfirm;
         }
 
         private void UnregisterCallbacks(ILobbyActions instance)
@@ -938,6 +964,9 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
             @CustomizationRight.started -= instance.OnCustomizationRight;
             @CustomizationRight.performed -= instance.OnCustomizationRight;
             @CustomizationRight.canceled -= instance.OnCustomizationRight;
+            @CustomizationConfirm.started -= instance.OnCustomizationConfirm;
+            @CustomizationConfirm.performed -= instance.OnCustomizationConfirm;
+            @CustomizationConfirm.canceled -= instance.OnCustomizationConfirm;
         }
 
         public void RemoveCallbacks(ILobbyActions instance)
@@ -1040,6 +1069,7 @@ public partial class @VehicleControls: IInputActionCollection2, IDisposable
         void OnNextTutorial(InputAction.CallbackContext context);
         void OnCustomizationLeft(InputAction.CallbackContext context);
         void OnCustomizationRight(InputAction.CallbackContext context);
+        void OnCustomizationConfirm(InputAction.CallbackContext context);
     }
     public interface ICoopTaskActions
     {

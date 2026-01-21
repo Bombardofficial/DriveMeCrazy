@@ -368,6 +368,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "CustomizationConfirm",
+                    "type": "Button",
+                    "id": "44a1ed9e-ef9f-4f9e-b0e6-90514ef0f92a",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -456,6 +465,17 @@
                     "processors": "",
                     "groups": "Gamepad",
                     "action": "CustomizationRight",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "4af9d316-d96f-45c0-8450-ad276a844967",
+                    "path": "<Gamepad>/buttonNorth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "CustomizationConfirm",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

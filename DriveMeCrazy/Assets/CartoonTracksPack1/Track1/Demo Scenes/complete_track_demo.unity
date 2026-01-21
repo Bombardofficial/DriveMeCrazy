@@ -6995,8 +6995,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
-  m_fontSizeBase: 36
+  m_fontSize: 40
+  m_fontSizeBase: 40
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -11820,8 +11820,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
-  m_fontSizeBase: 36
+  m_fontSize: 40
+  m_fontSizeBase: 40
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -17469,8 +17469,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
-  m_fontSizeBase: 36
+  m_fontSize: 40
+  m_fontSizeBase: 40
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -91437,7 +91437,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -668, y: -316.28854}
+  m_AnchoredPosition: {x: -668, y: -329}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &347367754
@@ -91487,8 +91487,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 35
-  m_fontSizeBase: 35
+  m_fontSize: 40
+  m_fontSizeBase: 40
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -107287,7 +107287,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -668, y: -316.28854}
+  m_AnchoredPosition: {x: -668, y: -329}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &519131611
@@ -107337,8 +107337,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 35
-  m_fontSizeBase: 35
+  m_fontSize: 40
+  m_fontSizeBase: 40
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -117887,8 +117887,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
-  m_fontSizeBase: 36
+  m_fontSize: 40
+  m_fontSizeBase: 40
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -134329,6 +134329,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 881506953}
+  - component: {fileID: 881506954}
   m_Layer: 5
   m_Name: Player2Custom
   m_TagString: Untagged
@@ -134360,6 +134361,20 @@ RectTransform:
   m_AnchoredPosition: {x: 457, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &881506954
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 881506952}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d402636796d2349408722dc0e5f1af05, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerIndex: 1
+  hatNameText: {fileID: 595536178}
 --- !u!43 &881640372
 Mesh:
   m_ObjectHideFlags: 0
@@ -174825,6 +174840,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tutorialController: {fileID: 1091771128}
   playerJoinCanvasRoot: {fileID: 1317100902}
+  hatUI: {fileID: 0}
+  customizationCanvasRoot: {fileID: 0}
   seatIcons:
   - {fileID: 6750848143244333423}
   - {fileID: 5767742030411327129}
@@ -181313,13 +181330,14 @@ GameObject:
   - component: {fileID: 1497324570}
   - component: {fileID: 1497324569}
   - component: {fileID: 1497324568}
+  - component: {fileID: 1497324572}
   m_Layer: 5
   m_Name: CharacterCustomCanvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1497324568
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -181407,6 +181425,40 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &1497324572
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1497324567}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad61fb22cd1acc042b01ac5b2279aec4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  customizationCanvasRoot: {fileID: 1497324567}
+  slots:
+  - {fileID: 2010566902}
+  - {fileID: 881506954}
+  - {fileID: 1743400194}
+  - {fileID: 1700660348}
+  hatPrefabs:
+  - {fileID: 0}
+  - {fileID: 100000, guid: a0dfaf0497ab5334a99165f16b697e6e, type: 3}
+  - {fileID: 100000, guid: 06c4131835f65024586454416f6b1f66, type: 3}
+  - {fileID: 100000, guid: a9853556c4fc4d44087cd153918f7305, type: 3}
+  - {fileID: 100000, guid: cf015317a103ab34483db3f2dc6f0f59, type: 3}
+  - {fileID: 100000, guid: 290f57b34312fbf448d3b8ca6b6bd41d, type: 3}
+  - {fileID: 100000, guid: a20ea7771cebbda4696ef82ef45481a0, type: 3}
+  hatNames:
+  - None
+  - CowboyHat
+  - MagicianHat
+  - MinerHat
+  - PoliceCap
+  - Sombrero
+  - VikingHelmet
 --- !u!1 &1497590239
 GameObject:
   m_ObjectHideFlags: 0
@@ -181675,7 +181727,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -668, y: -316.28854}
+  m_AnchoredPosition: {x: -668, y: -329}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1499608889
@@ -181725,8 +181777,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 35
-  m_fontSizeBase: 35
+  m_fontSize: 40
+  m_fontSizeBase: 40
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -209586,6 +209638,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1700660347}
+  - component: {fileID: 1700660348}
   m_Layer: 5
   m_Name: Player4Custom
   m_TagString: Untagged
@@ -209617,6 +209670,20 @@ RectTransform:
   m_AnchoredPosition: {x: 1291, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1700660348
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1700660346}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d402636796d2349408722dc0e5f1af05, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerIndex: 3
+  hatNameText: {fileID: 191929781}
 --- !u!1 &1700739668
 GameObject:
   m_ObjectHideFlags: 0
@@ -217310,6 +217377,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1743400193}
+  - component: {fileID: 1743400194}
   m_Layer: 5
   m_Name: Player3Custom
   m_TagString: Untagged
@@ -217341,6 +217409,20 @@ RectTransform:
   m_AnchoredPosition: {x: 872, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1743400194
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1743400192}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d402636796d2349408722dc0e5f1af05, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerIndex: 2
+  hatNameText: {fileID: 281126489}
 --- !u!4 &1743985773 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3517792593053471781, guid: b31cca7e1418b9042921e3ec481ec6ac,
@@ -246259,6 +246341,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2010566901}
+  - component: {fileID: 2010566902}
   m_Layer: 5
   m_Name: Player1Custom
   m_TagString: Untagged
@@ -246290,6 +246373,20 @@ RectTransform:
   m_AnchoredPosition: {x: 40, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &2010566902
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2010566900}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d402636796d2349408722dc0e5f1af05, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerIndex: 0
+  hatNameText: {fileID: 109846372}
 --- !u!1 &2010805276 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4795999477328522398, guid: b9dff2ffa5142b94d92fb0655c744eb0,
@@ -260069,7 +260166,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -668, y: -316.28854}
+  m_AnchoredPosition: {x: -668, y: -329}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2134622562
@@ -260119,8 +260216,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 35
-  m_fontSizeBase: 35
+  m_fontSize: 40
+  m_fontSizeBase: 40
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -265329,90 +265426,6 @@ MonoBehaviour:
       m_Flags: 0
     m_Reference: {fileID: 1461506389955678125, guid: 2e79e7edeb1eae94f9049da0d825010a,
       type: 3}
-  steeringSabotageAction:
-    m_UseReference: 0
-    m_Action:
-      m_Name: Steering Sabotage
-      m_Type: 0
-      m_ExpectedControlType: 
-      m_Id: 9680f9f7-dcc2-4d7c-bca1-99e89a2b0764
-      m_Processors: 
-      m_Interactions: 
-      m_SingletonActionBindings: []
-      m_Flags: 0
-    m_Reference: {fileID: 0}
-  handbrakeSabotageAction:
-    m_UseReference: 0
-    m_Action:
-      m_Name: Handbrake Sabotage
-      m_Type: 0
-      m_ExpectedControlType: 
-      m_Id: 4758ea9b-3d23-42d9-8e60-02579b755a1e
-      m_Processors: 
-      m_Interactions: 
-      m_SingletonActionBindings: []
-      m_Flags: 0
-    m_Reference: {fileID: 0}
-  leftSteerSabotageAction:
-    m_UseReference: 0
-    m_Action:
-      m_Name: Left Steer Sabotage
-      m_Type: 0
-      m_ExpectedControlType: 
-      m_Id: 5cbac1b8-a451-4176-9dbb-12e82cf4bdbc
-      m_Processors: 
-      m_Interactions: 
-      m_SingletonActionBindings: []
-      m_Flags: 0
-    m_Reference: {fileID: 0}
-  rightSteerSabotageAction:
-    m_UseReference: 0
-    m_Action:
-      m_Name: Right Steer Sabotage
-      m_Type: 0
-      m_ExpectedControlType: 
-      m_Id: 83200dfd-200c-4f34-a1af-0fe5bf1fe3a1
-      m_Processors: 
-      m_Interactions: 
-      m_SingletonActionBindings: []
-      m_Flags: 0
-    m_Reference: {fileID: 0}
-  blockBrakeSabotageAction:
-    m_UseReference: 0
-    m_Action:
-      m_Name: Block Brake Sabotage
-      m_Type: 0
-      m_ExpectedControlType: 
-      m_Id: 65d3af54-cc48-41cf-bc68-3e9a474feda9
-      m_Processors: 
-      m_Interactions: 
-      m_SingletonActionBindings: []
-      m_Flags: 0
-    m_Reference: {fileID: 0}
-  blockGasSabotageAction:
-    m_UseReference: 0
-    m_Action:
-      m_Name: Block Gas Sabotage
-      m_Type: 0
-      m_ExpectedControlType: 
-      m_Id: dc1335b6-8e7a-45df-a44f-9f1881a4e803
-      m_Processors: 
-      m_Interactions: 
-      m_SingletonActionBindings: []
-      m_Flags: 0
-    m_Reference: {fileID: 0}
-  blockSteeringSabotageAction:
-    m_UseReference: 0
-    m_Action:
-      m_Name: Block Steering Sabotage
-      m_Type: 0
-      m_ExpectedControlType: 
-      m_Id: 4ffff65e-e7a5-4381-a38d-5ec4746a6a96
-      m_Processors: 
-      m_Interactions: 
-      m_SingletonActionBindings: []
-      m_Flags: 0
-    m_Reference: {fileID: 0}
   isDriver: 1
 --- !u!65 &4051074286637142758
 BoxCollider:

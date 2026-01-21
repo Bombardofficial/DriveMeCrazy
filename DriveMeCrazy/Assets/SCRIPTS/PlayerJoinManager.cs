@@ -1,12 +1,13 @@
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.InputSystem;
-using UnityEngine.SceneManagement;
-using TMPro;
-using System.Collections;
-using System.Linq;
 using ArcadeVP;
 using System;
+using System.Collections;
+using System.Linq;
+using TMPro;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
 public class PlayerJoinManager : MonoBehaviour
 {
@@ -14,6 +15,12 @@ public class PlayerJoinManager : MonoBehaviour
     [Header("Tutorial")]
     [SerializeField] private GameTutorialController tutorialController;
     [SerializeField] private GameObject playerJoinCanvasRoot;
+
+    /* ???????????????????????? CUSTOMIZATION ???????????????????????? */
+    [Header("Customization")]
+    [SerializeField] private HatCustomizationUIManager hatUI;
+    [SerializeField] private GameObject customizationCanvasRoot;
+
 
     /* ?????????????????????????? INSPECTOR ?????????????????????????? */
     [Header("UI (Lobby)")]
@@ -385,6 +392,8 @@ public class PlayerJoinManager : MonoBehaviour
         pi.transform.SetPositionAndRotation(seat.position, seat.rotation);
         pi.transform.SetParent(seat, true);
 
+        hatUI.RegisterPlayer(seatIdx, pi.gameObject);
+
         var passenger = pi.GetComponent<Passenger>();
         PlayerManager.Instance?.RegisterPassenger(passenger, seatIdx);
 
@@ -430,7 +439,34 @@ public class PlayerJoinManager : MonoBehaviour
         countdownText?.gameObject.SetActive(false);
         PlayerInputManager.instance.DisableJoining();
 
+        var players = GetJoinedPlayers();
+
+        /// hide join UI
+        if (playerJoinCanvasRoot) playerJoinCanvasRoot.SetActive(false);
+
+        // --- CUSTOMIZATION FIRST ---
+        if (hatUI != null)
+        {
+            // (hatUI can toggle its own canvas root; depends on your setup)
+            yield return hatUI.RunCustomization(players, joinCount);
+        }
+        else
+        {
+            Debug.LogWarning("[PlayerJoinManager] hatUI is NULL (not assigned).");
+        }
+
+        // --- THEN TUTORIAL ---
+        if (tutorialController != null)
+        {
+            yield return tutorialController.RunTutorial(players);
+        }
+        else
+        {
+            Debug.LogWarning("[PlayerJoinManager] tutorialController is NULL (not assigned in Inspector).");
+        }
+
         /* Tutorial before intro camera fly */
+        /*
         if (tutorialController != null)
         {
             var players = GetJoinedPlayers();
@@ -442,6 +478,7 @@ public class PlayerJoinManager : MonoBehaviour
         {
             Debug.LogWarning("[PlayerJoinManager] tutorialController is NULL (not assigned in Inspector).");
         }
+        */
 
         yield return FadeCanvas(fadeOutCanvas, 1f, 0f, fadeOutDuration);
 
