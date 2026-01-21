@@ -568,7 +568,8 @@ public class PlayerJoinManager : MonoBehaviour
         for (int i = 0; i < passengers.Count; ++i)
         {
             var p = passengers[i];
-            string line = $"Player {p.PlayerNumber}  -  {p.Points} pts";
+            string color = ColorUtility.ToHtmlStringRGBA(PlayerManager.Instance.GetColorForPlayerNumber(p.PlayerNumber));
+            string line = $"<color=#{color}>Player {p.PlayerNumber}</color>  -  {p.Points} pts";
             resultsText.text = line + "\n" + resultsText.text;      // prepend
             yield return new WaitForSeconds(0.3f);
         }
