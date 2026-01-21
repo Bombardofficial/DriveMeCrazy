@@ -11,8 +11,7 @@ public class GameUIManager : MonoBehaviour
 {
     [Header("UI References")]
     [Tooltip("The UI Text element for displaying car health.")]
-    [SerializeField] private TextMeshProUGUI carDamageText;
-    [SerializeField] private TextMeshProUGUI carDamageNumber;
+    [SerializeField] private Image carDamage;
 
     [Tooltip("A list of UI Text elements for player scores. Assign these in the Inspector.")]
     [SerializeField] private List<TextMeshProUGUI> playerScoreTexts;
@@ -79,9 +78,9 @@ public class GameUIManager : MonoBehaviour
 
         // ---- NEW ----
         // Store the original color of the health text at the start.
-        if (carDamageNumber != null)
+        if (carDamage != null)
         {
-            _defaultHealthColor = carDamageNumber.color;
+            _defaultHealthColor = carDamage.color;
         }
         // -------------
 
@@ -177,33 +176,34 @@ public class GameUIManager : MonoBehaviour
     // This entire method has been updated for the new health display.
     void UpdateDamageUI()
     {
-        if (carDamageNumber == null) return;
+        if (carDamage == null) return;
 
-        // Calculate health as a percentage from 100 down to 0.
-        float healthPercent = (carDamageable.Health / carDamageable.maxHealth) * 100f;
+        // Calculate health as a percentage from 1 down to 0.
+        float health = (carDamageable.Health / carDamageable.maxHealth);
+        float healthPercent = health * 100;
 
         // Update the text to show "Car Health" and the new value.
-        carDamageNumber.text = $"{healthPercent:F0}%";
+        carDamage.fillAmount = health;
 
         // Logic to smoothly change the color based on the current health percentage.
         if (healthPercent > 50f)
         {
             // Health is good, use the default color.
-            carDamageNumber.color = _defaultHealthColor;
+            carDamage.color = _defaultHealthColor;
         }
         else if (healthPercent > 25f)
         {
             // Health is between 50% and 25%. We smoothly interpolate from default to orange.
             // 't' will go from 0 (at 50% health) to 1 (at 25% health).
             float t = 1.0f - ((healthPercent - 25f) / 25f);
-            carDamageNumber.color = Color.Lerp(_defaultHealthColor, _cautionColor, t);
+            carDamage.color = Color.Lerp(_defaultHealthColor, _cautionColor, t);
         }
         else // Health is 25% or lower.
         {
             // Health is critical. We smoothly interpolate from orange to red.
             // 't' will go from 0 (at 25% health) to 1 (at 0% health).
             float t = 1.0f - (healthPercent / 25f);
-            carDamageNumber.color = Color.Lerp(_cautionColor, _dangerColor, t);
+            carDamage.color = Color.Lerp(_cautionColor, _dangerColor, t);
         }
     }
     // --------------------
@@ -274,7 +274,7 @@ public class GameUIManager : MonoBehaviour
                 TextMeshProUGUI text = blockCooldownNumbers[slot];
                 text.gameObject.SetActive(true);
                 text.text = $"{Math.Ceiling(blockingCooldownRemain)}";
-                blockAbilityIcons[slot].color = new(1f,1f,1f,0.7f);
+                blockAbilityIcons[slot].color = new(1f,1f,1f,0.3f);
             }
 
             if (disruptingCooldownRemain >= 0f)
@@ -282,7 +282,7 @@ public class GameUIManager : MonoBehaviour
                 TextMeshProUGUI text = disruptCooldownNumbers[slot];
                 text.gameObject.SetActive(true);
                 text.text = $"{Math.Ceiling(disruptingCooldownRemain)}";
-                disruptAbilityIcons[slot].color = new(1f,1f,1f,0.7f);
+                disruptAbilityIcons[slot].color = new(1f,1f,1f,0.3f);
             }
 
             if (sabotageCooldownRemain >= 0f)
