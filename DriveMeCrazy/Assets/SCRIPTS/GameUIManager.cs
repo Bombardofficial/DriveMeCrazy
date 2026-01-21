@@ -54,6 +54,7 @@ public class GameUIManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI newDriverText;   // drag a big TMP text here
     [SerializeField] private float announceDuration = 1.5f;  // total time on-screen
     [SerializeField] private float shakeMagnitude = 40f;     // pixels
+    private Vector2 newDriverPosition;
 
     [Header("Multiplier Pop Animation")]
     [SerializeField] private float popFactor = 1.25f;   
@@ -98,6 +99,8 @@ public class GameUIManager : MonoBehaviour
         }
 
         PlayerManager.OnDriverChanged += HandleDriverChange;
+        newDriverText.GetComponent<CanvasGroup>().alpha = 1f;
+        newDriverPosition = newDriverText.rectTransform.anchoredPosition;
 
         baseMultiplierScale = pointMultiplierNumber.transform.localScale;
     }
@@ -123,9 +126,12 @@ public class GameUIManager : MonoBehaviour
     {
         // set-up
         newDriverText.text = message;
+        newDriverText.color = playerManager.GetColorForPlayerNumber(playerManager.CurrentDriver.PlayerNumber);
         newDriverText.alpha = 0f;
-        newDriverText.rectTransform.anchoredPosition = Vector2.zero;
+        newDriverText.rectTransform.anchoredPosition = newDriverPosition;
         newDriverText.gameObject.SetActive(true);
+
+        newDriverText.GetComponent<CanvasGroup>().alpha = 1f;
 
         float half = announceDuration * 0.5f;
         float t = 0f;
@@ -138,7 +144,7 @@ public class GameUIManager : MonoBehaviour
             newDriverText.alpha = Mathf.SmoothStep(0f, 1f, a);
 
             // simple screen-shake by jittering anchored position
-            Vector2 shake = UnityEngine.Random.insideUnitCircle * shakeMagnitude * (1f - a * 0.6f);
+            Vector2 shake = UnityEngine.Random.insideUnitCircle * shakeMagnitude * (1f - a * 0.6f) + newDriverPosition;
             newDriverText.rectTransform.anchoredPosition = shake;
 
             yield return null;

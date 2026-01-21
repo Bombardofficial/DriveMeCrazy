@@ -94575,6 +94575,16 @@ PrefabInstance:
       propertyPath: arrowDown
       value: 
       objectReference: {fileID: 1111560747}
+    - target: {fileID: 4630535389774214590, guid: 186d835971b893b46993c4a081eb9ffc,
+        type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 900
+      objectReference: {fileID: 0}
+    - target: {fileID: 4630535389774214590, guid: 186d835971b893b46993c4a081eb9ffc,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 300
+      objectReference: {fileID: 0}
     - target: {fileID: 4671335633864239459, guid: 186d835971b893b46993c4a081eb9ffc,
         type: 3}
       propertyPath: m_IsActive
@@ -94583,9 +94593,19 @@ PrefabInstance:
     - target: {fileID: 4718869220494948121, guid: 186d835971b893b46993c4a081eb9ffc,
         type: 3}
       propertyPath: m_text
-      value: 'New Driver:
+      value: 'Player 1
 
-        Player 2'
+        Takes the weel'
+      objectReference: {fileID: 0}
+    - target: {fileID: 4718869220494948121, guid: 186d835971b893b46993c4a081eb9ffc,
+        type: 3}
+      propertyPath: m_margin.x
+      value: 2.1246338
+      objectReference: {fileID: 0}
+    - target: {fileID: 4718869220494948121, guid: 186d835971b893b46993c4a081eb9ffc,
+        type: 3}
+      propertyPath: m_margin.z
+      value: -0.5876465
       objectReference: {fileID: 0}
     - target: {fileID: 4718869220494948121, guid: 186d835971b893b46993c4a081eb9ffc,
         type: 3}
