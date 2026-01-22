@@ -45,6 +45,9 @@ public class HatCustomizationUIManager : MonoBehaviour
 
     private void Awake()
     {
+        for (int i = 0; i < slots.Length; i++)
+            slots[i].SetJoined(false);
+
         if (customizationCanvasRoot != null)
             customizationCanvasRoot.SetActive(false);
         else
@@ -62,6 +65,8 @@ public class HatCustomizationUIManager : MonoBehaviour
         if (pi != null)
             playerInputs[seatIndex] = pi;
 
+        slots[seatIndex].SetJoined(true);
+
         UpdateSlotLabel(seatIndex);
 
         // Apply hat to BOTH: real player (if exists) and dummy (if exists)
@@ -70,19 +75,19 @@ public class HatCustomizationUIManager : MonoBehaviour
         if (running && playerInputs[seatIndex] != null)
             HookInputsForSeat(seatIndex);
 
-    /*if (seatIndex < 0 || seatIndex >= 4) return;
+        /*if (seatIndex < 0 || seatIndex >= 4) return;
 
-    equippers[seatIndex] = playerRoot.GetComponentInChildren<HatEquipper>(true);
-    playerInputs[seatIndex] = playerRoot.GetComponent<PlayerInput>();
+        equippers[seatIndex] = playerRoot.GetComponentInChildren<HatEquipper>(true);
+        playerInputs[seatIndex] = playerRoot.GetComponent<PlayerInput>();
 
-    // default label/hat
-    UpdateSlotLabel(seatIndex);
-    ApplyHat(seatIndex);
+        // default label/hat
+        UpdateSlotLabel(seatIndex);
+        ApplyHat(seatIndex);
 
-    // if customization already running, hook immediately
-    if (running) HookInputsForSeat(seatIndex);
-    */
-}
+        // if customization already running, hook immediately
+        if (running) HookInputsForSeat(seatIndex);
+        */
+    }
 
 public void RegisterDummy(int seatIndex, GameObject dummyRoot)
     {

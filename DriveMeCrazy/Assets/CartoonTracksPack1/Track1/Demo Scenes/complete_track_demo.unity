@@ -134433,6 +134433,7 @@ GameObject:
   m_Component:
   - component: {fileID: 881506953}
   - component: {fileID: 881506954}
+  - component: {fileID: 881506955}
   m_Layer: 5
   m_Name: Player2Custom
   m_TagString: Untagged
@@ -134476,8 +134477,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d402636796d2349408722dc0e5f1af05, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerIndex: 1
+  canvasGroup: {fileID: 881506955}
   hatNameText: {fileID: 595536178}
+  inactiveLabel: None
+--- !u!225 &881506955
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 881506952}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!43 &881640372
 Mesh:
   m_ObjectHideFlags: 0
@@ -209881,6 +209895,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1700660347}
   - component: {fileID: 1700660348}
+  - component: {fileID: 1700660349}
   m_Layer: 5
   m_Name: Player4Custom
   m_TagString: Untagged
@@ -209924,8 +209939,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d402636796d2349408722dc0e5f1af05, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerIndex: 3
+  canvasGroup: {fileID: 1700660349}
   hatNameText: {fileID: 191929781}
+  inactiveLabel: None
+--- !u!225 &1700660349
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1700660346}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &1700739668
 GameObject:
   m_ObjectHideFlags: 0
@@ -217620,6 +217648,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1743400193}
   - component: {fileID: 1743400194}
+  - component: {fileID: 1743400195}
   m_Layer: 5
   m_Name: Player3Custom
   m_TagString: Untagged
@@ -217663,8 +217692,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d402636796d2349408722dc0e5f1af05, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerIndex: 2
+  canvasGroup: {fileID: 1743400195}
   hatNameText: {fileID: 281126489}
+  inactiveLabel: None
+--- !u!225 &1743400195
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1743400192}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!4 &1743985773 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3517792593053471781, guid: b31cca7e1418b9042921e3ec481ec6ac,
@@ -246584,6 +246626,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2010566901}
   - component: {fileID: 2010566902}
+  - component: {fileID: 2010566903}
   m_Layer: 5
   m_Name: Player1Custom
   m_TagString: Untagged
@@ -246627,8 +246670,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d402636796d2349408722dc0e5f1af05, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerIndex: 0
+  canvasGroup: {fileID: 2010566903}
   hatNameText: {fileID: 109846372}
+  inactiveLabel: None
+--- !u!225 &2010566903
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2010566900}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &2010805276 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4795999477328522398, guid: b9dff2ffa5142b94d92fb0655c744eb0,
