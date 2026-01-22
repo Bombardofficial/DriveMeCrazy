@@ -208719,15 +208719,31 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: -88
       objectReference: {fileID: 0}
+    - target: {fileID: 6734108097942938523, guid: 9629fa062d40cc941960a5286363fb7f,
+        type: 3}
+      propertyPath: m_text
+      value: '- sabotage the driver
+
+        - last passenger to sabotage (when car
+        health reaches 0) gets to be the next driver'
+      objectReference: {fileID: 0}
     - target: {fileID: 6909747548574809535, guid: 9629fa062d40cc941960a5286363fb7f,
         type: 3}
       propertyPath: m_text
-      value: 'prevents of forces the driver to:'
+      value: 'prevents or forces the driver to:'
       objectReference: {fileID: 0}
     - target: {fileID: 7085680575359880003, guid: 9629fa062d40cc941960a5286363fb7f,
         type: 3}
       propertyPath: m_AnchoredPosition.x
       value: -234
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298824350083891741, guid: 9629fa062d40cc941960a5286363fb7f,
+        type: 3}
+      propertyPath: m_text
+      value: "- 1 car, 1 driver and 1-3 passengers\n- only the driver can collect
+        points \n- only the driver can get Drift Checks\n- use sabotages to hinder
+        the driver collecting points\n- use sabotages to hit obsatcles = car health
+        loss"
       objectReference: {fileID: 0}
     - target: {fileID: 7316512158992093928, guid: 9629fa062d40cc941960a5286363fb7f,
         type: 3}
@@ -208742,7 +208758,7 @@ PrefabInstance:
     - target: {fileID: 7896673059878842008, guid: 9629fa062d40cc941960a5286363fb7f,
         type: 3}
       propertyPath: m_text
-      value: forcelane switch right
+      value: force lane switch right
       objectReference: {fileID: 0}
     - target: {fileID: 7939094146898843961, guid: 9629fa062d40cc941960a5286363fb7f,
         type: 3}
