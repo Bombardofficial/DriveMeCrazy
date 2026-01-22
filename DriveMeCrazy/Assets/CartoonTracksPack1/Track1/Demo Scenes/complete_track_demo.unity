@@ -131062,6 +131062,16 @@ PrefabInstance:
       propertyPath: _playerManager
       value: 
       objectReference: {fileID: 2111085467219387267}
+    - target: {fileID: 3481089596873969149, guid: 7d7201b852c343d45adfd5a2b7ed9d90,
+        type: 3}
+      propertyPath: _slowMotionFactor
+      value: 0.03
+      objectReference: {fileID: 0}
+    - target: {fileID: 3481089596873969149, guid: 7d7201b852c343d45adfd5a2b7ed9d90,
+        type: 3}
+      propertyPath: _slowMotionFadeDuration
+      value: 0.7
+      objectReference: {fileID: 0}
     - target: {fileID: 5206992491515278959, guid: 7d7201b852c343d45adfd5a2b7ed9d90,
         type: 3}
       propertyPath: m_LocalPosition.x
