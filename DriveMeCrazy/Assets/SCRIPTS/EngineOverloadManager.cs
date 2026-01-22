@@ -1,8 +1,10 @@
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
+using System.Collections;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using ArcadeVP;
 
 public class OverloadButton
 {
@@ -39,6 +41,8 @@ public class EngineOverloadManager : MonoBehaviour
     public float _overloadDuration = 4f;
     public int _successPointBonus = 50;
     public int _failurePointPenalty = 30;
+    public float _slowMotionFadeDuration = 1f;
+    public float _slowMotionFactor = 0.05f;
 
     private float _timer;
     private bool _isActive;
@@ -50,6 +54,7 @@ public class EngineOverloadManager : MonoBehaviour
     // External references
     public PlayerManager _playerManager;
     public OverloadUIController _uiController;
+    public ArcadeVehicleController _carController;
 
     void Awake()
     {
@@ -66,6 +71,8 @@ public class EngineOverloadManager : MonoBehaviour
 
         _passengerPlayerIds.Clear();
 
+        StartCoroutine(SlowMotion(_slowMotionFactor, _slowMotionFadeDuration));
+
         foreach (var player in passengers)
         {
             _passengerPlayerIds.Add(player.PlayerNumber);
@@ -74,7 +81,7 @@ public class EngineOverloadManager : MonoBehaviour
 
         InitializeButtons(passengers.Count);
 
-        _uiController.Show(_buttons.Values.ToList());
+        _uiController.Show(_buttons.Values.ToList(), _slowMotionFadeDuration);
     }
 
     public void OnPlayerHoldButton(Passenger passenger, InputControl control)
@@ -127,7 +134,7 @@ public class EngineOverloadManager : MonoBehaviour
     {
         if (!_isActive) return;
 
-        _timer -= Time.deltaTime;
+        _timer -= Time.unscaledDeltaTime;
         _uiController.UpdateTimer(_timer / _overloadDuration);
 
         if (AllButtonsHeld())
@@ -173,7 +180,7 @@ public class EngineOverloadManager : MonoBehaviour
         // Success feedback
         _uiController.PlaySuccess();
 
-        Invoke(nameof(Cleanup), 0.6f);
+        StartCoroutine(CleanupCoroutine(0.8f, true));
     }
 
     private void ResolveFailure()
@@ -185,10 +192,10 @@ public class EngineOverloadManager : MonoBehaviour
         // Failure feedback
         _uiController.PlayFailure();
 
-        Invoke(nameof(Cleanup), 0.8f);
+        StartCoroutine(CleanupCoroutine(0.8f, false));
     }
 
-    private void Cleanup()
+    private void Cleanup(bool success)
     {
         foreach (int playerId in _passengerPlayerIds)
         {
@@ -202,6 +209,15 @@ public class EngineOverloadManager : MonoBehaviour
 
         // Hide UI
         _uiController.Hide();
+
+        StartCoroutine(SlowMotion(1f, _slowMotionFadeDuration));
+
+        if (!success) 
+        {
+            _carController.TriggerSpeedStumbleExternal();
+            Debug.Log("[EngineOverloadManager] Triggered failure");
+        }
+
     }
 
     private OverloadControlType? GetControlType(InputControl control)
@@ -235,4 +251,31 @@ public class EngineOverloadManager : MonoBehaviour
             .Take(n)
             .ToArray();
     }
+
+    IEnumerator SlowMotion(float targetScale, float duration) {
+        float startScale = Time.timeScale;
+        float elapsed = 0f;
+
+        while (elapsed < duration) {
+            elapsed += Time.unscaledDeltaTime;
+            Time.timeScale = Mathf.Lerp(startScale, targetScale, elapsed / duration);
+            Time.fixedDeltaTime = 0.02f * Time.timeScale;
+            yield return null;
+        }
+
+        Time.timeScale = targetScale;
+        Time.fixedDeltaTime = 0.02f * Time.timeScale;
+    }
+
+    private IEnumerator CleanupCoroutine(float delay, bool success)
+{
+    float elapsed = 0f;
+    while (elapsed < delay)
+    {
+        elapsed += Time.unscaledDeltaTime;
+        yield return null;
+    }
+
+    Cleanup(success); // call your method
+}
 }

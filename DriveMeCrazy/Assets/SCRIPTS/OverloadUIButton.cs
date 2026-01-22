@@ -56,8 +56,8 @@ public class OverloadUIButton : MonoBehaviour
         icon.color = Color.green;
         transform.localScale = Vector3.one * 1.1f;
 
-        LeanTween.scale(gameObject, Vector3.one, 0.2f);
-        LeanTween.alpha(icon.rectTransform, 0f, 0.3f);
+        LeanTween.scale(gameObject, Vector3.one, 0.2f).setIgnoreTimeScale(true);
+        LeanTween.alpha(icon.rectTransform, 0f, 0.3f).setIgnoreTimeScale(true);
     }
 
     public void PlayFailureFlash()
@@ -70,9 +70,9 @@ public class OverloadUIButton : MonoBehaviour
         icon.color = Color.red;
 
         LeanTween.moveX(gameObject, transform.position.x + 10f, 0.05f)
-            .setLoopPingPong(2);
+            .setLoopPingPong(2).setIgnoreTimeScale(true);
 
-        LeanTween.alpha(icon.rectTransform, 0f, 0.4f);
+        LeanTween.alpha(icon.rectTransform, 0f, 0.4f).setIgnoreTimeScale(true);
     }
 
     public void ResetVisuals()

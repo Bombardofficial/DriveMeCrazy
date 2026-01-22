@@ -26,13 +26,14 @@ public class OverloadUIController : MonoBehaviour
         HideImmediate();
     }
 
-    public void Show(List<OverloadButton> buttons)
+    public void Show(List<OverloadButton> buttons, float fadeInDuration)
     {
         Clear();
 
         gameObject.SetActive(true);
 
-        overloadUICanvas.alpha = 1f;
+        //overloadUICanvas.alpha = 1f;
+        StartCoroutine(FadeCanvas(fadeInDuration));
         overloadUICanvas.interactable = false;
         overloadUICanvas.blocksRaycasts = false;
 
@@ -50,6 +51,16 @@ public class OverloadUIController : MonoBehaviour
 
         overheatMessage.gameObject.SetActive(true);
         holdMessage.gameObject.SetActive(true);
+    }
+
+    IEnumerator FadeCanvas(float duration)
+    {
+        while (duration > 0f) 
+        {
+            overloadUICanvas.alpha = Mathf.MoveTowards(overloadUICanvas.alpha, 1f, (1f / duration) * Time.unscaledDeltaTime);
+            duration -= Time.unscaledDeltaTime;
+            yield return null;
+        }
     }
 
     public void UpdateTimer(float ratio)

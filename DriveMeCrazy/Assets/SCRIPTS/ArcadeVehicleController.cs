@@ -166,17 +166,17 @@ namespace ArcadeVP
         [Tooltip("Overshoot % where the game reaches MAX difficulty")]
         public float fullDifficultyAtRatio = 1.0f;   // 100 % over
                                                      // ??  MINI-GAME TUNING -------------------------------------------------
-        [Header("Mini-game – trigger threshold")]
+        [Header("Mini-game ï¿½ trigger threshold")]
         [Tooltip("Overshoot ratio (0.15 = 15 % past the sign) below which the mini-game never triggers")]
         public float minOvershootRatioToTrigger = 0.15f;
 
-        [Header("Mini-game – difficulty curves")]
+        [Header("Mini-game ï¿½ difficulty curves")]
         public float shrinkEasy = 0.02f;   // green-zone shrink (frac/s)
         public float shrinkHard = 0.15f;
         public float oscAmpEasy = 0.15f;   // zone oscillation amplitude
         public float oscAmpHard = 0.40f;
 
-        [Header("Mini-game – timing")]
+        [Header("Mini-game ï¿½ timing")]
         public float overspeedTriggerTime = 0.40f;  // sustain time before start
         public float extraGraceAfterSwap = 1.0f;   // in addition to driverChangeGrace
                                                    // ---------------------------------------------------------------------
@@ -186,14 +186,14 @@ namespace ArcadeVP
         int armedSignIndex = -1;
         float armedLimitSnapshot = 0f;
 
-        [Header("Mini-game – UX & Pre-cue")]
+        [Header("Mini-game ï¿½ UX & Pre-cue")]
         [Tooltip("Pre-cue window before the gauge appears (seconds)")]
         public Vector2 preCueRange = new Vector2(0.25f, 0.40f); // NEW
         [Tooltip("Optional UI SFX source for mini-game beeps")]
         public AudioSource uiAudio; // NEW
 
 
-        [Header("Mini-game – outcomes")]
+        [Header("Mini-game ï¿½ outcomes")]
         [Tooltip("Stay within this NormalizedError to count as centred")]
         [Range(0.05f, 0.5f)] public float perfectCenterThreshold = 0.20f; // NEW
         [Tooltip("Seconds being centred to earn PERFECT")]
@@ -212,9 +212,9 @@ namespace ArcadeVP
 
 
         [Header("Ground Smoothing")]
-        public float groundSmoothTime = 0.06f;     // 0.04–0.10 tipik
-        public float maxSnapY = 0.75f;             // nagy lépcsõn snapel, ne simítson örökké
-        public float groundProbeRadius = 0.25f;    // 0.2–0.35 tipik
+        public float groundSmoothTime = 0.06f;     // 0.04ï¿½0.10 tipik
+        public float maxSnapY = 0.75f;             // nagy lï¿½pcsï¿½n snapel, ne simï¿½tson ï¿½rï¿½kkï¿½
+        public float groundProbeRadius = 0.25f;    // 0.2ï¿½0.35 tipik
 
         private float _ySmoothVel;
         private float _smoothedY;
@@ -269,7 +269,7 @@ namespace ArcadeVP
 
        float ignoreOverspeedUntil = 0f;          // runtime timer
 
-        [Header("Mini-game – corner/zone robustness")]
+        [Header("Mini-game ï¿½ corner/zone robustness")]
         [Tooltip("Keep the zone logically active this long after leaving the trigger.")]
         public float stickyExitSeconds = 0.75f;
 
@@ -298,19 +298,19 @@ namespace ArcadeVP
 
         public float TrackTNormalized => (splineLength > 0f) ? (traveledDistance / splineLength) : 0f;
 
-        [Header("Mini-game – AI adaptive mapping")]
+        [Header("Mini-game ï¿½ AI adaptive mapping")]
         [Tooltip("Blend 0=overspeed-only  1=director-only")]
         [Range(0f, 1f)] public float directorInfluence = 0.6f;
 
-        [Tooltip("Scale the driver’s pedal effect on the pointer.")]
+        [Tooltip("Scale the driverï¿½s pedal effect on the pointer.")]
         public Vector2 inputPowerRange = new Vector2(1.10f, 1.60f);   // easy .. hard
 
-        [Tooltip("How ‘sticky’ the pointer’s self-drift is.")]
-        public float driftSpeedEasy = 0.15f;     // (already existed above – keep values)
+        [Tooltip("How ï¿½stickyï¿½ the pointerï¿½s self-drift is.")]
+        public float driftSpeedEasy = 0.15f;     // (already existed above ï¿½ keep values)
         public float driftSpeedHard = 0.60f;
 
         [Tooltip("Initial green-zone width as a fraction of the bar.")]
-        public float zoneFracEasy = 0.60f;       // (already existed above – keep)
+        public float zoneFracEasy = 0.60f;       // (already existed above ï¿½ keep)
         public float zoneFracHard = 0.18f;
 
         [Tooltip("Seconds allowed in red before a stumble/crash.")]
@@ -325,7 +325,7 @@ namespace ArcadeVP
         [Tooltip("Seconds centred to PERFECT.")]
         public Vector2 perfectHoldRange = new Vector2(1.00f, 1.60f);
 
-        [Tooltip("How close to centre counts as ‘centred’.")]
+        [Tooltip("How close to centre counts as ï¿½centredï¿½.")]
         public Vector2 perfectCenterRange = new Vector2(0.28f, 0.16f);
 
         // ---- Per-round, locked tuning (NEW) ----
@@ -340,7 +340,7 @@ namespace ArcadeVP
 
         public event Action CrashHappened;
 
-        // +1 = jobbra vált, -1 = balra vált, 0 = nincs váltás
+        // +1 = jobbra vï¿½lt, -1 = balra vï¿½lt, 0 = nincs vï¿½ltï¿½s
         public int LaneChangeDirection
         {
             get
@@ -389,7 +389,7 @@ namespace ArcadeVP
             armedSignIndex = -1;
             armedLimitSnapshot = 0f;
 
-            // no “zone consumed” on cancel
+            // no ï¿½zone consumedï¿½ on cancel
             overspeedTimer = 0f;
 
             // stop any pre-cue beep
@@ -438,7 +438,7 @@ namespace ArcadeVP
 
         void AbortAllSpeedZoneStuff()
         {
-            // stop pending "arm" (pre-cue) so it can’t fire
+            // stop pending "arm" (pre-cue) so it canï¿½t fire
             if (armCR != null) { StopCoroutine(armCR); armCR = null; }
 
             // cut any pre-cue beep immediately
@@ -459,7 +459,7 @@ namespace ArcadeVP
         {
             if (!PlayerJoinManager.IsRaceStarted) return;
 
-            // detect “bounce enter” (multiple colliders / tiny re-enter) -> don’t nuke state
+            // detect ï¿½bounce enterï¿½ (multiple colliders / tiny re-enter) -> donï¿½t nuke state
             int prevSign = activeSignIndex;
             float prevLimit = activeSpeedLimit;
             bool wasInZone = activeSpeedLimit > 0f;
@@ -520,7 +520,7 @@ namespace ArcadeVP
         }
 
 
-        // Optional legacy wrapper (ha máshol hívod paraméter nélkül)
+        // Optional legacy wrapper (ha mï¿½shol hï¿½vod paramï¿½ter nï¿½lkï¿½l)
         public void ExitSpeedLimit()
         {
             ExitSpeedLimit(activeSignIndex);
@@ -675,7 +675,7 @@ namespace ArcadeVP
                 laneTrackSwitcher.laneChangeCooldown = laneChangeCooldown;
                 laneTrackSwitcher.laneChangeDuration = Mathf.Max(0.05f, laneOffsetDistance / Mathf.Max(0.01f, laneChangeSpeed));
 
-                float td = traveledDistance; // copy – switcher can do internal math without stealing forward distance
+                float td = traveledDistance; // copy ï¿½ switcher can do internal math without stealing forward distance
                 laneTrackSwitcher.Tick(dt, ref td, out bool laneFinished);
 
                 // Only apply the switcher's distance corrections if you explicitly want the old behavior
@@ -727,7 +727,7 @@ namespace ArcadeVP
             }
             else
             {
-                // outside eligibility -> don’t accumulate
+                // outside eligibility -> donï¿½t accumulate
                 overspeedTimer = 0f;
             }
 
@@ -759,7 +759,7 @@ namespace ArcadeVP
             // --- Robust end-of-zone handling ---
             if (balanceActive)
             {
-                // If sticky window is ending, but round hasn’t been visible long enough, extend sticky
+                // If sticky window is ending, but round hasnï¿½t been visible long enough, extend sticky
                 float visibleSoFar = Mathf.Max(0f, Time.time - roundStartTime);
                 if (zoneExiting && Time.time >= zoneStickyUntil && visibleSoFar < minRoundVisible)
                 {
@@ -826,8 +826,8 @@ namespace ArcadeVP
                 driftInput = 0f;
 
                 if (!allowBrakeDuringLock)
-                    slowInput = 0f;   // ha tényleg full freeze kell
-                                      // ha allowBrakeDuringLock=true: slowInput marad, tehát azonnal tudsz fékezni
+                    slowInput = 0f;   // ha tï¿½nyleg full freeze kell
+                                      // ha allowBrakeDuringLock=true: slowInput marad, tehï¿½t azonnal tudsz fï¿½kezni
             }
 
             // Speed Calculation
@@ -847,7 +847,7 @@ namespace ArcadeVP
 
                 speed = Mathf.Clamp(speed, -maxSpeed, maxSpeed);
 
-                // Corner drag csak normál vezetésnél
+                // Corner drag csak normï¿½l vezetï¿½snï¿½l
                 ApplyCornerDrag(dt);
             }
 
@@ -884,18 +884,18 @@ namespace ArcadeVP
                 float overspeedSample = -1f;      // -1 = ignore
 
                 // ----- Corner smoothness (0..1, HIGH = good) -----
-                // Csak akkor értékelünk kanyart, ha tényleg kanyarban vagyunk:
+                // Csak akkor ï¿½rtï¿½kelï¿½nk kanyart, ha tï¿½nyleg kanyarban vagyunk:
                 bool inCorner = detectedCornerAngle > cornerAngleThreshold && Mathf.Abs(speed) > 0.1f;
                 if (inCorner && splineLength > 0.01f)
                 {
-                    // Corner intenzitás: thresholdtól maxCornerAngleForFullDrift-ig normalizálva
+                    // Corner intenzitï¿½s: thresholdtï¿½l maxCornerAngleForFullDrift-ig normalizï¿½lva
                     float cornerIntensity = Mathf.Clamp01(
                         Mathf.InverseLerp(cornerAngleThreshold, maxCornerAngleForFullDrift, detectedCornerAngle));
 
-                    // Speed arány (0..1)
+                    // Speed arï¿½ny (0..1)
                     float speedFrac = Mathf.Clamp01(Mathf.Abs(speed) / Mathf.Max(0.01f, maxSpeed));
 
-                    // Ideális speed: enyhe kanyarban magasabb, élesben alacsonyabb
+                    // Ideï¿½lis speed: enyhe kanyarban magasabb, ï¿½lesben alacsonyabb
                     // pl. intensity=0  -> ~0.9
                     //     intensity=1  -> ~0.4
                     float idealSpeedFrac = Mathf.Lerp(0.9f, 0.4f, cornerIntensity);
@@ -903,13 +903,13 @@ namespace ArcadeVP
                     // Hiba a speed-ben
                     float speedError = Mathf.Clamp01(Mathf.Abs(speedFrac - idealSpeedFrac));
 
-                    // CornerSmooth: 1=perfekt, 0=szétcsúszott
+                    // CornerSmooth: 1=perfekt, 0=szï¿½tcsï¿½szott
                     cornerSmoothSample = 1f - speedError;
                 }
 
                 // ----- Lane jitter (0..1, HIGH = bad) -----
-                // Ha nagy sebességnél, lane váltás nélkül állandóan piszkálja a kormányt,
-                // az jitter és büntetjük.
+                // Ha nagy sebessï¿½gnï¿½l, lane vï¿½ltï¿½s nï¿½lkï¿½l ï¿½llandï¿½an piszkï¿½lja a kormï¿½nyt,
+                // az jitter ï¿½s bï¿½ntetjï¿½k.
                 if (Mathf.Abs(speed) > maxSpeed * 0.2f && !isChangingLane && !balanceActive)
                 {
                     // steeringInput eleve -1..1
@@ -917,7 +917,7 @@ namespace ArcadeVP
                 }
 
                 // ----- Overspeed control (0..1, HIGH = good) -----
-                // Ha van aktív speed limit, akkor azt nézzük mennyire lépi túl.
+                // Ha van aktï¿½v speed limit, akkor azt nï¿½zzï¿½k mennyire lï¿½pi tï¿½l.
                 if (activeSpeedLimit > 0f && PlayerJoinManager.IsRaceStarted)
                 {
                     float limit = activeSpeedLimit;
@@ -926,7 +926,7 @@ namespace ArcadeVP
 
                     // 0 = nincs overspeed, 1 = fullDifficultyAtRatio vagy felette
                     float t = Mathf.Clamp01(ratio / Mathf.Max(0.001f, fullDifficultyAtRatio));
-                    overspeedSample = 1f - t;   // 1 = teljesen kontrollált, 0 = nagyon túllépi
+                    overspeedSample = 1f - t;   // 1 = teljesen kontrollï¿½lt, 0 = nagyon tï¿½llï¿½pi
                 }
 
                 SkillEstimator.Instance.OnTrajectorySample(
@@ -978,7 +978,7 @@ namespace ArcadeVP
             // pre-cue wait
             float pre = UnityEngine.Random.Range(preCueRange.x, preCueRange.y);
 
-            // If we’re already exiting and the pre-cue wouldn’t fit, skip it
+            // If weï¿½re already exiting and the pre-cue wouldnï¿½t fit, skip it
             if (zoneExiting && (Time.time + pre > zoneStickyUntil))
                 pre = 0f;
 
@@ -1021,7 +1021,7 @@ namespace ArcadeVP
                 yield break;
             }
 
-            // 4) still overspeeding NOW? -> otherwise cancel (THIS FIXES “30-nál is bedobja” feeling)
+            // 4) still overspeeding NOW? -> otherwise cancel (THIS FIXES ï¿½30-nï¿½l is bedobjaï¿½ feeling)
             float absSpeed = Mathf.Abs(speed);
             float ratioNow = OvershootRatioNow(absSpeed);
 
@@ -1058,7 +1058,7 @@ namespace ArcadeVP
             currentRoundDrift = rt_drift;
             isDrifting = false;
 
-            // NOW we consume this zone’s mini-game (only once it actually begins)
+            // NOW we consume this zoneï¿½s mini-game (only once it actually begins)
             miniGamePlayedThisZone = true;
             miniGameArmedThisZone = false;
 
@@ -1184,7 +1184,7 @@ namespace ArcadeVP
 
             int dir = UnityEngine.Random.value > .5f ? 1 : -1;
 
-            // gentle lane nudge (don’t swap lanes)
+            // gentle lane nudge (donï¿½t swap lanes)
             currentDriftYaw = dir * 35f;
             if (bodyMesh) bodyMesh.localRotation = Quaternion.Euler(0, 0, -dir * 15f);
 
@@ -1606,6 +1606,8 @@ namespace ArcadeVP
             if (Mathf.Abs(speed) > allowed)
                 speed = Mathf.MoveTowards(speed, Mathf.Sign(speed) * allowed, cornerDecel * dt);
         }
+
+        public void TriggerSpeedStumbleExternal() => TriggerSpeedStumble();
 
     }
 }

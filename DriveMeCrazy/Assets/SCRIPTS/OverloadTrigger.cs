@@ -7,8 +7,9 @@ public class OverloadTrigger : MonoBehaviour
     [Header("Debug")]
     [SerializeField] private bool oneShot = true;
     [SerializeField] public int _maxOverloads = 3;
+    [SerializeField] public float _overloadRandomness = 0.5f;
 
-    private bool _triggered = false;
+    [SerializeField] private bool _triggered = false;
 
     [SerializeField] private EngineOverloadManager _overloadManager;
 
@@ -17,6 +18,7 @@ public class OverloadTrigger : MonoBehaviour
     void Awake()
     {
         _overloadManager = FindObjectOfType<EngineOverloadManager>();
+        _overloadCount = 0;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -28,7 +30,7 @@ public class OverloadTrigger : MonoBehaviour
         
         
 
-        if (Random.Range(0f, 1f) > 0.5 ||_overloadCount >= _maxOverloads)
+        if (Random.Range(0f, 1f) < _overloadRandomness ||_overloadCount >= _maxOverloads)
             return;
 
         // Adjust this check to your car setup
