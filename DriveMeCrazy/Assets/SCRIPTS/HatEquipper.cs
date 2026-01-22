@@ -9,29 +9,32 @@ public class HatEquipper : MonoBehaviour
 
     void Start()
     {
-        Debug.Log($"[HatEquipper] Start on {gameObject.name}. Socket={hatSocket?.name}, Prefab={hatPrefab?.name}");
+        //Debug.Log($"[HatEquipper] Start on {gameObject.name}. Socket={hatSocket?.name}, Prefab={hatPrefab?.name}");
         EquipHat();
     }
 
+
     public void EquipHat()
     {
+        if (currentHat != null)
+        {
+            Destroy(currentHat);
+            currentHat = null;
+        }
+
         if (hatPrefab == null) 
         { 
-            Debug.LogWarning("[HatEquipper] hatPrefab is NULL"); 
+            //Debug.LogWarning("[HatEquipper] hatPrefab is NULL"); 
             return; 
         }
 
+        /*
         if (hatSocket == null) 
         { 
             Debug.LogWarning("[HatEquipper] hatSocket is NULL"); 
             return; 
         }
-
-        //if (hatPrefab == null || hatSocket == null)
-        //    return;
-
-        if (currentHat != null)
-            Destroy(currentHat);
+        */
 
         currentHat = Instantiate(hatPrefab, hatSocket);
 
@@ -42,7 +45,7 @@ public class HatEquipper : MonoBehaviour
         }
 
         currentHat.name = "EquippedHat_RUNTIME";
-        Debug.Log("[HatEquipper] Hat instantiated: " + currentHat.name);
+        //Debug.Log("[HatEquipper] Hat instantiated: " + currentHat.name);
 
         currentHat.transform.localPosition = Vector3.zero;
         currentHat.transform.localRotation = Quaternion.identity;

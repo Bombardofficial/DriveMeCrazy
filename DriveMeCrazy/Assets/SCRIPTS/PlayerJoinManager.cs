@@ -21,7 +21,18 @@ public class PlayerJoinManager : MonoBehaviour
     [SerializeField] private HatCustomizationUIManager hatUI;
     [SerializeField] private GameObject customizationCanvasRoot;
 
+    [Header("Customization Camera Fly")]
+    [SerializeField] private Camera lobbyCamera;               // assign Intro Camera here
+    [SerializeField] private Transform customizationCamPose;   // assign CustomizationCamPose here
+    [SerializeField] private Camera mainCamera;                // (optional) gameplay/main cam to disable
+    [SerializeField] private float customizationFlyTime = 0.8f;
+    [SerializeField] private Animator cameraAnimatorRev;          // animator that normally drives lobby camera
 
+    private Vector3 lobbyCamStartPos;
+    private Quaternion lobbyCamStartRot;
+    private Coroutine camFlyRoutine;
+    private bool customizationCamActive;
+    
     /* ?????????????????????????? INSPECTOR ?????????????????????????? */
     [Header("UI (Lobby)")]
     [SerializeField] Image[] seatIcons;          // size 4
@@ -148,6 +159,8 @@ public class PlayerJoinManager : MonoBehaviour
 
         gameplayMusicTargetVol = gameplayMusic.volume;
         lobbyMusicTargetVol = lobbyMusic ? lobbyMusic.volume : 1f;
+
+        if (introCamera == null) introCamera = introCamera;
 
         // Hook lap trigger (if this script isn�t placed on the gate)
         if (lapGateTrigger) lapGateTrigger.isTrigger = true;
@@ -279,6 +292,7 @@ public class PlayerJoinManager : MonoBehaviour
             car.enabled = false;
             foreach (var d in playerDummies) if (d) d.SetActive(false);
             PlayerInputManager.instance.playerJoinedEvent.AddListener(OnPlayerJoined);
+            PlayerInputManager.instance.EnableJoining();
             if (countdownText) countdownText.text = "WAITING FOR DRIVER�";
             RefreshUI();
         }
@@ -408,6 +422,13 @@ public class PlayerJoinManager : MonoBehaviour
         {
             playerDummies[seatIdx].SetActive(true);
 
+            // also equip hats on the lobby dummy you actually see
+            if (hatUI != null && playerDummies[seatIdx] != null)
+            {
+                //hatUI.RegisterPlayer(seatIdx, playerDummies[seatIdx]);
+                hatUI.RegisterDummy(seatIdx, playerDummies[seatIdx]);
+            }
+
             // player identity = Passenger.PlayerNumber (NOT seat)
             if (tintLobbyDummies && passenger != null && PlayerManager.Instance != null)
             {
@@ -449,6 +470,7 @@ public class PlayerJoinManager : MonoBehaviour
         {
             // (hatUI can toggle its own canvas root; depends on your setup)
             yield return hatUI.RunCustomization(players, joinCount);
+            hatUI.ApplySelectionsToAllRegisteredPlayers();
         }
         else
         {
@@ -479,6 +501,13 @@ public class PlayerJoinManager : MonoBehaviour
             Debug.LogWarning("[PlayerJoinManager] tutorialController is NULL (not assigned in Inspector).");
         }
         */
+
+        SwitchAllPlayersToActionMap("Gameplay");
+
+        foreach (var pi in players)
+        {
+            Debug.Log($"Player {pi.playerIndex} current map: {pi.currentActionMap?.name}");
+        }
 
         yield return FadeCanvas(fadeOutCanvas, 1f, 0f, fadeOutDuration);
 
@@ -907,6 +936,78 @@ public class PlayerJoinManager : MonoBehaviour
             }
 
             countdownGametext.gameObject.SetActive(false);
+        }
+    }
+
+
+    /* ??????????????? Camera fly customization menu ??????????????? */
+    public void BeginCustomizationCamera()
+    {
+        Debug.Log("[CAMFLY] BeginCustomizationCamera() CALLED");
+
+        if (!lobbyCamera || !customizationCamPose)
+        {
+            Debug.LogWarning("[CAMFLY] Missing lobbyCamera or customizationCamPose reference.");
+            return;
+        }
+
+        // ensure correct camera is rendering
+        lobbyCamera.gameObject.SetActive(true);
+        if (mainCamera) mainCamera.gameObject.SetActive(false);
+
+        // cache start pose
+        lobbyCamStartPos = lobbyCamera.transform.position;
+        lobbyCamStartRot = lobbyCamera.transform.rotation;
+
+        // stop animator so it doesn't fight the fly
+        if (cameraAnimatorRev) cameraAnimatorRev.enabled = false;
+
+        customizationCamActive = true;
+        StartCameraFly(customizationCamPose.position, customizationCamPose.rotation, reenableAnimator: false);
+    }
+
+    public void EndCustomizationCamera()
+    {
+        Debug.Log("[CAMFLY] EndCustomizationCamera() CALLED");
+
+        if (!lobbyCamera || !customizationCamActive) return;
+
+        customizationCamActive = false;
+        StartCameraFly(lobbyCamStartPos, lobbyCamStartRot, reenableAnimator: true);
+    }
+
+    private void StartCameraFly(Vector3 targetPos, Quaternion targetRot, bool reenableAnimator)
+    {
+        if (camFlyRoutine != null) StopCoroutine(camFlyRoutine);
+        camFlyRoutine = StartCoroutine(FlyCameraRoutine(targetPos, targetRot, reenableAnimator));
+    }
+
+    private IEnumerator FlyCameraRoutine(Vector3 targetPos, Quaternion targetRot, bool reenableAnimator)
+    {
+        Transform camT = lobbyCamera.transform;
+
+        Vector3 startPos = camT.position;
+        Quaternion startRot = camT.rotation;
+
+        float t = 0f;
+        while (t < 1f)
+        {
+            t += Time.unscaledDeltaTime / Mathf.Max(0.01f, customizationFlyTime);
+            camT.position = Vector3.Lerp(startPos, targetPos, t);
+            camT.rotation = Quaternion.Slerp(startRot, targetRot, t);
+            yield return null;
+        }
+
+        if (reenableAnimator && cameraAnimatorRev)
+            cameraAnimatorRev.enabled = true;
+    }
+
+    private void SwitchAllPlayersToActionMap(string mapName)
+    {
+        foreach (var pi in GetJoinedPlayers())
+        {
+            if (!pi) continue;
+            pi.SwitchCurrentActionMap(mapName);
         }
     }
 
