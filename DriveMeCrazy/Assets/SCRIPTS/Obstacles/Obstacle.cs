@@ -66,6 +66,23 @@ public class Obstacle : MonoBehaviour
             if (collision.gameObject.TryGetComponent<Damageable>(out Damageable playerDamage))
             {
                 playerDamage.InflictDamage(damageToInflict);
+
+                // Logging collision
+                int obstacleId = gameObject.GetInstanceID();
+                TelemetryLogger.Instance?.RegisterCollision(obstacleId);
+
+                WarningTracker tracker = FindObjectOfType<WarningTracker>();
+                if (tracker != null)
+                {
+                    tracker.ForceClearWarningAfterHit(obstacleId);
+                }
+
+                FeedbackIntensityUI feedback = FindObjectOfType<FeedbackIntensityUI>();
+                if (feedback != null)
+                {
+                    feedback.TriggerDamageFlash();
+                }
+
             }
             if (SkillEstimator.Instance) SkillEstimator.Instance.OnObstacleHit();
             // 2. --- REVISED AND CORRECTED FORCE CALCULATION ---

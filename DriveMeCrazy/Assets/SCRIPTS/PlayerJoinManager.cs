@@ -16,7 +16,9 @@ public class PlayerJoinManager : MonoBehaviour
     [SerializeField] private GameObject playerJoinCanvasRoot;
 
     /* ???????????????????????? CUSTOMIZATION ???????????????????????? */
+    /*
     [Header("Customization")]
+    [SerializeField] bool EnableCusomizationMenu = false;
     [SerializeField] private HatCustomizationUIManager hatUI;
     [SerializeField] private GameObject customizationCanvasRoot;
 
@@ -31,6 +33,7 @@ public class PlayerJoinManager : MonoBehaviour
     private Quaternion lobbyCamStartRot;
     private Coroutine camFlyRoutine;
     private bool customizationCamActive;
+    */
     
     /* ?????????????????????????? INSPECTOR ?????????????????????????? */
     [Header("UI (Lobby)")]
@@ -405,7 +408,7 @@ public class PlayerJoinManager : MonoBehaviour
         pi.transform.SetPositionAndRotation(seat.position, seat.rotation);
         pi.transform.SetParent(seat, true);
 
-        hatUI.RegisterPlayer(seatIdx, pi.gameObject);
+        //hatUI.RegisterPlayer(seatIdx, pi.gameObject);
 
         var passenger = pi.GetComponent<Passenger>();
         PlayerManager.Instance?.RegisterPassenger(passenger, seatIdx);
@@ -422,11 +425,11 @@ public class PlayerJoinManager : MonoBehaviour
             playerDummies[seatIdx].SetActive(true);
 
             // also equip hats on the lobby dummy you actually see
-            if (hatUI != null && playerDummies[seatIdx] != null)
+            /*if (hatUI != null && playerDummies[seatIdx] != null)
             {
                 //hatUI.RegisterPlayer(seatIdx, playerDummies[seatIdx]);
                 hatUI.RegisterDummy(seatIdx, playerDummies[seatIdx]);
-            }
+            }*/
 
             // player identity = Passenger.PlayerNumber (NOT seat)
             if (tintLobbyDummies && passenger != null && PlayerManager.Instance != null)
@@ -465,16 +468,26 @@ public class PlayerJoinManager : MonoBehaviour
         if (playerJoinCanvasRoot) playerJoinCanvasRoot.SetActive(false);
 
         // --- CUSTOMIZATION FIRST ---
-        if (hatUI != null)
+        /*if(EnableCusomizationMenu =! false)
         {
-            // (hatUI can toggle its own canvas root; depends on your setup)
-            yield return hatUI.RunCustomization(players, joinCount);
-            hatUI.ApplySelectionsToAllRegisteredPlayers();
+            if (hatUI != null)
+            {
+                // (hatUI can toggle its own canvas root; depends on your setup)
+                yield return hatUI.RunCustomization(players, joinCount);
+                hatUI.ApplySelectionsToAllRegisteredPlayers();
+            }
+            else
+            {
+                Debug.LogWarning("[PlayerJoinManager] hatUI is NULL (not assigned).");
+            }
         }
         else
         {
-            Debug.LogWarning("[PlayerJoinManager] hatUI is NULL (not assigned).");
-        }
+            hatUI = null;
+            Debug.LogWarning("Customization Menu disabled.");
+        }*/
+
+
 
         // --- THEN TUTORIAL ---
         if (tutorialController != null)
@@ -485,21 +498,6 @@ public class PlayerJoinManager : MonoBehaviour
         {
             Debug.LogWarning("[PlayerJoinManager] tutorialController is NULL (not assigned in Inspector).");
         }
-
-        /* Tutorial before intro camera fly */
-        /*
-        if (tutorialController != null)
-        {
-            var players = GetJoinedPlayers();
-
-            if (playerJoinCanvasRoot) playerJoinCanvasRoot.SetActive(false);
-            yield return tutorialController.RunTutorial(players);
-        }
-        else
-        {
-            Debug.LogWarning("[PlayerJoinManager] tutorialController is NULL (not assigned in Inspector).");
-        }
-        */
 
         SwitchAllPlayersToActionMap("Gameplay");
 
@@ -556,6 +554,12 @@ public class PlayerJoinManager : MonoBehaviour
         driverInput.enabled = true;
         raceStarted = IsRaceStarted = true;
 
+        // Start logging of game
+        if (TelemetryLogger.Instance != null)
+        {
+            TelemetryLogger.Instance.StartLogging();
+        }
+
         // Ensure systems are on in case they were off
         EnableGameplaySystems(); // <-- NEW safeguard
     }
@@ -590,6 +594,13 @@ public class PlayerJoinManager : MonoBehaviour
     IEnumerator FinishRaceSequence()
     {
         IsRaceStarted = raceStarted = false;   // master flag
+
+        // End logging of game
+        if (TelemetryLogger.Instance != null)
+        {
+            TelemetryLogger.Instance.StopLogging();
+        }
+
         DisableGameplaySystems();
         counting = false;
         timeLeft = 0f;
@@ -940,7 +951,7 @@ public class PlayerJoinManager : MonoBehaviour
 
 
     /* ??????????????? Camera fly customization menu ??????????????? */
-    public void BeginCustomizationCamera()
+    /*public void BeginCustomizationCamera()
     {
         Debug.Log("[CAMFLY] BeginCustomizationCamera() CALLED");
 
@@ -999,7 +1010,7 @@ public class PlayerJoinManager : MonoBehaviour
 
         if (reenableAnimator && cameraAnimatorRev)
             cameraAnimatorRev.enabled = true;
-    }
+    }*/
 
     private void SwitchAllPlayersToActionMap(string mapName)
     {

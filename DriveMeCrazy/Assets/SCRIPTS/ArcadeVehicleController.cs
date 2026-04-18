@@ -64,6 +64,8 @@ namespace ArcadeVP
         [Tooltip("If true, lane switching NEVER modifies traveledDistance. Forward motion stays continuous (recommended).")]
         public bool keepForwardDistanceDuringLaneChange = true;
 
+        public event Action LaneChanged;
+
         // --- End Existing Headers ---
 
         [Header("Ground Settings")]
@@ -253,6 +255,9 @@ namespace ArcadeVP
         public bool IsDrifting => isDrifting;
         public bool IsGrounded => isGrounded; // Public accessor for grounded state
 
+        
+        public int CurrentLane => currentLane; // For Warning Signal & Tracking
+
         public bool IsBrakePressed => driftInput > 0.1f;   // NEW
 
 
@@ -341,6 +346,7 @@ namespace ArcadeVP
         public event Action CrashHappened;
 
         // +1 = jobbra v�lt, -1 = balra v�lt, 0 = nincs v�lt�s
+
         public int LaneChangeDirection
         {
             get
@@ -348,6 +354,9 @@ namespace ArcadeVP
                 if (useSeparateLaneSplines && laneTrackSwitcher != null && laneTrackSwitcher.IsChanging)
                 {
                     int dir = (int)Mathf.Sign(laneTrackSwitcher.TargetLane - laneTrackSwitcher.CurrentLane);
+
+                    TelemetryLogger.Instance?.RegisterDriverInputThisFrame();
+
                     return dir;
                 }
 
@@ -355,7 +364,12 @@ namespace ArcadeVP
                 {
                     float d = targetOffset - currentOffset;
                     if (Mathf.Abs(d) <= laneSnapThreshold) return 0;
-                    return (int)Mathf.Sign(d);
+
+                    int dir = (int)Mathf.Sign(d);
+
+                    TelemetryLogger.Instance?.RegisterDriverInputThisFrame();
+
+                    return dir;
                 }
 
                 return 0;
@@ -1302,6 +1316,8 @@ namespace ArcadeVP
                             traveledDistance = remapped;
 
                         lastLaneChangeTime = Time.time;
+                        currentLane = newLane;
+                        LaneChanged?.Invoke();
                     }
                 }
                 else
@@ -1309,6 +1325,7 @@ namespace ArcadeVP
                     currentLane = newLane;
                     targetOffset = laneOffsets[newLane];
                     lastLaneChangeTime = Time.time;
+                    LaneChanged?.Invoke();
                 }
             }
 

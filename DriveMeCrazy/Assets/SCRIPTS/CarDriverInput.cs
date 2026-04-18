@@ -15,6 +15,12 @@ public class CarDriverInput : MonoBehaviour
     private InputAction _brakeAction;
     private InputAction _slowBrakeAction;
 
+    private bool _wasThrottlePressed;
+    private bool _wasBrakePressed;
+    private float _lastSteer;
+
+    [SerializeField] private float steerThreshold = 0.6f;
+
     void Awake()
     {
         // REPLACE your old Awake logic with this
@@ -34,6 +40,31 @@ public class CarDriverInput : MonoBehaviour
         float gas = _throttleAction.ReadValue<float>();
         float brake = _brakeAction.ReadValue<float>();
         float slow = _slowBrakeAction.ReadValue<float>();
+
+        bool throttlePressedNow = gas > 0.1f;
+        bool brakePressedNow = brake > 0.1f || slow > 0.1f;
+
+        bool throttlePressEvent = throttlePressedNow && !_wasThrottlePressed;
+        bool brakePressEvent = brakePressedNow && !_wasBrakePressed;
+
+        // optional: deutlicher Lenkeinschlag als Event
+        bool strongSteerEvent = Mathf.Abs(steer) >= steerThreshold && Mathf.Abs(_lastSteer) < steerThreshold;
+
+
+        // Logging Input per second (?)
+        if (throttlePressEvent || brakePressEvent || strongSteerEvent)
+        {
+            TelemetryLogger.Instance?.RegisterDriverInputThisFrame();
+        }
+
+        /*if (TelemetryLogger.Instance != null)
+        {
+            TelemetryLogger.Instance.SetCurrentInputs(steer, gas, brake, slow);
+        }*/
+
+        _wasThrottlePressed = throttlePressedNow;
+        _wasBrakePressed = brakePressedNow;
+        _lastSteer = steer;
 
         if (ArcadeVP.VehicleInputMixer.Instance)
         {
