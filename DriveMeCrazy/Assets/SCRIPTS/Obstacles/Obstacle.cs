@@ -30,6 +30,7 @@ public class Obstacle : MonoBehaviour
 
     private Rigidbody _rb;
     private bool _hasBeenHit = false;
+    public bool HasBeenHit => _hasBeenHit;
 
     [Header("Audio")]
     public AudioClip impactClip;            // assign in prefab
@@ -47,10 +48,11 @@ public class Obstacle : MonoBehaviour
         // Ignore collisions if this obstacle has already been hit.
         if (_hasBeenHit) return;
 
-        
+
 
         // We now check for the car's controller first to handle the collision.
-        if (collision.gameObject.TryGetComponent<ArcadeVehicleController>(out ArcadeVehicleController carController))
+        ArcadeVehicleController carController = collision.gameObject.GetComponentInParent<ArcadeVehicleController>();
+        if (carController != null)
         {
             // --- DEBUGGING LINE ---
             // If you still pass through obstacles, check if this log appears in the console.
@@ -63,18 +65,18 @@ public class Obstacle : MonoBehaviour
                 audioPool.Play3D(impactClip, transform.position);
 
             // 1. Inflict damage on the player (if the car has the Damageable component).
-            if (collision.gameObject.TryGetComponent<Damageable>(out Damageable playerDamage))
+            Damageable playerDamage = collision.gameObject.GetComponentInParent<Damageable>();
+            if (playerDamage != null)
             {
                 playerDamage.InflictDamage(damageToInflict);
 
                 // Logging collision
-                int obstacleId = gameObject.GetInstanceID();
-                TelemetryLogger.Instance?.RegisterCollision(obstacleId);
+                TelemetryLogger.Instance?.RegisterCollisionForCurrentDriver();
 
                 WarningTracker tracker = FindObjectOfType<WarningTracker>();
                 if (tracker != null)
                 {
-                    tracker.ForceClearWarningAfterHit(obstacleId);
+                    tracker.ForceClearWarningAfterHit();
                 }
 
                 FeedbackIntensityUI feedback = FindObjectOfType<FeedbackIntensityUI>();

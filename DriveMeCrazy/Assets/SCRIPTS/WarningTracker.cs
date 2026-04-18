@@ -15,7 +15,6 @@ public class WarningTracker : MonoBehaviour
     [SerializeField] private float forwardDotThreshold = 0.35f;
     [SerializeField] private float checkInterval = 0.1f; // 10x pro Sekunde
 
-    private int _currentlyWarnedObstacleId = -1;
     private bool _warningCurrentlyOn = false;
     private float _nextCheckTime;
 
@@ -37,22 +36,17 @@ public class WarningTracker : MonoBehaviour
     {
         if (!PlayerJoinManager.IsRaceStarted)
         {
-            ClearWarningAsAvoided(); 
+            ClearWarningVisualOnly(); 
             return;
         }
 
         if (vehicle == null || obstacleManager == null || feedbackUI == null)
         {
-            ClearWarningAsAvoided();
+            ClearWarningVisualOnly();
             return;
         }
 
         var metas = obstacleManager.ActiveMetas;
-        if (metas == null || metas.Count == 0)
-        {
-            ClearWarningAsAvoided();
-            return;
-        }
 
         Vector3 carPos = vehicle.transform.position;
         Vector3 carForward = vehicle.transform.forward;
@@ -61,92 +55,73 @@ public class WarningTracker : MonoBehaviour
         float bestDistance = float.MaxValue;
         GameObject bestObstacle = null;
 
-        for (int i = 0; i < metas.Count; i++)
+
+        if (metas != null && metas.Count > 0)
         {
-            var meta = metas[i];
-
-            if (meta.go == null || !meta.go.activeInHierarchy)
-                continue;
-
-            // Nur aktuelle Spur
-            if (meta.lane != currentLane)
-                continue;
-            // ---- auskommentieren --> auf alle hindernisse warnung (gleich) 
-
-            Vector3 toObstacle = meta.go.transform.position - carPos;
-            float distance = toObstacle.magnitude;
-
-            if (distance > warningDistance)
-                continue;
-
-            Vector3 dirToObstacle = toObstacle.normalized;
-            float dot = Vector3.Dot(carForward, dirToObstacle);
-
-            // Nur vor dem Auto
-            if (dot < forwardDotThreshold)
-                continue;
-
-            if (distance < bestDistance)
+            for (int i = 0; i < metas.Count; i++)
             {
-                bestDistance = distance;
-                bestObstacle = meta.go;
+                var meta = metas[i];
+
+                if (meta.go == null || !meta.go.activeInHierarchy)
+                    continue;
+
+                Obstacle obstacleComponent = meta.go.GetComponent<Obstacle>();
+                if (obstacleComponent != null && obstacleComponent.HasBeenHit)
+                    continue;
+
+                // Nur aktuelle Spur
+                if (meta.lane != currentLane)
+                    continue;
+                // ---- auskommentieren --> auf alle hindernisse warnung (gleich) 
+
+                Vector3 toObstacle = meta.go.transform.position - carPos;
+                float distance = toObstacle.magnitude;
+
+                if (distance > warningDistance)
+                    continue;
+
+                Vector3 dirToObstacle = toObstacle.normalized;
+                float dot = Vector3.Dot(carForward, dirToObstacle);
+
+                // Nur vor dem Auto
+                if (dot < forwardDotThreshold)
+                    continue;
+
+                if (distance < bestDistance)
+                {
+                    bestDistance = distance;
+                    bestObstacle = meta.go;
+                }
             }
         }
 
-        /*if (bestObstacle != null)
+        if (bestObstacle != null)
         {
-            int obstacleId = bestObstacle.GetInstanceID();
-            _currentlyWarnedObstacleId = obstacleId;
-            feedbackUI.SetWarningActive(true);
+            _warningCurrentlyOn = true;
+
+            if (feedbackUI != null)
+                feedbackUI.SetWarningActive(true);
+
             TelemetryLogger.Instance?.SetWarningActive(true);
         }
         else
         {
-            ClearWarning();
-            feedbackUI.SetWarningActive(false);
-            TelemetryLogger.Instance?.SetWarningActive(false);
-        }*/
-
-        if (bestObstacle != null)
-        {
-            int obstacleId = bestObstacle.GetInstanceID();
-
-            // Warnung startet neu oder wechselt auf anderes Hindernis
-            if (!_warningCurrentlyOn || _currentlyWarnedObstacleId != obstacleId)
-            {
-                _currentlyWarnedObstacleId = obstacleId;
-                _warningCurrentlyOn = true;
-
-                TelemetryLogger.Instance?.RegisterWarningStartedForObstacle(obstacleId);
-            }
-
-            if (feedbackUI != null)
-                feedbackUI.SetWarningActive(true);
-            //TelemetryLogger.Instance?.SetWarningActive(true);
-        }
-        else
-        {
-            ClearWarningAsAvoided();
-            //ClearWarning();
+            ClearWarningVisualOnly();  
         }
     }
 
     private void ClearWarningVisualOnly()
     {
         _warningCurrentlyOn = false;
-        _currentlyWarnedObstacleId = -1;
 
         if (feedbackUI != null)
             feedbackUI.SetWarningActive(false);
+
+        TelemetryLogger.Instance?.SetWarningActive(true);
     }
 
     private void ClearWarningAsAvoided()
     {
-        if (_warningCurrentlyOn && _currentlyWarnedObstacleId != -1)
-        {
-            TelemetryLogger.Instance?.RegisterWarningObstacleAvoided(_currentlyWarnedObstacleId);
-        }
-
         ClearWarningVisualOnly();
     }
 
@@ -168,11 +143,8 @@ public class WarningTracker : MonoBehaviour
     }
     */
 
-    public void ForceClearWarningAfterHit(int obstacleId)
+    public void ForceClearWarningAfterHit()
     {
-        if (_warningCurrentlyOn && _currentlyWarnedObstacleId == obstacleId)
-        {
-            ClearWarningVisualOnly();
-        }
+        ClearWarningVisualOnly();
     }
 }

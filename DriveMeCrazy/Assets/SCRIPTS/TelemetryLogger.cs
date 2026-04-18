@@ -27,9 +27,11 @@ public class TelemetryLogger : MonoBehaviour
     private int _collisionCountTotal;
 
     private bool _warningActive;
-    private int _activeWarningObstacleId = -1;
-    private bool _warningOutcomePending;
-    private string _warningObstacleResult = "";
+
+    private int _player1CollisionCounter;
+    private int _player2CollisionCounter;
+    private int _player3CollisionCounter;
+    private int _player4CollisionCounter;
 
     private float _warningReactionTime = -1f;
     private float _warningStartTime = -1f;
@@ -82,7 +84,10 @@ public class TelemetryLogger : MonoBehaviour
             _driverInputThisFrame ? 1 : 0,
             _warningReactionTime.ToString("F4", CultureInfo.InvariantCulture),
             _inputsPerSecond.ToString("F4", CultureInfo.InvariantCulture),
-            Escape(_warningObstacleResult),
+            _player1CollisionCounter,
+            _player2CollisionCounter,
+            _player3CollisionCounter,
+            _player4CollisionCounter,
             _collisionCountTotal
         ));
 
@@ -108,12 +113,18 @@ public class TelemetryLogger : MonoBehaviour
         _waitingForWarningReaction = false;
         _driverInputTimes.Clear();
         _inputsPerSecond = 0f;
+        _player1CollisionCounter = 0;
+        _player2CollisionCounter = 0;
+        _player3CollisionCounter = 0;
+        _player4CollisionCounter = 0;
         _collisionCountTotal = 0;
-        _activeWarningObstacleId = -1;
-        _warningOutcomePending = false;
-        _warningObstacleResult = "";
 
-        _rows.Add("run_time,current_driver_player_number,driver_changed_this_frame,driver_change_count_total,warning_active,driver_input_this_frame,warning_reaction_time,inputs_per_second,warning_obstacle_result,collision_count_total");
+        if (PlayerManager.Instance != null && PlayerManager.Instance.CurrentDriver != null)
+        {
+            _currentDriverPlayerNumber = PlayerManager.Instance.CurrentDriver.PlayerNumber;
+        }
+
+        _rows.Add("run_time,current_driver_player_number,driver_changed_this_frame,driver_change_count_total,warning_active,driver_input_this_frame,warning_reaction_time,inputs_per_second,player1_collision_counter,player2_collision_counter,player3_collision_counter,player4_collision_counter,collision_count_total");
     }
 
     public void StopLogging()
@@ -137,7 +148,7 @@ public class TelemetryLogger : MonoBehaviour
         _driverChangeCountTotal++;
     }
 
-    /*
+    
     public void SetWarningActive(bool active)
     {
         if (!_isLogging)
@@ -160,7 +171,7 @@ public class TelemetryLogger : MonoBehaviour
         _warningActive = active;
 
     }
-    */
+    
 
     public void RegisterDriverInputThisFrame()
     {
@@ -223,58 +234,27 @@ public class TelemetryLogger : MonoBehaviour
         RegisterDriverChange(playerNumber);
     }
 
-    private static string Escape(string value)
-    {
-        if (string.IsNullOrEmpty(value)) return "";
-        return "\"" + value.Replace("\"", "\"\"") + "\"";
-    }
-
-    public void RegisterWarningStartedForObstacle(int obstacleId)
+    public void RegisterCollisionForCurrentDriver()
     {
         if (!_isLogging)
             return;
 
-        if (_warningActive && _activeWarningObstacleId == obstacleId)
-            return;
-
-        _warningActive = true;
-
-        _activeWarningObstacleId = obstacleId;
-        _warningOutcomePending = true;
-        _warningObstacleResult = "";
-
-        _warningStartTime = Time.time;
-        _warningReactionTime = -1f;
-        _waitingForWarningReaction = true;
-    }
-
-    public void RegisterCollision(int obstacleId)
-    {
-        if (!_isLogging)
-            return;
+        switch (_currentDriverPlayerNumber)
+        {
+            case 1:
+                _player1CollisionCounter++;
+                break;
+            case 2:
+                _player2CollisionCounter++;
+                break;
+            case 3:
+                _player3CollisionCounter++;
+                break;
+            case 4:
+                _player4CollisionCounter++;
+                break;
+        }
 
         _collisionCountTotal++;
-
-        if (_warningOutcomePending && obstacleId == _activeWarningObstacleId)
-        {
-            _warningObstacleResult = "hit";
-            _warningOutcomePending = false;
-
-            _warningActive = false;
-            _waitingForWarningReaction = false;
-            _activeWarningObstacleId = -1;
-        }
-    }
-
-    public void RegisterWarningObstacleAvoided(int obstacleId)
-    {
-        if (!_isLogging)
-            return;
-
-        if (_warningOutcomePending && obstacleId == _activeWarningObstacleId)
-        {
-            _warningObstacleResult = "avoided";
-            _warningOutcomePending = false;
-        }
     }
 }
