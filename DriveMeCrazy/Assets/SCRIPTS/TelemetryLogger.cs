@@ -61,6 +61,38 @@ public class TelemetryLogger : MonoBehaviour
         Instance = this;
     }
 
+    // Füge das am Ende von Update() hinzu, um jeden Frame zu loggen
+    private void LateUpdate()
+    {
+        if (!_isLogging) return;
+
+        while (_driverInputTimes.Count > 0 && Time.time - _driverInputTimes.Peek() > 1f)
+        {
+            _driverInputTimes.Dequeue();
+        }
+        _inputsPerSecond = _driverInputTimes.Count;
+
+        // Erstelle eine Zeile mit allen aktuellen Werten
+        string row = $"{Time.time.ToString(CultureInfo.InvariantCulture)}," +
+                     $"{_currentDriverPlayerNumber}," +
+                     $"{(_driverChangedThisFrame ? 1 : 0)}," +
+                     $"{_driverChangeCountTotal}," +
+                     $"{(_warningActive ? 1 : 0)}," +
+                     $"{(_driverInputThisFrame ? 1 : 0)}," +
+                     //$"{_warningReactionTime.ToString("F4", CultureInfo.InvariantCulture)}," +
+                     $"{_inputsPerSecond.ToString("F4", CultureInfo.InvariantCulture)}," +
+                     $"{_player1CollisionCounter},{_player2CollisionCounter}," +
+                     $"{_player3CollisionCounter},{_player4CollisionCounter}," +
+                     $"{_collisionCountTotal}";
+
+        _rows.Add(row);
+
+        // WICHTIG: Setze Event-Flags nach jedem Frame zurück, damit sie nicht "kleben"
+        _driverInputThisFrame = false;
+        _driverChangedThisFrame = false;
+    }
+
+    /*
     private void LateUpdate()
     {
         if (!_isLogging)
@@ -95,6 +127,7 @@ public class TelemetryLogger : MonoBehaviour
         _driverChangedThisFrame = false;
         _driverInputThisFrame = false;
     }
+    */
 
     public void StartLogging()
     {
@@ -108,9 +141,9 @@ public class TelemetryLogger : MonoBehaviour
         _driverChangeCountTotal = 0;
         _warningActive = false;
         _driverInputThisFrame = false;
-        _warningReactionTime = -1f;
-        _warningStartTime = -1f;
-        _waitingForWarningReaction = false;
+        //_warningReactionTime = -1f;
+        //_warningStartTime = -1f;
+        //_waitingForWarningReaction = false;
         _driverInputTimes.Clear();
         _inputsPerSecond = 0f;
         _player1CollisionCounter = 0;
@@ -124,7 +157,8 @@ public class TelemetryLogger : MonoBehaviour
             _currentDriverPlayerNumber = PlayerManager.Instance.CurrentDriver.PlayerNumber;
         }
 
-        _rows.Add("run_time,current_driver_player_number,driver_changed_this_frame,driver_change_count_total,warning_active,driver_input_this_frame,warning_reaction_time,inputs_per_second,player1_collision_counter,player2_collision_counter,player3_collision_counter,player4_collision_counter,collision_count_total");
+        _rows.Add("run_time,current_driver_player_number,driver_changed_this_frame,driver_change_count_total,warning_active,driver_input_this_frame,inputs_per_second,player1_collision_counter,player2_collision_counter,player3_collision_counter,player4_collision_counter,collision_count_total");
+        //_rows.Add("run_time,current_driver_player_number,driver_changed_this_frame,driver_change_count_total,warning_active,driver_input_this_frame,warning_reaction_time,inputs_per_second,player1_collision_counter,player2_collision_counter,player3_collision_counter,player4_collision_counter,collision_count_total");
     }
 
     public void StopLogging()
@@ -154,26 +188,26 @@ public class TelemetryLogger : MonoBehaviour
         if (!_isLogging)
             return;
 
-        // Warnung startet neu
-        if (active && !_warningActive)
+        _warningActive = active; 
+
+        /*
+        // Warnung gestartet
+        if (active)
         {
             _warningStartTime = Time.time;
-            _warningReactionTime = -1f;
+            //_warningReactionTime = -1f;
             _waitingForWarningReaction = true;
         }
-
-        // Warnung endet
-        if (!active && _warningActive)
+        else // Warnung beendet
         {
+            if (_waitingForWarningReaction)
+                _warningReactionTime = -1f;
             _waitingForWarningReaction = false;
         }
-
-        _warningActive = active;
-
+        */
     }
-    
 
-    public void RegisterDriverInputThisFrame()
+    public void RegisterDriverInputThisFrame(bool countsAsWarningReaction)
     {
         if (!_isLogging)
             return;
@@ -181,11 +215,13 @@ public class TelemetryLogger : MonoBehaviour
         _driverInputTimes.Enqueue(Time.time);
         _driverInputThisFrame = true;
 
-        if (_warningActive && _waitingForWarningReaction)
+        /*
+        if (_warningActive && _waitingForWarningReaction && countsAsWarningReaction)
         {
             _warningReactionTime = Time.time - _warningStartTime;
             _waitingForWarningReaction = false;
         }
+        */
     }
 
     private void SaveCsv()
@@ -207,25 +243,15 @@ public class TelemetryLogger : MonoBehaviour
         }
     }
 
+    
     private void OnEnable()
     {
         PlayerManager.OnDriverChanged += HandleDriverChanged;
-
-        if (vehicle != null)
-            vehicle.LaneChanged += HandleLaneChanged;
     }
 
     private void OnDisable()
     {
         PlayerManager.OnDriverChanged -= HandleDriverChanged;
-
-        if (vehicle != null)
-            vehicle.LaneChanged -= HandleLaneChanged;
-    }
-
-    private void HandleLaneChanged()
-    {
-        RegisterDriverInputThisFrame();
     }
 
     private void HandleDriverChanged(Passenger oldDriver, Passenger newDriver)
@@ -257,4 +283,16 @@ public class TelemetryLogger : MonoBehaviour
 
         _collisionCountTotal++;
     }
+
+    /*
+    public void TryRegisterWarningReaction()
+    {
+        if (_isLogging  && _waitingForWarningReaction)
+        {
+            _warningReactionTime = Time.time - _warningStartTime;
+            _waitingForWarningReaction = false; // Reaction wurde erfasst
+        }
+    }
+    */
+    
 }

@@ -65,6 +65,7 @@ namespace ArcadeVP
         public bool keepForwardDistanceDuringLaneChange = true;
 
         public event Action LaneChanged;
+        private bool _wasLaneChangingLastFrame = false;
 
         // --- End Existing Headers ---
 
@@ -354,9 +355,6 @@ namespace ArcadeVP
                 if (useSeparateLaneSplines && laneTrackSwitcher != null && laneTrackSwitcher.IsChanging)
                 {
                     int dir = (int)Mathf.Sign(laneTrackSwitcher.TargetLane - laneTrackSwitcher.CurrentLane);
-
-                    TelemetryLogger.Instance?.RegisterDriverInputThisFrame();
-
                     return dir;
                 }
 
@@ -364,11 +362,7 @@ namespace ArcadeVP
                 {
                     float d = targetOffset - currentOffset;
                     if (Mathf.Abs(d) <= laneSnapThreshold) return 0;
-
                     int dir = (int)Mathf.Sign(d);
-
-                    TelemetryLogger.Instance?.RegisterDriverInputThisFrame();
-
                     return dir;
                 }
 
@@ -698,16 +692,17 @@ namespace ArcadeVP
 
                 if (laneFinished)
                     currentLane = laneTrackSwitcher.CurrentLane;
-                if (laneFinished)
-                    currentLane = laneTrackSwitcher.CurrentLane;
+                /*if (laneFinished)
+                    currentLane = laneTrackSwitcher.CurrentLane;*/
 
                 splineContainer = laneTrackSwitcher.ActiveLaneContainer;
                 spline = laneTrackSwitcher.ActiveSpline;
                 splineLength = laneTrackSwitcher.ActiveLength;
             }
 
-            float tolFactor = 1f + speedOvershootTolerance;
+            //HandleLaneChangeLogging();
 
+            float tolFactor = 1f + speedOvershootTolerance;
 
             bool overspeedEligible = (activeSpeedLimit > 0f)
                                   && inZone

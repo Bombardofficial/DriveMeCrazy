@@ -47,20 +47,30 @@ public class CarDriverInput : MonoBehaviour
         bool throttlePressEvent = throttlePressedNow && !_wasThrottlePressed;
         bool brakePressEvent = brakePressedNow && !_wasBrakePressed;
 
-        // optional: deutlicher Lenkeinschlag als Event
+        // deutlicher Lenkeinschlag als Event
         bool strongSteerEvent = Mathf.Abs(steer) >= steerThreshold && Mathf.Abs(_lastSteer) < steerThreshold;
+
+        // aktuell gültige Reaktionshaltung
+        //bool validReactionHeld = brakePressedNow || Mathf.Abs(steer) >= steerThreshold;
 
 
         // Logging Input per second (?)
-        if (throttlePressEvent || brakePressEvent || strongSteerEvent)
+        if (brakePressEvent || strongSteerEvent)
         {
-            TelemetryLogger.Instance?.RegisterDriverInputThisFrame();
+            TelemetryLogger.Instance?.RegisterDriverInputThisFrame(true);
+        }
+        else if (throttlePressEvent)
+        {
+            TelemetryLogger.Instance?.RegisterDriverInputThisFrame(false);
         }
 
-        /*if (TelemetryLogger.Instance != null)
+        /*
+        // 2) warning_reaction_time auch dann setzen, wenn Bremse/Lenkung bereits gehalten wird
+        if (validReactionHeld)
         {
-            TelemetryLogger.Instance.SetCurrentInputs(steer, gas, brake, slow);
-        }*/
+            TelemetryLogger.Instance?.TryRegisterWarningReaction();
+        }
+        */
 
         _wasThrottlePressed = throttlePressedNow;
         _wasBrakePressed = brakePressedNow;

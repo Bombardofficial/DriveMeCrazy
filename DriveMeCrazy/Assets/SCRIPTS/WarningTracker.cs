@@ -36,13 +36,13 @@ public class WarningTracker : MonoBehaviour
     {
         if (!PlayerJoinManager.IsRaceStarted)
         {
-            ClearWarningVisualOnly(); 
+            ClearWarning(); 
             return;
         }
 
         if (vehicle == null || obstacleManager == null || feedbackUI == null)
         {
-            ClearWarningVisualOnly();
+            ClearWarning();
             return;
         }
 
@@ -97,32 +97,32 @@ public class WarningTracker : MonoBehaviour
 
         if (bestObstacle != null)
         {
-            _warningCurrentlyOn = true;
+            if (!_warningCurrentlyOn)
+            {
+                _warningCurrentlyOn = true;
+                TelemetryLogger.Instance?.SetWarningActive(true);
 
-            if (feedbackUI != null)
-                feedbackUI.SetWarningActive(true);
-
-            TelemetryLogger.Instance?.SetWarningActive(true);
+                if (feedbackUI != null)
+                    feedbackUI.SetWarningActive(true);                
+            }
         }
         else
         {
-            ClearWarningVisualOnly();  
+            if (_warningCurrentlyOn)
+            {
+                ClearWarning();
+            }
         }
     }
 
-    private void ClearWarningVisualOnly()
+    private void ClearWarning()
     {
         _warningCurrentlyOn = false;
 
         if (feedbackUI != null)
             feedbackUI.SetWarningActive(false);
 
-        TelemetryLogger.Instance?.SetWarningActive(true);
-    }
-
-    private void ClearWarningAsAvoided()
-    {
-        ClearWarningVisualOnly();
+        TelemetryLogger.Instance?.SetWarningActive(false);
     }
 
     /*
@@ -145,6 +145,6 @@ public class WarningTracker : MonoBehaviour
 
     public void ForceClearWarningAfterHit()
     {
-        ClearWarningVisualOnly();
+        ClearWarning();
     }
 }
