@@ -23,21 +23,14 @@ public class TelemetryLogger : MonoBehaviour
     private readonly Queue<float> _driverInputTimes = new();
 
     private float _inputsPerSecond;
-
     private int _collisionCountTotal;
-
     private bool _warningActive;
+    private bool _curveActive;
 
     private int _player1CollisionCounter;
     private int _player2CollisionCounter;
     private int _player3CollisionCounter;
     private int _player4CollisionCounter;
-
-    /*
-    private float _warningReactionTime = -1f;
-    private float _warningStartTime = -1f;
-    private bool _waitingForWarningReaction;
-    */
 
     private bool _driverInputThisFrame;
 
@@ -79,9 +72,10 @@ public class TelemetryLogger : MonoBehaviour
                      $"{_currentDriverPlayerNumber}," +
                      $"{(_driverChangedThisFrame ? 1 : 0)}," +
                      $"{_driverChangeCountTotal}," +
+                     $"{(_curveActive ? 1 : 0)}," +
                      $"{(_warningActive ? 1 : 0)}," +
+                     // hier noch obstacleId, obstacle cout curve, obstacle_count_curve_lane, hit_obstacle_id
                      $"{(_driverInputThisFrame ? 1 : 0)}," +
-                     //$"{_warningReactionTime.ToString("F4", CultureInfo.InvariantCulture)}," +
                      $"{_inputsPerSecond.ToString("F4", CultureInfo.InvariantCulture)}," +
                      $"{_player1CollisionCounter},{_player2CollisionCounter}," +
                      $"{_player3CollisionCounter},{_player4CollisionCounter}," +
@@ -94,43 +88,6 @@ public class TelemetryLogger : MonoBehaviour
         _driverChangedThisFrame = false;
     }
 
-    /*
-    private void LateUpdate()
-    {
-        if (!_isLogging)
-            return;
-
-        while (_driverInputTimes.Count > 0 && Time.time - _driverInputTimes.Peek() > 1f)
-        {
-            _driverInputTimes.Dequeue();
-        }
-
-        _inputsPerSecond = _driverInputTimes.Count;
-
-        float runTime = Time.time - _raceStartTime;
-
-        _rows.Add(string.Join(",",
-            runTime.ToString("F4", CultureInfo.InvariantCulture),
-            _currentDriverPlayerNumber,
-            _driverChangedThisFrame ? 1 : 0,
-            _driverChangeCountTotal,
-            _warningActive ? 1 : 0,
-            _driverInputThisFrame ? 1 : 0,
-            _warningReactionTime.ToString("F4", CultureInfo.InvariantCulture),
-            _inputsPerSecond.ToString("F4", CultureInfo.InvariantCulture),
-            _player1CollisionCounter,
-            _player2CollisionCounter,
-            _player3CollisionCounter,
-            _player4CollisionCounter,
-            _collisionCountTotal
-        ));
-
-        // frame flags nach dem Schreiben zurücksetzen
-        _driverChangedThisFrame = false;
-        _driverInputThisFrame = false;
-    }
-    */
-
     public void StartLogging()
     {
         _rows.Clear();
@@ -141,11 +98,10 @@ public class TelemetryLogger : MonoBehaviour
         _currentDriverPlayerNumber = -1;
         _driverChangedThisFrame = false;
         _driverChangeCountTotal = 0;
+        _curveActive = false;
         _warningActive = false;
+        // hier noch obstacleId, obstacle cout curve, obstacle_count_curve_lane, hit_obstacle_id
         _driverInputThisFrame = false;
-        //_warningReactionTime = -1f;
-        //_warningStartTime = -1f;
-        //_waitingForWarningReaction = false;
         _driverInputTimes.Clear();
         _inputsPerSecond = 0f;
         _player1CollisionCounter = 0;
@@ -159,8 +115,7 @@ public class TelemetryLogger : MonoBehaviour
             _currentDriverPlayerNumber = PlayerManager.Instance.CurrentDriver.PlayerNumber;
         }
 
-        _rows.Add("run_time,current_driver_player_number,driver_changed_this_frame,driver_change_count_total,warning_active,driver_input_this_frame,inputs_per_second,player1_collision_counter,player2_collision_counter,player3_collision_counter,player4_collision_counter,collision_count_total");
-        //_rows.Add("run_time,current_driver_player_number,driver_changed_this_frame,driver_change_count_total,warning_active,driver_input_this_frame,warning_reaction_time,inputs_per_second,player1_collision_counter,player2_collision_counter,player3_collision_counter,player4_collision_counter,collision_count_total");
+        _rows.Add("run_time,current_driver_player_number,driver_changed_this_frame,driver_change_count_total,curve_active,warning_active,driver_input_this_frame,inputs_per_second,player1_collision_counter,player2_collision_counter,player3_collision_counter,player4_collision_counter,collision_count_total");
     }
 
     public void StopLogging()
@@ -191,22 +146,6 @@ public class TelemetryLogger : MonoBehaviour
             return;
 
         _warningActive = active; 
-
-        /*
-        // Warnung gestartet
-        if (active)
-        {
-            _warningStartTime = Time.time;
-            //_warningReactionTime = -1f;
-            _waitingForWarningReaction = true;
-        }
-        else // Warnung beendet
-        {
-            if (_waitingForWarningReaction)
-                _warningReactionTime = -1f;
-            _waitingForWarningReaction = false;
-        }
-        */
     }
 
     public void RegisterDriverInputThisFrame(bool countsAsWarningReaction)
@@ -216,14 +155,6 @@ public class TelemetryLogger : MonoBehaviour
 
         _driverInputTimes.Enqueue(Time.time);
         _driverInputThisFrame = true;
-
-        /*
-        if (_warningActive && _waitingForWarningReaction && countsAsWarningReaction)
-        {
-            _warningReactionTime = Time.time - _warningStartTime;
-            _waitingForWarningReaction = false;
-        }
-        */
     }
 
     private void SaveCsv()
@@ -286,15 +217,12 @@ public class TelemetryLogger : MonoBehaviour
         _collisionCountTotal++;
     }
 
-    /*
-    public void TryRegisterWarningReaction()
+    public void SetCurveActive(bool active)
     {
-        if (_isLogging  && _waitingForWarningReaction)
-        {
-            _warningReactionTime = Time.time - _warningStartTime;
-            _waitingForWarningReaction = false; // Reaction wurde erfasst
-        }
+        if (!_isLogging)
+            return;
+
+        _curveActive = active;
     }
-    */
-    
+
 }

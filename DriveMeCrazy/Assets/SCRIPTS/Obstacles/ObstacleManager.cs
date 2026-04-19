@@ -20,10 +20,13 @@ public class ObstacleManager : MonoBehaviour
     public struct ObstacleMeta
     {
         public GameObject go;
+        public int id;
         public float t;         // 0..1 position on spline
         public int lane;        // lane index (for debug / future)
         public float spawnTime; // Time.time at spawn
     }
+
+    private int obstacleId = 0;
 
     public IReadOnlyList<ObstacleMeta> ActiveMetas => _activeMeta;
     readonly List<ObstacleMeta> _activeMeta = new();
@@ -639,7 +642,7 @@ public class ObstacleManager : MonoBehaviour
             obs.manager = this;
             obs.SetTracker(warningTracker);
 
-            _activeMeta.Add(new ObstacleMeta { go = go, t = t2, lane = lane, spawnTime = Time.time });
+            _activeMeta.Add(new ObstacleMeta { go = go, id = obstacleId++, t = t2, lane = lane, spawnTime = Time.time });
 
             _lastGuardTimeByCollectibleId[cid] = Time.time;
 

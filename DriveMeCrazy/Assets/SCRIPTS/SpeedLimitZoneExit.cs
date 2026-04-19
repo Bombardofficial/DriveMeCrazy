@@ -25,5 +25,12 @@ public class SpeedLimitZoneExit : MonoBehaviour
 
         Debug.Log($"[SpeedZone] EXIT signIndex={signIndex}");
         car.ExitSpeedLimit(signIndex);
+
+        if (DriftState.IsInDriftZone)
+        {
+            DriftState.IsInDriftZone = false;
+            TelemetryLogger.Instance?.SetCurveActive(false);
+            Debug.Log("[DriftZone] Exited Curve");
+        }
     }
 }

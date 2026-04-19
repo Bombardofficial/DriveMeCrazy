@@ -12,12 +12,10 @@ public class WarningTracker : MonoBehaviour
 
     [Header("Warning Settings")]
     [SerializeField] private float warningDistance = 25f;
-    [SerializeField] private float forwardDotThreshold = 0.7f;
     [SerializeField] private float checkInterval = 0.02f; // 10x pro Sekunde
     [SerializeField] private float warningHoldDuration = 0.3f; // Warnung bleibt 0.3s länger an
 
     private bool _warningCurrentlyOn = false;
-    private float _lastValidObstacleTime;
     private float _nextCheckTime;
 
     private GameObject _currentWarnedObstacle = null; // Speichert das Objekt, das die Warnung auslöst
@@ -43,29 +41,43 @@ public class WarningTracker : MonoBehaviour
 
         GameObject bestObstacle = null;
         float bestDistance = float.MaxValue;
+        bool inCurve = DriftState.IsInDriftZone;
         int currentLane = vehicle.CurrentLane;
         Vector3 carPos = vehicle.transform.position;
         Vector3 carForward = vehicle.transform.forward;
+
+        int obsOnLane = 0;
+        int obsInCurveTotal = 0;
 
         foreach (var meta in obstacleManager.ActiveMetas)
         {
             if (meta.go == null || !meta.go.activeInHierarchy) continue;
 
-            // 1. Filter: Nur Hindernisse, keine Collectables
             Obstacle obs = meta.go.GetComponent<Obstacle>();
             if (obs == null || obs.HasBeenHit) continue;
 
-            // 2. Spur-Filter
-            if (meta.lane != currentLane) continue;
+            float dist = Vector3.Distance(carPos, meta.go.transform.position);
+            if (dist > warningDistance) continue;
 
-            // 3. Distanz-Filter (wieder fest auf 20-30m)
+            // --- Logik für Telemetrie ---
+            obsInCurveTotal++;
+            if (meta.lane == currentLane) obsOnLane++;
+
+            // --- FILTER-LOGIK ---
+            // 1. Wenn wir NICHT in der Kurve sind (Gerade), Filtern wir hart nach Spur.
+            // 2. In der Kurve lassen wir alles zu (kein 'continue' bei anderem Lane-Index).
+            if (!inCurve && meta.lane != currentLane) continue;
+
+            // 2. DISTANZ-FILTER
+            // Warnung nur, wenn das Hindernis innerhalb von z.B. 25-30 Metern ist.
             float distance = Vector3.Distance(carPos, meta.go.transform.position);
             if (distance > warningDistance) continue;
 
-            // 4. Sichtkegel
+            // Dot-Produkt für Richtung (etwas großzügiger für Kurven)
             Vector3 toObstacle = (meta.go.transform.position - carPos).normalized;
-            if (Vector3.Dot(carForward, toObstacle) < forwardDotThreshold) continue;
+            if (Vector3.Dot(carForward, toObstacle) < 0.1f) continue;
 
+            // Finde das NÄCHSTE Hindernis auf der Spur
             if (distance < bestDistance)
             {
                 bestDistance = distance;
@@ -73,11 +85,9 @@ public class WarningTracker : MonoBehaviour
             }
         }
 
-        // ZUSTANDS-LOGIK:
+        // ZUSTANDS-LOGIK (Unverändert)
         if (bestObstacle != null)
         {
-            // Wir haben ein Hindernis gefunden. 
-            // Wenn es ein neues ist, UI triggern.
             if (_currentWarnedObstacle != bestObstacle)
             {
                 _currentWarnedObstacle = bestObstacle;
@@ -86,40 +96,11 @@ public class WarningTracker : MonoBehaviour
         }
         else
         {
-            // Kein Hindernis in der aktuellen Spur gefunden -> Ausschalten
             if (_warningCurrentlyOn)
             {
                 ClearWarning();
             }
         }
-
-        /*
-        if (metas != null)
-        {
-            for (int i = 0; i < metas.Count; i++)
-            {
-                var meta = metas[i];
-                if (meta.go == null || !meta.go.activeInHierarchy) continue;
-
-                // WICHTIG: Nur Hindernisse auf der aktuellen Spur!
-                if (meta.lane != currentLane) continue;
-
-                Vector3 toObstacle = meta.go.transform.position - carPos;
-                float distance = toObstacle.magnitude;
-
-                if (distance > warningDistance) continue;
-
-                float dot = Vector3.Dot(carForward, toObstacle.normalized);
-                if (dot < forwardDotThreshold) continue;
-
-                if (distance < bestDistance)
-                {
-                    bestDistance = distance;
-                    bestObstacle = meta.go;
-                }
-            }
-        }
-        */
     }
 
     private void TriggerWarning(bool active)

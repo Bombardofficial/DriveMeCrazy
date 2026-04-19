@@ -22,6 +22,9 @@ namespace ArcadeVP
 
         float LimitMps => unit == SpeedUnit.MetresPerSecond ? limitValue : limitValue / 3.6f;
 
+        public bool isDriftCurve = false; // Checkbox im Inspector für Kurven-Zonen
+        public static bool IsInDriftZone { get; private set; }
+
         void OnTriggerEnter(Collider other)
         {
             if (!other.CompareTag(targetTag)) return;
@@ -38,6 +41,13 @@ namespace ArcadeVP
 
             Debug.Log($"[SpeedZone] ENTRY id={signIndex} {limitValue} {unit} => {LimitMps:0.00} m/s");
             car.EnterSpeedLimit(LimitMps, signIndex);
+
+            if (isDriftCurve)
+            {
+                DriftState.IsInDriftZone = true;
+                TelemetryLogger.Instance?.SetCurveActive(true);
+                Debug.Log("[DriftZone] Entered Curve");
+            }
         }
     }
 }

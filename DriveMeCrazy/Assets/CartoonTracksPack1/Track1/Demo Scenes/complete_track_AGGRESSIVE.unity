@@ -267147,8 +267147,7 @@ MonoBehaviour:
   vehicle: {fileID: 2111085467219387259}
   obstacleManager: {fileID: 1639027661}
   feedbackUI: {fileID: 419289298}
-  warningDistance: 25
-  forwardDotThreshold: 0.35
+  warningDistance: 40
   checkInterval: 0.1
   warningHoldDuration: 0.3
 --- !u!4 &2170742185082655839
