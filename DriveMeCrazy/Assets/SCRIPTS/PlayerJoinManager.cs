@@ -122,7 +122,7 @@ public class PlayerJoinManager : MonoBehaviour
     [Tooltip("OPTIONAL.  Leave empty if this script is placed ON the LapGate")]
     [SerializeField] private Collider lapGateTrigger;        // start/finish
     [Tooltip("Tag on the car root GameObject")]
-    [SerializeField] private string playerCarTag = "PlayerCar";
+    //[SerializeField] private string playerCarTag = "PlayerCar";
 
     [Header("Results & End-Game UI")]
     [SerializeField] CanvasGroup resultsPanel;       // parent group

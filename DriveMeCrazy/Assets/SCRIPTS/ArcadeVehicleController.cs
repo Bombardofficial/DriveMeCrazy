@@ -18,6 +18,7 @@ namespace ArcadeVP
         public float maxSpeed = 20f;
         public float acceleration = 5f;
         private float speed = 0f;
+        public float _Speed => speed;
         private float traveledDistance = 0f;
 
 
@@ -65,7 +66,6 @@ namespace ArcadeVP
         public bool keepForwardDistanceDuringLaneChange = true;
 
         public event Action LaneChanged;
-        private bool _wasLaneChangingLastFrame = false;
 
         // --- End Existing Headers ---
 

@@ -36,6 +36,8 @@ public class Obstacle : MonoBehaviour
     public AudioClip impactClip;            // assign in prefab
     [HideInInspector] public AudioSourcePool audioPool;   // set by manager
 
+    private WarningTracker _tracker;
+
     void Awake()
     {
         _rb = GetComponent<Rigidbody>();
@@ -60,6 +62,11 @@ public class Obstacle : MonoBehaviour
             Debug.Log($"Obstacle '{name}' hit by car. Applying force.", gameObject);
 
             _hasBeenHit = true;
+
+            if (_tracker != null)
+            {
+                _tracker.ForceClearWarningAfterHit();
+            }
 
             if (audioPool && impactClip)
                 audioPool.Play3D(impactClip, transform.position);
@@ -135,5 +142,10 @@ public class Obstacle : MonoBehaviour
 
         // Reset rotation to ensure it spawns upright.
         transform.rotation = Quaternion.identity;
+    }
+
+    public void SetTracker(WarningTracker tracker)
+    {
+        _tracker = tracker;
     }
 }

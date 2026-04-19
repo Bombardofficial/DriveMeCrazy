@@ -11,12 +11,12 @@ public class FeedbackIntensityUI : MonoBehaviour
     [SerializeField] private Image damageRedBorder;
 
     [Header("Warning Settings")]
-    [SerializeField] private float warningFadeSpeed = 3f;
+    [SerializeField] private float warningFadeSpeed = 5f;
     [SerializeField] private float warningMaxAlpha = 0.85f;
 
     [Header("Damage Settings")]
     [SerializeField] private float damageFlashDuration = 0.25f;
-    [SerializeField] private float damageFadeOutDuration = 0.35f;
+    [SerializeField] private float damageFadeOutDuration = 0.25f;
     [SerializeField] private float damageMaxAlpha = 0.95f;
 
     private bool _warningActive;
@@ -27,7 +27,7 @@ public class FeedbackIntensityUI : MonoBehaviour
     [SerializeField] private AudioSource uiAudioSource;
     [SerializeField] private AudioClip warningClip;
     [SerializeField] private AudioClip damageClip;
-    [SerializeField] private float warningCooldown = 0.35f;
+    [SerializeField] private float warningCooldown = 0.25f;
 
     private float _lastWarningAudioTime = -999f;
     private bool _previousWarningActive;

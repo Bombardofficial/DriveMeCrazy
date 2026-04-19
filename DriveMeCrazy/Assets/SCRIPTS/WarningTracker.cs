@@ -11,12 +11,16 @@ public class WarningTracker : MonoBehaviour
     [SerializeField] private FeedbackIntensityUI feedbackUI;
 
     [Header("Warning Settings")]
-    [SerializeField] private float warningDistance = 20f;
-    [SerializeField] private float forwardDotThreshold = 0.35f;
-    [SerializeField] private float checkInterval = 0.1f; // 10x pro Sekunde
+    [SerializeField] private float warningDistance = 25f;
+    [SerializeField] private float forwardDotThreshold = 0.7f;
+    [SerializeField] private float checkInterval = 0.02f; // 10x pro Sekunde
+    [SerializeField] private float warningHoldDuration = 0.3f; // Warnung bleibt 0.3s länger an
 
     private bool _warningCurrentlyOn = false;
+    private float _lastValidObstacleTime;
     private float _nextCheckTime;
+
+    private GameObject _currentWarnedObstacle = null; // Speichert das Objekt, das die Warnung auslöst
 
     private void Reset()
     {
@@ -34,58 +38,79 @@ public class WarningTracker : MonoBehaviour
 
     private void CheckWarnings()
     {
-        if (!PlayerJoinManager.IsRaceStarted)
-        {
-            ClearWarning(); 
-            return;
-        }
+        if (!PlayerJoinManager.IsRaceStarted) { ClearWarning(); return; }
+        if (vehicle == null || obstacleManager == null || feedbackUI == null) return;
 
-        if (vehicle == null || obstacleManager == null || feedbackUI == null)
-        {
-            ClearWarning();
-            return;
-        }
-
-        var metas = obstacleManager.ActiveMetas;
-
+        GameObject bestObstacle = null;
+        float bestDistance = float.MaxValue;
+        int currentLane = vehicle.CurrentLane;
         Vector3 carPos = vehicle.transform.position;
         Vector3 carForward = vehicle.transform.forward;
-        int currentLane = vehicle.CurrentLane;
 
-        float bestDistance = float.MaxValue;
-        GameObject bestObstacle = null;
+        foreach (var meta in obstacleManager.ActiveMetas)
+        {
+            if (meta.go == null || !meta.go.activeInHierarchy) continue;
 
+            // 1. Filter: Nur Hindernisse, keine Collectables
+            Obstacle obs = meta.go.GetComponent<Obstacle>();
+            if (obs == null || obs.HasBeenHit) continue;
 
-        if (metas != null && metas.Count > 0)
+            // 2. Spur-Filter
+            if (meta.lane != currentLane) continue;
+
+            // 3. Distanz-Filter (wieder fest auf 20-30m)
+            float distance = Vector3.Distance(carPos, meta.go.transform.position);
+            if (distance > warningDistance) continue;
+
+            // 4. Sichtkegel
+            Vector3 toObstacle = (meta.go.transform.position - carPos).normalized;
+            if (Vector3.Dot(carForward, toObstacle) < forwardDotThreshold) continue;
+
+            if (distance < bestDistance)
+            {
+                bestDistance = distance;
+                bestObstacle = meta.go;
+            }
+        }
+
+        // ZUSTANDS-LOGIK:
+        if (bestObstacle != null)
+        {
+            // Wir haben ein Hindernis gefunden. 
+            // Wenn es ein neues ist, UI triggern.
+            if (_currentWarnedObstacle != bestObstacle)
+            {
+                _currentWarnedObstacle = bestObstacle;
+                TriggerWarning(true);
+            }
+        }
+        else
+        {
+            // Kein Hindernis in der aktuellen Spur gefunden -> Ausschalten
+            if (_warningCurrentlyOn)
+            {
+                ClearWarning();
+            }
+        }
+
+        /*
+        if (metas != null)
         {
             for (int i = 0; i < metas.Count; i++)
             {
                 var meta = metas[i];
+                if (meta.go == null || !meta.go.activeInHierarchy) continue;
 
-                if (meta.go == null || !meta.go.activeInHierarchy)
-                    continue;
-
-                Obstacle obstacleComponent = meta.go.GetComponent<Obstacle>();
-                if (obstacleComponent != null && obstacleComponent.HasBeenHit)
-                    continue;
-
-                // Nur aktuelle Spur
-                if (meta.lane != currentLane)
-                    continue;
-                // ---- auskommentieren --> auf alle hindernisse warnung (gleich) 
+                // WICHTIG: Nur Hindernisse auf der aktuellen Spur!
+                if (meta.lane != currentLane) continue;
 
                 Vector3 toObstacle = meta.go.transform.position - carPos;
                 float distance = toObstacle.magnitude;
 
-                if (distance > warningDistance)
-                    continue;
+                if (distance > warningDistance) continue;
 
-                Vector3 dirToObstacle = toObstacle.normalized;
-                float dot = Vector3.Dot(carForward, dirToObstacle);
-
-                // Nur vor dem Auto
-                if (dot < forwardDotThreshold)
-                    continue;
+                float dot = Vector3.Dot(carForward, toObstacle.normalized);
+                if (dot < forwardDotThreshold) continue;
 
                 if (distance < bestDistance)
                 {
@@ -94,57 +119,25 @@ public class WarningTracker : MonoBehaviour
                 }
             }
         }
+        */
+    }
 
-        if (bestObstacle != null)
-        {
-            if (!_warningCurrentlyOn)
-            {
-                _warningCurrentlyOn = true;
-                TelemetryLogger.Instance?.SetWarningActive(true);
-
-                if (feedbackUI != null)
-                    feedbackUI.SetWarningActive(true);                
-            }
-        }
-        else
-        {
-            if (_warningCurrentlyOn)
-            {
-                ClearWarning();
-            }
-        }
+    private void TriggerWarning(bool active)
+    {
+        _warningCurrentlyOn = active;
+        feedbackUI?.SetWarningActive(active);
+        TelemetryLogger.Instance?.SetWarningActive(active);
     }
 
     private void ClearWarning()
     {
-        _warningCurrentlyOn = false;
-
-        if (feedbackUI != null)
-            feedbackUI.SetWarningActive(false);
-
-        TelemetryLogger.Instance?.SetWarningActive(false);
+        _currentWarnedObstacle = null; // Reset des getrackten Hindernisses
+        TriggerWarning(false);
     }
-
-    /*
-    private void ClearWarning()
-    {
-        if (_warningCurrentlyOn && _currentlyWarnedObstacleId != -1)
-        {
-            TelemetryLogger.Instance?.RegisterWarningObstacleAvoided(_currentlyWarnedObstacleId);
-        }
-
-        _warningCurrentlyOn = false;
-        _currentlyWarnedObstacleId = -1;
-
-        if (feedbackUI != null)
-            feedbackUI.SetWarningActive(false);
-
-        TelemetryLogger.Instance?.SetWarningActive(false);
-    }
-    */
 
     public void ForceClearWarningAfterHit()
     {
+        _currentWarnedObstacle = null;
         ClearWarning();
     }
 }

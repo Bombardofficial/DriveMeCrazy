@@ -33,9 +33,11 @@ public class TelemetryLogger : MonoBehaviour
     private int _player3CollisionCounter;
     private int _player4CollisionCounter;
 
+    /*
     private float _warningReactionTime = -1f;
     private float _warningStartTime = -1f;
     private bool _waitingForWarningReaction;
+    */
 
     private bool _driverInputThisFrame;
 

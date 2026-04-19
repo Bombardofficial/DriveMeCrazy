@@ -160,6 +160,9 @@ public class ObstacleManager : MonoBehaviour
 
     static readonly List<GameObject> _tmpActivePrune = new();
 
+    [Header("WarningTracker")]
+    [SerializeField] private WarningTracker warningTracker;
+
     bool IsSplineLooped()
     {
         // Unity Splines: Spline.Closed == loop track
@@ -630,6 +633,12 @@ public class ObstacleManager : MonoBehaviour
             go.transform.SetPositionAndRotation(finalPos, Quaternion.LookRotation(wt2, Vector3.up));
             go.SetActive(true);
             _active.Add(go);
+
+            // WarningTracker stuff
+            Obstacle obs = go.GetComponent<Obstacle>();
+            obs.manager = this;
+            obs.SetTracker(warningTracker);
+
             _activeMeta.Add(new ObstacleMeta { go = go, t = t2, lane = lane, spawnTime = Time.time });
 
             _lastGuardTimeByCollectibleId[cid] = Time.time;
