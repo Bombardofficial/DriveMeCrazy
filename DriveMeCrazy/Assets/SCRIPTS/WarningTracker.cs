@@ -3,8 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Splines;
-using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
 public class WarningTracker : MonoBehaviour
 {
@@ -12,123 +10,151 @@ public class WarningTracker : MonoBehaviour
     [SerializeField] private ArcadeVehicleController vehicle;
     [SerializeField] private FeedbackIntensityUI feedbackUI;
 
-    private bool _warningCurrentlyOn = false;
-    private Obstacle _currentObstacleInZone = null;
-    private GameObject _currentWarnedObstacle = null; 
+    private readonly Dictionary<int, Obstacle> _obstaclesInZone = new();
+
+    private bool _warningCurrentlyOn;
+    private int _activeWarningObstacleId = -1;
 
     private void Reset()
     {
-        vehicle = GetComponent<ArcadeVehicleController>();
+        vehicle = GetComponentInParent<ArcadeVehicleController>();
     }
 
     private void Update()
     {
-        if (_currentObstacleInZone != null)
+        RefreshWarningState();
+    }
+
+    private void RefreshWarningState()
+    {
+        RemoveInvalidObstacles();
+
+        Obstacle bestObstacle = GetBestObstacleForCurrentLane();
+
+        if (bestObstacle == null)
         {
-            CheckAndTrigger();
+            ClearWarning();
+            return;
+        }
+
+        if (!_warningCurrentlyOn || _activeWarningObstacleId != bestObstacle.Id)
+        {
+            ActivateWarning(bestObstacle);
         }
     }
 
-    private void CheckAndTrigger()
+    private void RemoveInvalidObstacles()
     {
-        // Check: Sind wir auf der gleichen Spur?
-        if (vehicle.CurrentLane == _currentObstacleInZone.currentLane)
+        List<int> idsToRemove = null;
+
+        foreach (var kvp in _obstaclesInZone)
         {
-            if (!_warningCurrentlyOn) TriggerWarning(true, _currentObstacleInZone.id);
-        }
-        else
-        {
-            // Wenn wir in der Box sind, aber die Spur gewechselt haben
-            if (_warningCurrentlyOn) ClearWarning();
-        }
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        //if (!PlayerJoinManager.IsRaceStarted) return;
-        if (!_warningCurrentlyOn)
-            feedbackUI?.SetWarningActive(true);
-
-        // Prüfen, ob wir in den collider eines Hindernisses gefahren sind
-        Obstacle obs = other.GetComponent<Obstacle>();
-        Debug.Log("Trigger Entered: " + (obs != null ? "Obstacle gefunden!" : "Kein Obstacle-Script am Trigger-Objekt")); 
-        
-        if (obs != null && !obs.HasBeenHit)
-        {
-            _currentObstacleInZone = obs;
-        }
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (_warningCurrentlyOn) 
-            feedbackUI?.SetWarningActive(false);
-
-        Obstacle obs = other.GetComponent<Obstacle>();
-
-        Debug.Log("Trigger verlassen von: " + other.name);
-
-        if (obs != null && obs == _currentObstacleInZone)
-        {
-            _currentObstacleInZone = null;
-            //if (_warningCurrentlyOn) ClearWarning();
-        }
-    }
-
-    private void CheckWarnings()
-    {
-        // Wir prüfen jeden Frame nur noch: Sind wir in einer Zone?
-        // Wenn ja, sind wir auf derselben Spur wie das Hindernis?
-        if (_currentObstacleInZone != null && !_currentObstacleInZone.HasBeenHit)
-        {
-            // Vergleiche die Spur des Autos mit der Spur des Hindernisses
-            if (vehicle.CurrentLane == _currentObstacleInZone.currentLane)
+            Obstacle obs = kvp.Value;
+            if (obs == null || !obs.gameObject.activeInHierarchy || obs.HasBeenHit)
             {
-                if (!_warningCurrentlyOn) TriggerWarning(true, _currentObstacleInZone.id);
-            }
-            else
-            {
-                // Wir sind im Kreis, aber auf einer anderen Spur -> Warnung aus
-                if (_warningCurrentlyOn) ClearWarning();
+                idsToRemove ??= new List<int>();
+                idsToRemove.Add(kvp.Key);
             }
         }
-        else
-        {
-            if (_warningCurrentlyOn) ClearWarning();
-        }
 
-        /*
-        // Prüfe nur auf derselben Spur
-        if (meta.lane != currentLane) continue;
+        if (idsToRemove == null) return;
 
-        var obsComp = meta.go.GetComponent<Obstacle>();
-        bestObstacleID = (obsComp != null) ? obsComp.id : -1;
-        */
+        foreach (int id in idsToRemove)
+            _obstaclesInZone.Remove(id);
     }
 
-
-
-    // Erweitertes Trigger-System
-    private void TriggerWarning(bool active, int obstacleID)
+    private Obstacle GetBestObstacleForCurrentLane()
     {
-        _warningCurrentlyOn = active;
-        feedbackUI?.SetWarningActive(active);
-        TelemetryLogger.Instance?.SetWarningActive(active);
+        Obstacle best = null;
+        float bestSqrDistance = float.MaxValue;
+        int carLane = GetWarningComparableCarLane();
 
-        // Telemetrie: Logge jetzt mit ID
-        // TelemetryLogger.Instance?.LogWarningEvent(obstacleID, active);
-        // --> Set warning umschreiben dass es auch die ID mitliefert
+        foreach (var kvp in _obstaclesInZone)
+        {
+            Obstacle obs = kvp.Value;
+            if (obs == null || obs.HasBeenHit) continue;
+            //Debug.Log($"LUCY - CHECKING OBSTACLE | id={obs.Id} obsLane={obs.CurrentLane} carLane={carLane}");
+            if (obs.CurrentLane != carLane) continue;
+
+            float sqrDist = (obs.transform.position - vehicle.transform.position).sqrMagnitude;
+            if (sqrDist < bestSqrDistance)
+            {
+                bestSqrDistance = sqrDist;
+                best = obs;
+            }
+        }
+
+        return best;
+    }
+
+    private int GetWarningComparableCarLane()
+    {
+        int lane = vehicle.CurrentLane;
+
+        // Für 3 Spuren:
+        // Vehicle-Konvention ist gespiegelt gegenüber Obstacle-/World-Konvention
+        // 0 <-> 2, 1 bleibt 1
+        return 2 - lane;
+    }
+
+    private void ActivateWarning(Obstacle obstacle)
+    {
+        //Debug.Log($"LUCY - WARNING ON | obstacleId={obstacle.Id} obstacleLane={obstacle.CurrentLane} carLane={vehicle.CurrentLane}");
+
+        _warningCurrentlyOn = true;
+        _activeWarningObstacleId = obstacle.Id;
+
+        feedbackUI?.SetWarningActive(true);
+        TelemetryLogger.Instance?.SetWarningActive(true, obstacle.Id);
     }
 
     private void ClearWarning()
     {
-        _currentWarnedObstacle = null; // Reset des getrackten Hindernisses
-        TriggerWarning(false, 0);
+        if (!_warningCurrentlyOn)
+            return;
+
+        _warningCurrentlyOn = false;
+        _activeWarningObstacleId = -1;
+
+        feedbackUI?.SetWarningActive(false);
+        TelemetryLogger.Instance?.SetWarningActive(false, -1);
+    }
+
+
+    private void OnTriggerEnter(Collider other)
+    {
+        Obstacle obs = other.GetComponentInParent<Obstacle>();
+        if (obs == null) return;
+        if (obs.HasBeenHit) return;
+
+        //Debug.Log($"LUCY - TRIGGER ENTER | other={other.name} obstacleId={obs.Id} obstacleLane={obs.CurrentLane} carLane={vehicle.CurrentLane}");
+        _obstaclesInZone[obs.Id] = obs;
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        Obstacle obs = other.GetComponentInParent<Obstacle>();
+        if (obs == null) return;
+
+        //Debug.Log($"LUCY - TRIGGER EXIT | other={other.name} obstacleId={obs.Id} obstacleLane={obs.CurrentLane} carLane={vehicle.CurrentLane}");
+        _obstaclesInZone.Remove(obs.Id);
+
+        if (_activeWarningObstacleId == obs.Id)
+            RefreshWarningState();
+    }
+
+    public void NotifyObstacleHit(Obstacle obstacle)
+    {
+        if (obstacle == null) return;
+
+        _obstaclesInZone.Remove(obstacle.Id);
+
+        if (_activeWarningObstacleId == obstacle.Id)
+            RefreshWarningState();
     }
 
     public void ForceClearWarningAfterHit()
     {
-        _currentWarnedObstacle = null;
         ClearWarning();
     }
 }

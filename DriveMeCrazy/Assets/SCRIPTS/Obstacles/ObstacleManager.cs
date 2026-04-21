@@ -612,6 +612,7 @@ public class ObstacleManager : MonoBehaviour
                        Mathf.Clamp(m.lane + (UnityEngine.Random.value < 0.5f ? -1 : +1), 0, collectableMgr.laneVis.laneOffsets.Length - 1);
 
             float offset = collectableMgr.laneVis.laneOffsets[lane];
+            int normalizedLane = NormalizeLaneIndexFromOffset(offset);
 
             Vector3 rayStart = wp2 + right2 * offset + Vector3.up * raycastHeight;
             Vector3 finalPos;
@@ -639,13 +640,23 @@ public class ObstacleManager : MonoBehaviour
 
             // WarningTracker stuff
             Obstacle obs = go.GetComponent<Obstacle>();
+            int spawnedObstacleId = obstacleId++;
+
             if (obs != null)
             {
-                obs.currentLane = lane;
-                // obsComp.id = obstacleId++;
+                obs.InitializeForSpawn(spawnedObstacleId, normalizedLane, warningTracker);
             }
 
-            _activeMeta.Add(new ObstacleMeta { go = go, id = obstacleId, t = t2, lane = lane, spawnTime = Time.time });
+            _activeMeta.Add(new ObstacleMeta
+            {
+                go = go,
+                id = spawnedObstacleId,
+                t = t2,
+                lane = normalizedLane,
+                spawnTime = Time.time
+            });
+
+            //_activeMeta.Add(new ObstacleMeta { go = go, t = t2, lane = lane, spawnTime = Time.time });
 
             _lastGuardTimeByCollectibleId[cid] = Time.time;
 
@@ -862,6 +873,7 @@ public class ObstacleManager : MonoBehaviour
 
             int laneIdx = UnityEngine.Random.Range(0, laneVis.laneOffsets.Length);
             float offset = laneVis.laneOffsets[laneIdx];
+            int normalizedLane = NormalizeLaneIndexFromOffset(offset);
 
             Vector3 rayStart = wp + right * offset + Vector3.up * raycastHeight;
 
@@ -884,7 +896,24 @@ public class ObstacleManager : MonoBehaviour
             go.transform.SetPositionAndRotation(finalPos, Quaternion.LookRotation(wt, Vector3.up));
             go.SetActive(true);
             _active.Add(go);
-            _activeMeta.Add(new ObstacleMeta { go = go, t = t, lane = laneIdx, spawnTime = Time.time });
+
+            int spawnedObstacleId = obstacleId++;
+
+            Obstacle obs = go.GetComponent<Obstacle>();
+            if (obs != null)
+            {
+                obs.InitializeForSpawn(spawnedObstacleId, normalizedLane, warningTracker);
+            }
+
+            _activeMeta.Add(new ObstacleMeta
+            {
+                go = go,
+                id = spawnedObstacleId,
+                t = t,
+                lane = normalizedLane,
+                spawnTime = Time.time
+            });
+            //_activeMeta.Add(new ObstacleMeta { go = go, t = t, lane = laneIdx, spawnTime = Time.time });
 
             if (SkillEstimator.Instance) SkillEstimator.Instance.OnObstacleSpawned();
             if (drawAttemptGizmos) DebugDraw(finalPos, Color.magenta);
@@ -913,5 +942,14 @@ public class ObstacleManager : MonoBehaviour
 #if UNITY_EDITOR
         Debug.DrawLine(p, p + Vector3.up * 3f, c, 0.9f);
 #endif
+    }
+
+    private int NormalizeLaneIndexFromOffset(float offset)
+    {
+        const float epsilon = 0.01f;
+
+        if (offset < -epsilon) return 0; // left lane in vehicle convention
+        if (offset > epsilon) return 2; // right lane in vehicle convention
+        return 1;                        // center lane
     }
 }

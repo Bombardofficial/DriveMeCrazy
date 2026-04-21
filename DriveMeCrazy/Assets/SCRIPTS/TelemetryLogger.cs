@@ -41,7 +41,10 @@ public class TelemetryLogger : MonoBehaviour
     private bool _driverChangedThisFrame;
     private int _driverChangeCountTotal;
 
-    
+    private int _warningObstacleId = -1;
+    private int _hitObstacleIdThisFrame = -1;
+
+
 
     public float CurrentRaceTime => _isLogging ? Time.time - _raceStartTime : 0f;
 
@@ -74,14 +77,16 @@ public class TelemetryLogger : MonoBehaviour
                      $"{_driverChangeCountTotal}," +
                      $"{(_curveActive ? 1 : 0)}," +
                      $"{(_warningActive ? 1 : 0)}," +
-                     // hier noch obstacleId, obstacle cout curve, obstacle_count_curve_lane, hit_obstacle_id
+                     $"{_warningObstacleId}," +
                      $"{(_driverInputThisFrame ? 1 : 0)}," +
                      $"{_inputsPerSecond.ToString("F4", CultureInfo.InvariantCulture)}," +
+                     $"{_hitObstacleIdThisFrame}," +
                      $"{_player1CollisionCounter},{_player2CollisionCounter}," +
                      $"{_player3CollisionCounter},{_player4CollisionCounter}," +
                      $"{_collisionCountTotal}";
 
-        _rows.Add(row);
+        _rows.Add("run_time,current_driver_player_number,driver_changed_this_frame,driver_change_count_total,curve_active,warning_active,warning_obstacle_id,driver_input_this_frame,inputs_per_second,hit_obstacle_id_this_frame,player1_collision_counter,player2_collision_counter,player3_collision_counter,player4_collision_counter,collision_count_total");
+        //_rows.Add(row);
 
         // WICHTIG: Setze Event-Flags nach jedem Frame zurück, damit sie nicht "kleben"
         _driverInputThisFrame = false;
@@ -100,10 +105,11 @@ public class TelemetryLogger : MonoBehaviour
         _driverChangeCountTotal = 0;
         _curveActive = false;
         _warningActive = false;
-        // hier noch obstacleId, obstacle cout curve, obstacle_count_curve_lane, hit_obstacle_id
-        _driverInputThisFrame = false;
+        _warningObstacleId = -1;
         _driverInputTimes.Clear();
+        _driverInputThisFrame = false;
         _inputsPerSecond = 0f;
+        _hitObstacleIdThisFrame = -1;
         _player1CollisionCounter = 0;
         _player2CollisionCounter = 0;
         _player3CollisionCounter = 0;
@@ -115,7 +121,8 @@ public class TelemetryLogger : MonoBehaviour
             _currentDriverPlayerNumber = PlayerManager.Instance.CurrentDriver.PlayerNumber;
         }
 
-        _rows.Add("run_time,current_driver_player_number,driver_changed_this_frame,driver_change_count_total,curve_active,warning_active,driver_input_this_frame,inputs_per_second,player1_collision_counter,player2_collision_counter,player3_collision_counter,player4_collision_counter,collision_count_total");
+        _rows.Add("run_time,current_driver_player_number,driver_changed_this_frame,driver_change_count_total,curve_active,warning_active,warning_obstacle_id,driver_input_this_frame,inputs_per_second,hit_obstacle_id_this_frame,player1_collision_counter,player2_collision_counter,player3_collision_counter,player4_collision_counter,collision_count_total");
+        //_rows.Add("run_time,current_driver_player_number,driver_changed_this_frame,driver_change_count_total,curve_active,warning_active,driver_input_this_frame,inputs_per_second,player1_collision_counter,player2_collision_counter,player3_collision_counter,player4_collision_counter,collision_count_total");
     }
 
     public void StopLogging()
@@ -140,12 +147,13 @@ public class TelemetryLogger : MonoBehaviour
     }
 
     
-    public void SetWarningActive(bool active)
+    public void SetWarningActive(bool active, int obstacleId)
     {
         if (!_isLogging)
             return;
 
-        _warningActive = active; 
+        _warningActive = active;
+        _warningObstacleId = active ? obstacleId : -1;
     }
 
     public void RegisterDriverInputThisFrame(bool countsAsWarningReaction)
@@ -176,7 +184,14 @@ public class TelemetryLogger : MonoBehaviour
         }
     }
 
-    
+    public void RegisterObstacleHit(int obstacleId)
+    {
+        if (!_isLogging)
+            return;
+
+        _hitObstacleIdThisFrame = obstacleId;
+    }
+
     private void OnEnable()
     {
         PlayerManager.OnDriverChanged += HandleDriverChanged;

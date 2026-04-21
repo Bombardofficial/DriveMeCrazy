@@ -1286,24 +1286,37 @@ namespace ArcadeVP
 
         private void HandleLaneChangeTap()
         {
+            //Debug.Log($"LUCY - LANE TAP START | car={name} currentLane={currentLane} steer={steeringInput} prevSteer={previousSteer} speed={speed}");
+            
             if (Time.time < lastLaneChangeTime + laneChangeCooldown) return;
             if (Mathf.Abs(speed) < maxSpeed * minSpeedFractionForLaneChange) return;
+
             bool tapR = steeringInput > 0f && previousSteer <= 0f;
             bool tapL = steeringInput < 0f && previousSteer >= 0f;
+
+            //Debug.Log($"LUCY - LANE TAP CHECK | tapL={tapL} tapR={tapR}");
+
             int newLane = currentLane;
+            //Debug.Log($"LUCY - LANE CHANGED | currentLane={currentLane}");
+
             int maxLaneIndex = useSeparateLaneSplines && laneTrackSwitcher != null
     ? (laneTrackSwitcher.LaneCount - 1)
     : 2;
+            //Debug.Log($"LUCY - LANE TAP RESULT | currentLane={currentLane} newLane={newLane} useSeparateLaneSplines={useSeparateLaneSplines}");
 
             // tap logic maradhat, csak a bounds legyen dinamikus
-            if (tapL && currentLane < maxLaneIndex) newLane++;
+            if(tapL && currentLane < maxLaneIndex) newLane++;
             if (tapR && currentLane > 0) newLane--;
 
             if (newLane != currentLane)
             {
                 if (useSeparateLaneSplines && laneTrackSwitcher != null)
                 {
-                    if (laneTrackSwitcher.RequestLane(newLane, traveledDistance, out float remapped))
+                    bool ok = laneTrackSwitcher.RequestLane(newLane, traveledDistance, out float remapped);
+                    //Debug.Log($"LUCY - REQUEST LANE | requested={newLane} success={ok} traveledDistance={traveledDistance}");
+
+                    //if (laneTrackSwitcher.RequestLane(newLane, traveledDistance, out float remapped))
+                    if (ok)
                     {
                         // If we keep forward distance continuous, DO NOT apply remapped
                         // (remapped exists to keep same normalized progress across splines, but it can feel like a slowdown)
@@ -1312,12 +1325,14 @@ namespace ArcadeVP
 
                         lastLaneChangeTime = Time.time;
                         currentLane = newLane;
+                        //Debug.Log($"LUCY - if CAR LANE CHANGED | car={name} currentLane={currentLane}");
                         LaneChanged?.Invoke();
                     }
                 }
                 else
                 {
                     currentLane = newLane;
+                    //Debug.Log($"LUCY - else CAR LANE CHANGED | car={name} currentLane={currentLane}");
                     targetOffset = laneOffsets[newLane];
                     lastLaneChangeTime = Time.time;
                     LaneChanged?.Invoke();

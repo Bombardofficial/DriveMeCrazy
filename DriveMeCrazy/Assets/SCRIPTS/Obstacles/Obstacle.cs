@@ -28,9 +28,12 @@ public class Obstacle : MonoBehaviour
     [Tooltip("How many seconds after being hit before it returns to the pool. This is the value you can adjust.")]
     public float returnToPoolDelay = 5.0f;
 
-    // Für Warning
-    [HideInInspector] public int currentLane;
-    public int id;
+    [Header("Warning Data")]
+    [SerializeField] private int currentLane;
+    [SerializeField] private int id;
+    private WarningTracker _tracker;
+    public int CurrentLane => currentLane;
+    public int Id => id;
 
     private Rigidbody _rb;
     private bool _hasBeenHit = false;
@@ -40,7 +43,6 @@ public class Obstacle : MonoBehaviour
     public AudioClip impactClip;            // assign in prefab
     [HideInInspector] public AudioSourcePool audioPool;   // set by manager
 
-    private WarningTracker _tracker;
 
     void Awake()
     {
@@ -49,28 +51,35 @@ public class Obstacle : MonoBehaviour
         // MUST be set to "Continuous" or "Continuous Dynamic".
     }
 
+    public void InitializeForSpawn(int obstacleId, int lane, WarningTracker tracker)
+    {
+        id = obstacleId;
+        currentLane = lane;
+        _tracker = tracker;
+        _hasBeenHit = false;
+
+        Debug.Log($"LUCY - Spawn obstacle id={id}, assignedLane={currentLane}, name={name}");
+    }
+
     private void OnCollisionEnter(Collision collision)
     {
         // Ignore collisions if this obstacle has already been hit.
         if (_hasBeenHit) return;
 
-
-
         // We now check for the car's controller first to handle the collision.
         ArcadeVehicleController carController = collision.gameObject.GetComponentInParent<ArcadeVehicleController>();
         if (carController != null)
         {
+            _hasBeenHit = true; 
+
             // --- DEBUGGING LINE ---
             // If you still pass through obstacles, check if this log appears in the console.
             // If it doesn't, the collision is not being detected by the physics engine.
             Debug.Log($"Obstacle '{name}' hit by car. Applying force.", gameObject);
 
-            _hasBeenHit = true;
-
-            if (_tracker != null)
-            {
-                _tracker.ForceClearWarningAfterHit();
-            }
+            // Pass Metrics to Logger and Warningsystem
+            TelemetryLogger.Instance?.RegisterObstacleHit(id);
+            _tracker?.NotifyObstacleHit(this);
 
             if (audioPool && impactClip)
                 audioPool.Play3D(impactClip, transform.position);
@@ -84,12 +93,7 @@ public class Obstacle : MonoBehaviour
                 // Logging collision
                 TelemetryLogger.Instance?.RegisterCollisionForCurrentDriver();
 
-                WarningTracker tracker = FindObjectOfType<WarningTracker>();
-                if (tracker != null)
-                {
-                    tracker.ForceClearWarningAfterHit();
-                }
-
+                // Trigger Damage Visual
                 FeedbackIntensityUI feedback = FindObjectOfType<FeedbackIntensityUI>();
                 if (feedback != null)
                 {
