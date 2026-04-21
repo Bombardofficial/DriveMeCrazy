@@ -1496,6 +1496,7 @@ MonoBehaviour:
   signIndex: 1
   signSprite: {fileID: 0}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &27231423
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -5168,6 +5169,7 @@ MonoBehaviour:
   sourceTerrain: {fileID: 0}
   roadMaterials:
   - dirt material
+  - road material 1
   - road material 3 lanes
   - road material
   connectionMaterials:
@@ -5195,7 +5197,7 @@ MonoBehaviour:
   selectedRoadRightInnerOffset: 0
   selectedCrossingMaterial: 0
   crossingTextureInfoIndex: 0
-  handleSelection: 2
+  handleSelection: 1
   positionHandleSelection: 1
   markerDirXZ: 0
   markerDirXZInt: 0
@@ -5207,11 +5209,11 @@ MonoBehaviour:
   infoTexture: {fileID: 0}
   infoTexture2: {fileID: 0}
   infoTextures: []
-  plusSignTexture: {fileID: 901612440}
-  minSignTexture: {fileID: 1885384409}
-  signPostHeaderBG: {fileID: 2082400087}
-  signPostListBG: {fileID: 1476094250}
-  signPostListSelBG: {fileID: 2034736102}
+  plusSignTexture: {fileID: 1079952160}
+  minSignTexture: {fileID: 2038787543}
+  signPostHeaderBG: {fileID: 1583569839}
+  signPostListBG: {fileID: 598580883}
+  signPostListSelBG: {fileID: 1853547268}
   editorSkin: 0
   showAllPrefabs: 1
   standardPrefabsFlag: 0
@@ -7906,6 +7908,7 @@ MonoBehaviour:
   signIndex: 15
   signSprite: {fileID: 21300000, guid: a3cc8cd4bb6fd88438ba8a31a7fd708e, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &118948589
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -10384,6 +10387,7 @@ MonoBehaviour:
   signIndex: 5
   signSprite: {fileID: 21300000, guid: 4d9886e401556ac4eb60849353d988b0, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &163577840
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -99113,6 +99117,7 @@ MonoBehaviour:
   signIndex: 12
   signSprite: {fileID: 21300000, guid: b42c7cbdc45164e4f8a2f848e6faeadd, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &452280447
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -99304,6 +99309,7 @@ MonoBehaviour:
   signIndex: 2
   signSprite: {fileID: 21300000, guid: ce896703f04bac14f91dd71a0b813ada, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &454246497
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -109977,6 +109983,7 @@ MonoBehaviour:
   signIndex: 9
   signSprite: {fileID: 21300000, guid: 42eda9326e67c2d43a930a9f78ee7639, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &534380247
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -118402,6 +118409,7 @@ MonoBehaviour:
   signIndex: 20
   signSprite: {fileID: 21300000, guid: 4d9886e401556ac4eb60849353d988b0, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &590254810
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -118830,6 +118838,7 @@ MonoBehaviour:
   signIndex: 2
   signSprite: {fileID: 0}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &593847216
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -119041,6 +119050,54 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -2432090755550338912, guid: 6082e0aafd351ec48945013503a94fd6, type: 3}
+--- !u!28 &598580883
+Texture2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_ForcedFallbackFormat: 4
+  m_DownscaleFallback: 0
+  m_IsAlphaChannelOptional: 0
+  serializedVersion: 2
+  m_Width: 2
+  m_Height: 2
+  m_CompleteImageSize: 20
+  m_MipsStripped: 0
+  m_TextureFormat: 4
+  m_MipCount: 2
+  m_IsReadable: 1
+  m_IsPreProcessed: 0
+  m_IgnoreMipmapLimit: 0
+  m_MipmapLimitGroupName: 
+  m_StreamingMipmaps: 0
+  m_StreamingMipmapsPriority: 0
+  m_VTOnly: 0
+  m_AlphaIsTransparency: 0
+  m_ImageCount: 1
+  m_TextureDimension: 2
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 1
+    m_MipBias: 0
+    m_WrapU: 0
+    m_WrapV: 0
+    m_WrapW: 0
+  m_LightmapFormat: 0
+  m_ColorSpace: 1
+  m_PlatformBlob: 
+  image data: 20
+  _typelessdata: 414141ff414141ff414141ff414141ff414141ff
+  m_StreamData:
+    serializedVersion: 2
+    offset: 0
+    size: 0
+    path: 
 --- !u!1 &609684668 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 741299743030484435, guid: b9dff2ffa5142b94d92fb0655c744eb0,
@@ -120643,6 +120700,7 @@ MonoBehaviour:
   signIndex: 11
   signSprite: {fileID: 21300000, guid: 5f66d5d621cbad64891e4b41668e6abc, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &633999773
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -123963,6 +124021,7 @@ MonoBehaviour:
   signIndex: 1
   signSprite: {fileID: 21300000, guid: b42c7cbdc45164e4f8a2f848e6faeadd, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &689774351
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -125991,6 +126050,7 @@ MonoBehaviour:
   signIndex: 6
   signSprite: {fileID: 21300000, guid: 5f66d5d621cbad64891e4b41668e6abc, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &721520003
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -130326,6 +130386,7 @@ MonoBehaviour:
   signIndex: 8
   signSprite: {fileID: 21300000, guid: 4d9886e401556ac4eb60849353d988b0, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &798997494
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -131859,6 +131920,7 @@ MonoBehaviour:
   signIndex: 14
   signSprite: {fileID: 21300000, guid: 4d9886e401556ac4eb60849353d988b0, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &831869550
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -135165,6 +135227,7 @@ MonoBehaviour:
   signIndex: 17
   signSprite: {fileID: 21300000, guid: 5f66d5d621cbad64891e4b41668e6abc, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &867382116
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -141476,6 +141539,7 @@ MonoBehaviour:
   signIndex: 18
   signSprite: {fileID: 21300000, guid: 5f66d5d621cbad64891e4b41668e6abc, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &886066330
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -142028,54 +142092,6 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -2432090755550338912, guid: 6082e0aafd351ec48945013503a94fd6, type: 3}
---- !u!28 &901612440
-Texture2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  m_ImageContentsHash:
-    serializedVersion: 2
-    Hash: 00000000000000000000000000000000
-  m_ForcedFallbackFormat: 4
-  m_DownscaleFallback: 0
-  m_IsAlphaChannelOptional: 0
-  serializedVersion: 2
-  m_Width: 12
-  m_Height: 12
-  m_CompleteImageSize: 760
-  m_MipsStripped: 0
-  m_TextureFormat: 4
-  m_MipCount: 4
-  m_IsReadable: 1
-  m_IsPreProcessed: 0
-  m_IgnoreMipmapLimit: 0
-  m_MipmapLimitGroupName: 
-  m_StreamingMipmaps: 0
-  m_StreamingMipmapsPriority: 0
-  m_VTOnly: 0
-  m_AlphaIsTransparency: 0
-  m_ImageCount: 1
-  m_TextureDimension: 2
-  m_TextureSettings:
-    serializedVersion: 2
-    m_FilterMode: 1
-    m_Aniso: 1
-    m_MipBias: 0
-    m_WrapU: 0
-    m_WrapV: 0
-    m_WrapW: 0
-  m_LightmapFormat: 0
-  m_ColorSpace: 1
-  m_PlatformBlob: 
-  image data: 760
-  _typelessdata: 0000000000000000000000000000000000000000ffffffccffffffcc00000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffccffffffcc00000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffccffffffcc00000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffccffffffcc00000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffccffffffcc0000000000000000000000000000000000000000ffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffcc0000000000000000000000000000000000000000ffffffccffffffcc00000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffccffffffcc00000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffccffffffcc00000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffccffffffcc00000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffccffffffcc000000000000000000000000000000000000000000000000000000007f7f7f667f7f7f66000000000000000000000000000000007f7f7f667f7f7f6600000000000000007f7f7f667f7f7f66bfbfbf99bfbfbf997f7f7f667f7f7f667f7f7f667f7f7f66bfbfbf99bfbfbf997f7f7f667f7f7f6600000000000000007f7f7f667f7f7f66000000000000000000000000000000007f7f7f667f7f7f660000000000000000000000007f7f7f66000000007f7f7f66bfbfbf997f7f7f66000000007f7f7f6600000000bfbfbf99
-  m_StreamData:
-    serializedVersion: 2
-    offset: 0
-    size: 0
-    path: 
 --- !u!1 &901976895
 GameObject:
   m_ObjectHideFlags: 0
@@ -153633,6 +153649,7 @@ MonoBehaviour:
   signIndex: 2
   signSprite: {fileID: 0}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &1016495237
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -156431,6 +156448,54 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -2432090755550338912, guid: 6082e0aafd351ec48945013503a94fd6, type: 3}
+--- !u!28 &1079952160
+Texture2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_ForcedFallbackFormat: 4
+  m_DownscaleFallback: 0
+  m_IsAlphaChannelOptional: 0
+  serializedVersion: 2
+  m_Width: 12
+  m_Height: 12
+  m_CompleteImageSize: 760
+  m_MipsStripped: 0
+  m_TextureFormat: 4
+  m_MipCount: 4
+  m_IsReadable: 1
+  m_IsPreProcessed: 0
+  m_IgnoreMipmapLimit: 0
+  m_MipmapLimitGroupName: 
+  m_StreamingMipmaps: 0
+  m_StreamingMipmapsPriority: 0
+  m_VTOnly: 0
+  m_AlphaIsTransparency: 0
+  m_ImageCount: 1
+  m_TextureDimension: 2
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 1
+    m_MipBias: 0
+    m_WrapU: 0
+    m_WrapV: 0
+    m_WrapW: 0
+  m_LightmapFormat: 0
+  m_ColorSpace: 1
+  m_PlatformBlob: 
+  image data: 760
+  _typelessdata: 0000000000000000000000000000000000000000ffffffccffffffcc00000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffccffffffcc00000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffccffffffcc00000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffccffffffcc00000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffccffffffcc0000000000000000000000000000000000000000ffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffcc0000000000000000000000000000000000000000ffffffccffffffcc00000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffccffffffcc00000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffccffffffcc00000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffccffffffcc00000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffccffffffcc000000000000000000000000000000000000000000000000000000007f7f7f667f7f7f66000000000000000000000000000000007f7f7f667f7f7f6600000000000000007f7f7f667f7f7f66bfbfbf99bfbfbf997f7f7f667f7f7f667f7f7f667f7f7f66bfbfbf99bfbfbf997f7f7f667f7f7f6600000000000000007f7f7f667f7f7f66000000000000000000000000000000007f7f7f667f7f7f660000000000000000000000007f7f7f66000000007f7f7f66bfbfbf997f7f7f66000000007f7f7f6600000000bfbfbf99
+  m_StreamData:
+    serializedVersion: 2
+    offset: 0
+    size: 0
+    path: 
 --- !u!1 &1081461169
 GameObject:
   m_ObjectHideFlags: 0
@@ -159111,6 +159176,7 @@ MonoBehaviour:
   signIndex: 23
   signSprite: {fileID: 21300000, guid: a3cc8cd4bb6fd88438ba8a31a7fd708e, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &1121195930
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -161050,6 +161116,7 @@ MonoBehaviour:
   signIndex: 2
   signSprite: {fileID: 0}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &1151118311
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -177754,7 +177821,6 @@ MonoBehaviour:
   lapsText: {fileID: 0}
   lapsToFinish: 5
   lapGateTrigger: {fileID: 1838805999}
-  playerCarTag: Driver
   resultsPanel: {fileID: 64447773}
   resultsText: {fileID: 873999560}
   winnerText: {fileID: 1219520108}
@@ -178481,6 +178547,7 @@ MonoBehaviour:
   signIndex: 22
   signSprite: {fileID: 21300000, guid: b42c7cbdc45164e4f8a2f848e6faeadd, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &1390734512
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -182679,54 +182746,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1472382346}
   m_Mesh: {fileID: -1550514412580984892, guid: c84780164c1ae614ea3a0c6bc4dfc247, type: 3}
---- !u!28 &1476094250
-Texture2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  m_ImageContentsHash:
-    serializedVersion: 2
-    Hash: 00000000000000000000000000000000
-  m_ForcedFallbackFormat: 4
-  m_DownscaleFallback: 0
-  m_IsAlphaChannelOptional: 0
-  serializedVersion: 2
-  m_Width: 2
-  m_Height: 2
-  m_CompleteImageSize: 20
-  m_MipsStripped: 0
-  m_TextureFormat: 4
-  m_MipCount: 2
-  m_IsReadable: 1
-  m_IsPreProcessed: 0
-  m_IgnoreMipmapLimit: 0
-  m_MipmapLimitGroupName: 
-  m_StreamingMipmaps: 0
-  m_StreamingMipmapsPriority: 0
-  m_VTOnly: 0
-  m_AlphaIsTransparency: 0
-  m_ImageCount: 1
-  m_TextureDimension: 2
-  m_TextureSettings:
-    serializedVersion: 2
-    m_FilterMode: 1
-    m_Aniso: 1
-    m_MipBias: 0
-    m_WrapU: 0
-    m_WrapV: 0
-    m_WrapW: 0
-  m_LightmapFormat: 0
-  m_ColorSpace: 1
-  m_PlatformBlob: 
-  image data: 20
-  _typelessdata: 414141ff414141ff414141ff414141ff414141ff
-  m_StreamData:
-    serializedVersion: 2
-    offset: 0
-    size: 0
-    path: 
 --- !u!1 &1477034060
 GameObject:
   m_ObjectHideFlags: 0
@@ -187443,6 +187462,7 @@ MonoBehaviour:
   signIndex: 21
   signSprite: {fileID: 21300000, guid: b42c7cbdc45164e4f8a2f848e6faeadd, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &1540064740
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -187689,6 +187709,7 @@ MonoBehaviour:
   signIndex: 7
   signSprite: {fileID: 21300000, guid: 4d9886e401556ac4eb60849353d988b0, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &1543589701
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -189811,6 +189832,54 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 754755908}
   m_PrefabAsset: {fileID: 0}
+--- !u!28 &1583569839
+Texture2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_ForcedFallbackFormat: 4
+  m_DownscaleFallback: 0
+  m_IsAlphaChannelOptional: 0
+  serializedVersion: 2
+  m_Width: 2
+  m_Height: 2
+  m_CompleteImageSize: 20
+  m_MipsStripped: 0
+  m_TextureFormat: 4
+  m_MipCount: 2
+  m_IsReadable: 1
+  m_IsPreProcessed: 0
+  m_IgnoreMipmapLimit: 0
+  m_MipmapLimitGroupName: 
+  m_StreamingMipmaps: 0
+  m_StreamingMipmapsPriority: 0
+  m_VTOnly: 0
+  m_AlphaIsTransparency: 0
+  m_ImageCount: 1
+  m_TextureDimension: 2
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 1
+    m_MipBias: 0
+    m_WrapU: 0
+    m_WrapV: 0
+    m_WrapW: 0
+  m_LightmapFormat: 0
+  m_ColorSpace: 1
+  m_PlatformBlob: 
+  image data: 20
+  _typelessdata: 383838ff383838ff383838ff383838ff383838ff
+  m_StreamData:
+    serializedVersion: 2
+    offset: 0
+    size: 0
+    path: 
 --- !u!1 &1583812419
 GameObject:
   m_ObjectHideFlags: 0
@@ -190155,6 +190224,7 @@ MonoBehaviour:
   signIndex: 26
   signSprite: {fileID: 21300000, guid: 4d9886e401556ac4eb60849353d988b0, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &1593428790
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -209475,6 +209545,7 @@ MonoBehaviour:
   clampMaxActiveToSpawnWindow: 1
   windowCapMultiplier: 0.65
   minWindowCap: 4
+  warningTracker: {fileID: 0}
 --- !u!114 &1639027662
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -211154,6 +211225,7 @@ MonoBehaviour:
   signIndex: 24
   signSprite: {fileID: 21300000, guid: 4d9886e401556ac4eb60849353d988b0, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &1670603233
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -212418,6 +212490,7 @@ MonoBehaviour:
   signIndex: 16
   signSprite: {fileID: 21300000, guid: ce896703f04bac14f91dd71a0b813ada, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &1692182509
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -228731,6 +228804,7 @@ MonoBehaviour:
   signIndex: 25
   signSprite: {fileID: 21300000, guid: ce896703f04bac14f91dd71a0b813ada, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &1791786312
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -231409,6 +231483,7 @@ MonoBehaviour:
   signIndex: 0
   signSprite: {fileID: 21300000, guid: 4d9886e401556ac4eb60849353d988b0, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &1824819004
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -233293,6 +233368,54 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7cf2d431b840f7e429e1a075d638bf02, type: 3}
+--- !u!28 &1853547268
+Texture2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_ForcedFallbackFormat: 4
+  m_DownscaleFallback: 0
+  m_IsAlphaChannelOptional: 0
+  serializedVersion: 2
+  m_Width: 2
+  m_Height: 2
+  m_CompleteImageSize: 20
+  m_MipsStripped: 0
+  m_TextureFormat: 4
+  m_MipCount: 2
+  m_IsReadable: 1
+  m_IsPreProcessed: 0
+  m_IgnoreMipmapLimit: 0
+  m_MipmapLimitGroupName: 
+  m_StreamingMipmaps: 0
+  m_StreamingMipmapsPriority: 0
+  m_VTOnly: 0
+  m_AlphaIsTransparency: 0
+  m_ImageCount: 1
+  m_TextureDimension: 2
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 1
+    m_MipBias: 0
+    m_WrapU: 0
+    m_WrapV: 0
+    m_WrapW: 0
+  m_LightmapFormat: 0
+  m_ColorSpace: 1
+  m_PlatformBlob: 
+  image data: 20
+  _typelessdata: 4d4d4dff4d4d4dff4d4d4dff4d4d4dff4d4d4dff
+  m_StreamData:
+    serializedVersion: 2
+    offset: 0
+    size: 0
+    path: 
 --- !u!1 &1854648836 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1479009826977309561, guid: b9dff2ffa5142b94d92fb0655c744eb0,
@@ -234717,54 +234840,6 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -2432090755550338912, guid: 6082e0aafd351ec48945013503a94fd6, type: 3}
---- !u!28 &1885384409
-Texture2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  m_ImageContentsHash:
-    serializedVersion: 2
-    Hash: 00000000000000000000000000000000
-  m_ForcedFallbackFormat: 4
-  m_DownscaleFallback: 0
-  m_IsAlphaChannelOptional: 0
-  serializedVersion: 2
-  m_Width: 10
-  m_Height: 2
-  m_CompleteImageSize: 112
-  m_MipsStripped: 0
-  m_TextureFormat: 4
-  m_MipCount: 4
-  m_IsReadable: 1
-  m_IsPreProcessed: 0
-  m_IgnoreMipmapLimit: 0
-  m_MipmapLimitGroupName: 
-  m_StreamingMipmaps: 0
-  m_StreamingMipmapsPriority: 0
-  m_VTOnly: 0
-  m_AlphaIsTransparency: 0
-  m_ImageCount: 1
-  m_TextureDimension: 2
-  m_TextureSettings:
-    serializedVersion: 2
-    m_FilterMode: 1
-    m_Aniso: 1
-    m_MipBias: 0
-    m_WrapU: 0
-    m_WrapV: 0
-    m_WrapW: 0
-  m_LightmapFormat: 0
-  m_ColorSpace: 1
-  m_PlatformBlob: 
-  image data: 112
-  _typelessdata: ffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffcc
-  m_StreamData:
-    serializedVersion: 2
-    offset: 0
-    size: 0
-    path: 
 --- !u!1 &1885425122
 GameObject:
   m_ObjectHideFlags: 0
@@ -234817,6 +234892,7 @@ MonoBehaviour:
   signIndex: 3
   signSprite: {fileID: 21300000, guid: ce896703f04bac14f91dd71a0b813ada, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &1885425125
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -256186,54 +256262,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2033732673}
   m_Mesh: {fileID: 1820399939}
---- !u!28 &2034736102
-Texture2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  m_ImageContentsHash:
-    serializedVersion: 2
-    Hash: 00000000000000000000000000000000
-  m_ForcedFallbackFormat: 4
-  m_DownscaleFallback: 0
-  m_IsAlphaChannelOptional: 0
-  serializedVersion: 2
-  m_Width: 2
-  m_Height: 2
-  m_CompleteImageSize: 20
-  m_MipsStripped: 0
-  m_TextureFormat: 4
-  m_MipCount: 2
-  m_IsReadable: 1
-  m_IsPreProcessed: 0
-  m_IgnoreMipmapLimit: 0
-  m_MipmapLimitGroupName: 
-  m_StreamingMipmaps: 0
-  m_StreamingMipmapsPriority: 0
-  m_VTOnly: 0
-  m_AlphaIsTransparency: 0
-  m_ImageCount: 1
-  m_TextureDimension: 2
-  m_TextureSettings:
-    serializedVersion: 2
-    m_FilterMode: 1
-    m_Aniso: 1
-    m_MipBias: 0
-    m_WrapU: 0
-    m_WrapV: 0
-    m_WrapW: 0
-  m_LightmapFormat: 0
-  m_ColorSpace: 1
-  m_PlatformBlob: 
-  image data: 20
-  _typelessdata: 4d4d4dff4d4d4dff4d4d4dff4d4d4dff4d4d4dff
-  m_StreamData:
-    serializedVersion: 2
-    offset: 0
-    size: 0
-    path: 
 --- !u!1001 &2035297179
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -256518,6 +256546,54 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.5, y: 3, z: 12.87}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!28 &2038787543
+Texture2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_ForcedFallbackFormat: 4
+  m_DownscaleFallback: 0
+  m_IsAlphaChannelOptional: 0
+  serializedVersion: 2
+  m_Width: 10
+  m_Height: 2
+  m_CompleteImageSize: 112
+  m_MipsStripped: 0
+  m_TextureFormat: 4
+  m_MipCount: 4
+  m_IsReadable: 1
+  m_IsPreProcessed: 0
+  m_IgnoreMipmapLimit: 0
+  m_MipmapLimitGroupName: 
+  m_StreamingMipmaps: 0
+  m_StreamingMipmapsPriority: 0
+  m_VTOnly: 0
+  m_AlphaIsTransparency: 0
+  m_ImageCount: 1
+  m_TextureDimension: 2
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 1
+    m_MipBias: 0
+    m_WrapU: 0
+    m_WrapV: 0
+    m_WrapW: 0
+  m_LightmapFormat: 0
+  m_ColorSpace: 1
+  m_PlatformBlob: 
+  image data: 112
+  _typelessdata: ffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffccffffffcc
+  m_StreamData:
+    serializedVersion: 2
+    offset: 0
+    size: 0
+    path: 
 --- !u!1 &2041375578 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7175835139842030458, guid: b9dff2ffa5142b94d92fb0655c744eb0,
@@ -257715,6 +257791,7 @@ MonoBehaviour:
   signIndex: 3
   signSprite: {fileID: 21300000, guid: 4d9886e401556ac4eb60849353d988b0, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &2057687703
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -258245,6 +258322,7 @@ MonoBehaviour:
   clampMaxActiveToSpawnWindow: 1
   windowCapMultiplier: 0.65
   minWindowCap: 4
+  warningTracker: {fileID: 0}
 --- !u!114 &2061689029
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -260918,54 +260996,6 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -2432090755550338912, guid: 6082e0aafd351ec48945013503a94fd6, type: 3}
---- !u!28 &2082400087
-Texture2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  m_ImageContentsHash:
-    serializedVersion: 2
-    Hash: 00000000000000000000000000000000
-  m_ForcedFallbackFormat: 4
-  m_DownscaleFallback: 0
-  m_IsAlphaChannelOptional: 0
-  serializedVersion: 2
-  m_Width: 2
-  m_Height: 2
-  m_CompleteImageSize: 20
-  m_MipsStripped: 0
-  m_TextureFormat: 4
-  m_MipCount: 2
-  m_IsReadable: 1
-  m_IsPreProcessed: 0
-  m_IgnoreMipmapLimit: 0
-  m_MipmapLimitGroupName: 
-  m_StreamingMipmaps: 0
-  m_StreamingMipmapsPriority: 0
-  m_VTOnly: 0
-  m_AlphaIsTransparency: 0
-  m_ImageCount: 1
-  m_TextureDimension: 2
-  m_TextureSettings:
-    serializedVersion: 2
-    m_FilterMode: 1
-    m_Aniso: 1
-    m_MipBias: 0
-    m_WrapU: 0
-    m_WrapV: 0
-    m_WrapW: 0
-  m_LightmapFormat: 0
-  m_ColorSpace: 1
-  m_PlatformBlob: 
-  image data: 20
-  _typelessdata: 383838ff383838ff383838ff383838ff383838ff
-  m_StreamData:
-    serializedVersion: 2
-    offset: 0
-    size: 0
-    path: 
 --- !u!1 &2082426225 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5427298923637001916, guid: b9dff2ffa5142b94d92fb0655c744eb0,
@@ -267144,11 +267174,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   vehicle: {fileID: 2111085467219387259}
-  obstacleManager: {fileID: 1639027661}
   feedbackUI: {fileID: 419289298}
-  warningDistance: 20
-  forwardDotThreshold: 0.35
-  checkInterval: 0.1
 --- !u!4 &2170742185082655839
 Transform:
   m_ObjectHideFlags: 0

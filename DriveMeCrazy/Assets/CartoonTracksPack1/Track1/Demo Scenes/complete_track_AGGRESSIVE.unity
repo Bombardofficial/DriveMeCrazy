@@ -1496,6 +1496,7 @@ MonoBehaviour:
   signIndex: 1
   signSprite: {fileID: 0}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &27231423
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -7906,6 +7907,7 @@ MonoBehaviour:
   signIndex: 15
   signSprite: {fileID: 21300000, guid: a3cc8cd4bb6fd88438ba8a31a7fd708e, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &118948589
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -10384,6 +10386,7 @@ MonoBehaviour:
   signIndex: 5
   signSprite: {fileID: 21300000, guid: 4d9886e401556ac4eb60849353d988b0, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &163577840
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -99113,6 +99116,7 @@ MonoBehaviour:
   signIndex: 12
   signSprite: {fileID: 21300000, guid: b42c7cbdc45164e4f8a2f848e6faeadd, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &452280447
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -99304,6 +99308,7 @@ MonoBehaviour:
   signIndex: 2
   signSprite: {fileID: 21300000, guid: ce896703f04bac14f91dd71a0b813ada, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &454246497
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -109977,6 +109982,7 @@ MonoBehaviour:
   signIndex: 9
   signSprite: {fileID: 21300000, guid: 42eda9326e67c2d43a930a9f78ee7639, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &534380247
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -118402,6 +118408,7 @@ MonoBehaviour:
   signIndex: 20
   signSprite: {fileID: 21300000, guid: 4d9886e401556ac4eb60849353d988b0, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &590254810
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -118830,6 +118837,7 @@ MonoBehaviour:
   signIndex: 2
   signSprite: {fileID: 0}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &593847216
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -120643,6 +120651,7 @@ MonoBehaviour:
   signIndex: 11
   signSprite: {fileID: 21300000, guid: 5f66d5d621cbad64891e4b41668e6abc, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &633999773
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -123963,6 +123972,7 @@ MonoBehaviour:
   signIndex: 1
   signSprite: {fileID: 21300000, guid: b42c7cbdc45164e4f8a2f848e6faeadd, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &689774351
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -125991,6 +126001,7 @@ MonoBehaviour:
   signIndex: 6
   signSprite: {fileID: 21300000, guid: 5f66d5d621cbad64891e4b41668e6abc, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &721520003
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -130326,6 +130337,7 @@ MonoBehaviour:
   signIndex: 8
   signSprite: {fileID: 21300000, guid: 4d9886e401556ac4eb60849353d988b0, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &798997494
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -131859,6 +131871,7 @@ MonoBehaviour:
   signIndex: 14
   signSprite: {fileID: 21300000, guid: 4d9886e401556ac4eb60849353d988b0, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &831869550
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -135165,6 +135178,7 @@ MonoBehaviour:
   signIndex: 17
   signSprite: {fileID: 21300000, guid: 5f66d5d621cbad64891e4b41668e6abc, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &867382116
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -141476,6 +141490,7 @@ MonoBehaviour:
   signIndex: 18
   signSprite: {fileID: 21300000, guid: 5f66d5d621cbad64891e4b41668e6abc, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &886066330
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -153633,6 +153648,7 @@ MonoBehaviour:
   signIndex: 2
   signSprite: {fileID: 0}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &1016495237
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -159111,6 +159127,7 @@ MonoBehaviour:
   signIndex: 23
   signSprite: {fileID: 21300000, guid: a3cc8cd4bb6fd88438ba8a31a7fd708e, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &1121195930
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -161050,6 +161067,7 @@ MonoBehaviour:
   signIndex: 2
   signSprite: {fileID: 0}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &1151118311
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -178480,6 +178498,7 @@ MonoBehaviour:
   signIndex: 22
   signSprite: {fileID: 21300000, guid: b42c7cbdc45164e4f8a2f848e6faeadd, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &1390734512
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -187442,6 +187461,7 @@ MonoBehaviour:
   signIndex: 21
   signSprite: {fileID: 21300000, guid: b42c7cbdc45164e4f8a2f848e6faeadd, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &1540064740
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -187688,6 +187708,7 @@ MonoBehaviour:
   signIndex: 7
   signSprite: {fileID: 21300000, guid: 4d9886e401556ac4eb60849353d988b0, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &1543589701
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -190154,6 +190175,7 @@ MonoBehaviour:
   signIndex: 26
   signSprite: {fileID: 21300000, guid: 4d9886e401556ac4eb60849353d988b0, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &1593428790
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -211154,6 +211176,7 @@ MonoBehaviour:
   signIndex: 24
   signSprite: {fileID: 21300000, guid: 4d9886e401556ac4eb60849353d988b0, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &1670603233
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -212418,6 +212441,7 @@ MonoBehaviour:
   signIndex: 16
   signSprite: {fileID: 21300000, guid: ce896703f04bac14f91dd71a0b813ada, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &1692182509
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -228731,6 +228755,7 @@ MonoBehaviour:
   signIndex: 25
   signSprite: {fileID: 21300000, guid: ce896703f04bac14f91dd71a0b813ada, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &1791786312
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -231409,6 +231434,7 @@ MonoBehaviour:
   signIndex: 0
   signSprite: {fileID: 21300000, guid: 4d9886e401556ac4eb60849353d988b0, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &1824819004
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -234817,6 +234843,7 @@ MonoBehaviour:
   signIndex: 3
   signSprite: {fileID: 21300000, guid: ce896703f04bac14f91dd71a0b813ada, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &1885425125
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -257715,6 +257742,7 @@ MonoBehaviour:
   signIndex: 3
   signSprite: {fileID: 21300000, guid: 4d9886e401556ac4eb60849353d988b0, type: 3}
   targetTag: Driver
+  isDriftCurve: 0
 --- !u!65 &2057687703
 BoxCollider:
   m_ObjectHideFlags: 0

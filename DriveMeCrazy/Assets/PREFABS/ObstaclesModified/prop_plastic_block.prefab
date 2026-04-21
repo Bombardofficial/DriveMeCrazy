@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: -8810366798878193468}
   - component: {fileID: -354478079356153694}
   - component: {fileID: 8499816579925540411}
+  - component: {fileID: 2008439387693337475}
   m_Layer: 0
   m_Name: prop_plastic_block
   m_TagString: Untagged
@@ -105,7 +106,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1.4, y: 0.7, z: 0.5}
+  m_Size: {x: 1.5, y: 0.7, z: 0.5}
   m_Center: {x: 0, y: 0.35, z: 0}
 --- !u!54 &-354478079356153694
 Rigidbody:
@@ -151,5 +152,28 @@ MonoBehaviour:
   forceMultiplier: 5
   upwardForceBias: 0.3
   returnToPoolDelay: 8
+  currentLane: 0
+  id: 0
   impactClip: {fileID: 8300000, guid: 1f88aae04c88d6f4d939b3ca9aecc4ae, type: 3}
   audioPool: {fileID: 0}
+--- !u!65 &2008439387693337475
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4294856336405139103}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.5, y: 0.7, z: 15}
+  m_Center: {x: 0, y: 0.35, z: -8}

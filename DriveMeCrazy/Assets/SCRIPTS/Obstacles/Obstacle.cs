@@ -28,6 +28,10 @@ public class Obstacle : MonoBehaviour
     [Tooltip("How many seconds after being hit before it returns to the pool. This is the value you can adjust.")]
     public float returnToPoolDelay = 5.0f;
 
+    // Für Warning
+    [HideInInspector] public int currentLane;
+    public int id;
+
     private Rigidbody _rb;
     private bool _hasBeenHit = false;
     public bool HasBeenHit => _hasBeenHit;

@@ -639,10 +639,13 @@ public class ObstacleManager : MonoBehaviour
 
             // WarningTracker stuff
             Obstacle obs = go.GetComponent<Obstacle>();
-            obs.manager = this;
-            obs.SetTracker(warningTracker);
+            if (obs != null)
+            {
+                obs.currentLane = lane;
+                // obsComp.id = obstacleId++;
+            }
 
-            _activeMeta.Add(new ObstacleMeta { go = go, id = obstacleId++, t = t2, lane = lane, spawnTime = Time.time });
+            _activeMeta.Add(new ObstacleMeta { go = go, id = obstacleId, t = t2, lane = lane, spawnTime = Time.time });
 
             _lastGuardTimeByCollectibleId[cid] = Time.time;
 

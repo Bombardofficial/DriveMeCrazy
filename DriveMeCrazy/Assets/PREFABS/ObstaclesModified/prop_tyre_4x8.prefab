@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 5702134071037959208}
   - component: {fileID: 6882628538897421640}
   - component: {fileID: -1983959385218217099}
+  - component: {fileID: 5620222025006195074}
   m_Layer: 0
   m_Name: prop_tyre_4x8
   m_TagString: Untagged
@@ -151,5 +152,28 @@ MonoBehaviour:
   forceMultiplier: 10
   upwardForceBias: 0.3
   returnToPoolDelay: 12
+  currentLane: 0
+  id: 0
   impactClip: {fileID: 8300000, guid: 849a239ea553d814b9903992d6a24f92, type: 3}
   audioPool: {fileID: 0}
+--- !u!65 &5620222025006195074
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1690117835345764520}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.5, y: 1.2819178, z: 15}
+  m_Center: {x: 0, y: 0.64398944, z: -8}
