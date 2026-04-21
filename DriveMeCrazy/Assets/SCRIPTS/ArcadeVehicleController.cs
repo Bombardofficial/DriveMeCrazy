@@ -1064,6 +1064,11 @@ namespace ArcadeVP
 
             roundStartTime = Time.time;
             balanceActive = true;
+
+            // Logging
+            TelemetryLogger.Instance?.SetDriftCheckActive(true);
+
+            // show gauge 2
             currentRoundDrift = rt_drift;
             isDrifting = false;
 
@@ -1143,6 +1148,7 @@ namespace ArcadeVP
             if (!balanceActive) return;
 
             balanceActive = false;
+            TelemetryLogger.Instance?.SetDriftCheckActive(false);
             //miniGamePlayedThisZone = false;
             isDrifting = false;
 
@@ -1154,6 +1160,8 @@ namespace ArcadeVP
             switch (outcome)
             {
                 case MiniGameOutcome.Perfect:
+                    TelemetryLogger.Instance?.RegisterDriftCheckResult(true);
+
                     if (SkillEstimator.Instance) SkillEstimator.Instance.OnMiniGamePerfect();
                     // small score plus
                     var pm = PlayerManager.Instance;
@@ -1167,11 +1175,15 @@ namespace ArcadeVP
                     break;
 
                 case MiniGameOutcome.Pass:
+                    TelemetryLogger.Instance?.RegisterDriftCheckResult(true);
+
                     if (SkillEstimator.Instance) SkillEstimator.Instance.OnMiniGamePass();
                     // no penalty, no crash
                     break;
 
                 case MiniGameOutcome.Fail:
+                    TelemetryLogger.Instance?.RegisterDriftCheckResult(false);
+
                     if (SkillEstimator.Instance) SkillEstimator.Instance.OnMiniGameFail(fullCrash);
                     if (fullCrash) TriggerSpeedCrash();   // edge slam
                     else TriggerSpeedStumble(); // mild spin/slow

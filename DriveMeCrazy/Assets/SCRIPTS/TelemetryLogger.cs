@@ -44,7 +44,8 @@ public class TelemetryLogger : MonoBehaviour
     private int _warningObstacleId = -1;
     private int _hitObstacleIdThisFrame = -1;
 
-
+    private bool _driftCheckActive;
+    private bool _driftCheckResult;
 
     public float CurrentRaceTime => _isLogging ? Time.time - _raceStartTime : 0f;
 
@@ -76,6 +77,8 @@ public class TelemetryLogger : MonoBehaviour
                      $"{(_driverChangedThisFrame ? 1 : 0)}," +
                      $"{_driverChangeCountTotal}," +
                      $"{(_curveActive ? 1 : 0)}," +
+                     $"{(_driftCheckActive ? 1 : 0)}," +
+                     $"{(_driftCheckResult ? 1 : 0)}," +
                      $"{(_warningActive ? 1 : 0)}," +
                      $"{_warningObstacleId}," +
                      $"{(_driverInputThisFrame ? 1 : 0)}," +
@@ -85,8 +88,8 @@ public class TelemetryLogger : MonoBehaviour
                      $"{_player3CollisionCounter},{_player4CollisionCounter}," +
                      $"{_collisionCountTotal}";
 
-        _rows.Add("run_time,current_driver_player_number,driver_changed_this_frame,driver_change_count_total,curve_active,warning_active,warning_obstacle_id,driver_input_this_frame,inputs_per_second,hit_obstacle_id_this_frame,player1_collision_counter,player2_collision_counter,player3_collision_counter,player4_collision_counter,collision_count_total");
-        //_rows.Add(row);
+        //_rows.Add("run_time,current_driver_player_number,driver_changed_this_frame,driver_change_count_total,curve_active,warning_active,warning_obstacle_id,driver_input_this_frame,inputs_per_second,hit_obstacle_id_this_frame,player1_collision_counter,player2_collision_counter,player3_collision_counter,player4_collision_counter,collision_count_total");
+        _rows.Add(row);
 
         // WICHTIG: Setze Event-Flags nach jedem Frame zurück, damit sie nicht "kleben"
         _driverInputThisFrame = false;
@@ -104,6 +107,8 @@ public class TelemetryLogger : MonoBehaviour
         _driverChangedThisFrame = false;
         _driverChangeCountTotal = 0;
         _curveActive = false;
+        _driftCheckActive = false;
+        _driftCheckResult = false;
         _warningActive = false;
         _warningObstacleId = -1;
         _driverInputTimes.Clear();
@@ -121,7 +126,7 @@ public class TelemetryLogger : MonoBehaviour
             _currentDriverPlayerNumber = PlayerManager.Instance.CurrentDriver.PlayerNumber;
         }
 
-        _rows.Add("run_time,current_driver_player_number,driver_changed_this_frame,driver_change_count_total,curve_active,warning_active,warning_obstacle_id,driver_input_this_frame,inputs_per_second,hit_obstacle_id_this_frame,player1_collision_counter,player2_collision_counter,player3_collision_counter,player4_collision_counter,collision_count_total");
+        _rows.Add("run_time,current_driver_player_number,driver_changed_this_frame,driver_change_count_total,curve_active,,drift_check_active,drift_check_result,warning_active,warning_obstacle_id,driver_input_this_frame,inputs_per_second,hit_obstacle_id_this_frame,player1_collision_counter,player2_collision_counter,player3_collision_counter,player4_collision_counter,collision_count_total");
         //_rows.Add("run_time,current_driver_player_number,driver_changed_this_frame,driver_change_count_total,curve_active,warning_active,driver_input_this_frame,inputs_per_second,player1_collision_counter,player2_collision_counter,player3_collision_counter,player4_collision_counter,collision_count_total");
     }
 
@@ -238,6 +243,23 @@ public class TelemetryLogger : MonoBehaviour
             return;
 
         _curveActive = active;
+    }
+
+    public void SetDriftCheckActive(bool active)
+    {
+        if (!_isLogging)
+            return;
+
+        _driftCheckActive = active;
+    }
+
+    public void RegisterDriftCheckResult(bool success)
+    {
+        if (!_isLogging)
+            return;
+
+        if (success)
+            _driftCheckResult = true;
     }
 
 }

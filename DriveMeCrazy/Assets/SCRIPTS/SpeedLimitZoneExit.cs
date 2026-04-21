@@ -9,6 +9,13 @@ public class SpeedLimitZoneExit : MonoBehaviour
     [Tooltip("MUST match the entering SpeedLimitZone.signIndex for this zone")]
     public int signIndex = 0;
 
+    private void OnTriggerEnter(Collider other)
+    {
+        DriftState.IsInDriftZone = false;
+        TelemetryLogger.Instance?.SetCurveActive(false);
+        Debug.Log("[DriftZone] Exited Curve");
+    }
+
     void OnTriggerExit(Collider other)
     {
         if (!other.CompareTag(targetTag)) return;
@@ -25,12 +32,5 @@ public class SpeedLimitZoneExit : MonoBehaviour
 
         Debug.Log($"[SpeedZone] EXIT signIndex={signIndex}");
         car.ExitSpeedLimit(signIndex);
-
-        if (DriftState.IsInDriftZone)
-        {
-            DriftState.IsInDriftZone = false;
-            TelemetryLogger.Instance?.SetCurveActive(false);
-            Debug.Log("[DriftZone] Exited Curve");
-        }
     }
 }
