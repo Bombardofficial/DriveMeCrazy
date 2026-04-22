@@ -88,12 +88,13 @@ public class TelemetryLogger : MonoBehaviour
                      $"{_player3CollisionCounter},{_player4CollisionCounter}," +
                      $"{_collisionCountTotal}";
 
-        //_rows.Add("run_time,current_driver_player_number,driver_changed_this_frame,driver_change_count_total,curve_active,warning_active,warning_obstacle_id,driver_input_this_frame,inputs_per_second,hit_obstacle_id_this_frame,player1_collision_counter,player2_collision_counter,player3_collision_counter,player4_collision_counter,collision_count_total");
         _rows.Add(row);
 
         // WICHTIG: Setze Event-Flags nach jedem Frame zurück, damit sie nicht "kleben"
         _driverInputThisFrame = false;
         _driverChangedThisFrame = false;
+        _driftCheckResult = false;
+        // _hitObstacleIdThisFrame = -1; //ka ob das so sein soll
     }
 
     public void StartLogging()
@@ -126,8 +127,7 @@ public class TelemetryLogger : MonoBehaviour
             _currentDriverPlayerNumber = PlayerManager.Instance.CurrentDriver.PlayerNumber;
         }
 
-        _rows.Add("run_time,current_driver_player_number,driver_changed_this_frame,driver_change_count_total,curve_active,,drift_check_active,drift_check_result,warning_active,warning_obstacle_id,driver_input_this_frame,inputs_per_second,hit_obstacle_id_this_frame,player1_collision_counter,player2_collision_counter,player3_collision_counter,player4_collision_counter,collision_count_total");
-        //_rows.Add("run_time,current_driver_player_number,driver_changed_this_frame,driver_change_count_total,curve_active,warning_active,driver_input_this_frame,inputs_per_second,player1_collision_counter,player2_collision_counter,player3_collision_counter,player4_collision_counter,collision_count_total");
+        _rows.Add("run_time,current_driver_player_number,driver_changed_this_frame,driver_change_count_total,curve_active,drift_check_active,drift_check_result,warning_active,warning_obstacle_id,driver_input_this_frame,inputs_per_second,hit_obstacle_id_this_frame,player1_collision_counter,player2_collision_counter,player3_collision_counter,player4_collision_counter,collision_count_total");
     }
 
     public void StopLogging()
@@ -251,6 +251,9 @@ public class TelemetryLogger : MonoBehaviour
             return;
 
         _driftCheckActive = active;
+
+        if (active)
+            _driftCheckResult = false;
     }
 
     public void RegisterDriftCheckResult(bool success)
