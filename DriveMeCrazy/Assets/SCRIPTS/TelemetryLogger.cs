@@ -94,7 +94,7 @@ public class TelemetryLogger : MonoBehaviour
         _driverInputThisFrame = false;
         _driverChangedThisFrame = false;
         _driftCheckResult = false;
-        // _hitObstacleIdThisFrame = -1; //ka ob das so sein soll
+        _hitObstacleIdThisFrame = -1; 
     }
 
     public void StartLogging()
