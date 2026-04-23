@@ -58,11 +58,22 @@ public class FeedbackIntensityUI : MonoBehaviour
         {
             if (uiAudioSource != null && warningClip != null && Time.time >= _lastWarningAudioTime + warningCooldown)
             {
-                uiAudioSource.PlayOneShot(warningClip);
+                uiAudioSource.clip = warningClip;
+                uiAudioSource.loop = true;
+                uiAudioSource.Play();
+                //uiAudioSource.PlayOneShot(warningClip);
                 _lastWarningAudioTime = Time.time;
             }
         }
-        
+
+        if (!active && _warningActive)
+        {
+            if (uiAudioSource != null && uiAudioSource.isPlaying)
+            {
+                uiAudioSource.Stop();
+            }
+        }
+
         _warningActive = active;
     }
 
