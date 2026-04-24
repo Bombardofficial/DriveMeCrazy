@@ -92432,7 +92432,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 3522581b52abe1941a9231888c4b6aeb, type: 3}
+  m_Sprite: {fileID: 21300000, guid: e82d35a0027cec548b42cd75557c95d2, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -96477,7 +96477,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 0.7
+  m_Volume: 0.45
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -98363,7 +98363,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: e82d35a0027cec548b42cd75557c95d2, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 3522581b52abe1941a9231888c4b6aeb, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -132439,7 +132439,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   vehicle: {fileID: 2111085467219387259}
   inputMixer: {fileID: 2111085467219387265}
-  outputDirectory: C:\Users\sagan\Documents\GitHub\DriveMeCrazy\DriveMeCrazy\GameLogging_LM
+  outputDirectory: C:\Users\sagan\Documents\GitHub\DriveMeCrazy\DriveMeCrazy\GameLogging_LM\Friends
   filePrefix: telemetry_
 --- !u!4 &834105666
 Transform:
@@ -141882,7 +141882,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: e82d35a0027cec548b42cd75557c95d2, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 3522581b52abe1941a9231888c4b6aeb, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -142279,7 +142279,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 3522581b52abe1941a9231888c4b6aeb, type: 3}
+  m_Sprite: {fileID: 21300000, guid: e82d35a0027cec548b42cd75557c95d2, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -166627,7 +166627,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: e82d35a0027cec548b42cd75557c95d2, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 3522581b52abe1941a9231888c4b6aeb, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -177887,6 +177887,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tutorialController: {fileID: 1091771128}
   playerJoinCanvasRoot: {fileID: 1317100902}
+  EnableCusomizationMenu: 0
+  hatUI: {fileID: 0}
+  customizationCanvasRoot: {fileID: 0}
+  lobbyCamera: {fileID: 0}
+  customizationCamPose: {fileID: 0}
+  mainCamera: {fileID: 0}
+  customizationFlyTime: 0.8
+  cameraAnimatorRev: {fileID: 0}
   seatIcons:
   - {fileID: 6750848143244333423}
   - {fileID: 5767742030411327129}
@@ -184333,7 +184341,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1497324568
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -211161,7 +211169,7 @@ PrefabInstance:
     - target: {fileID: 8586171324562636423, guid: 9629fa062d40cc941960a5286363fb7f,
         type: 3}
       propertyPath: panels.Array.size
-      value: 5
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 8586171324562636423, guid: 9629fa062d40cc941960a5286363fb7f,
         type: 3}
@@ -214621,7 +214629,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 3522581b52abe1941a9231888c4b6aeb, type: 3}
+  m_Sprite: {fileID: 21300000, guid: e82d35a0027cec548b42cd75557c95d2, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -230720,7 +230728,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: 7add56ad3ac76c2478d20b1bf950662e, type: 3}
+  m_audioClip: {fileID: 8300000, guid: d64f1fa1e50b86b43b693e8e5cd9d0ac, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 0.18
   m_Pitch: 1
@@ -232079,7 +232087,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: e82d35a0027cec548b42cd75557c95d2, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 3522581b52abe1941a9231888c4b6aeb, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -261377,7 +261385,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 3522581b52abe1941a9231888c4b6aeb, type: 3}
+  m_Sprite: {fileID: 21300000, guid: e82d35a0027cec548b42cd75557c95d2, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

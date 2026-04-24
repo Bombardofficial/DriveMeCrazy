@@ -5,6 +5,7 @@ using System.IO;
 using System.Text;
 using UnityEngine;
 using ArcadeVP;
+using UnityEngine.SceneManagement;
 
 public class TelemetryLogger : MonoBehaviour
 {
@@ -15,8 +16,8 @@ public class TelemetryLogger : MonoBehaviour
     [SerializeField] private VehicleInputMixer inputMixer;
 
     [Header("CSV Output")]
-    //[SerializeField] private string outputDirectory = @"C:\Users\sagan\Documents\Ausbildung\FH-Technikum\MAI\Master_Arbeit\GameLogs";
-    [SerializeField] private string outputDirectory = @"C:\Users\sagan\Documents\GitHub\DriveMeCrazy\DriveMeCrazy\GameLogging_LM";
+    //[SerializeField] private string outputDirectory = @"C:\Users\sagan\Documents\GitHub\DriveMeCrazy\DriveMeCrazy\GameLogging_LM";
+    [SerializeField] private string outputDirectory = "";
     [SerializeField] private string filePrefix = "telemetry";
 
     private readonly List<string> _rows = new();
@@ -51,6 +52,11 @@ public class TelemetryLogger : MonoBehaviour
 
     private void Awake()
     {
+        if (string.IsNullOrWhiteSpace(outputDirectory))
+        {
+            outputDirectory = Path.Combine(Application.persistentDataPath, "MasterthesisLogs");
+        }
+
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
@@ -141,6 +147,11 @@ public class TelemetryLogger : MonoBehaviour
         SaveCsv();
     }
 
+    private void OnApplicationQuit()
+    {
+        StopLogging();
+    }
+
     public void RegisterDriverChange(int newDriverPlayerNumber)
     {
         if (!_isLogging)
@@ -177,7 +188,8 @@ public class TelemetryLogger : MonoBehaviour
             if (!Directory.Exists(outputDirectory))
                 Directory.CreateDirectory(outputDirectory);
 
-            string fileName = $"{filePrefix}_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+            string sceneName = SceneManager.GetActiveScene().name;
+            string fileName = $"{filePrefix}_{sceneName}_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
             string fullPath = Path.Combine(outputDirectory, fileName);
 
             File.WriteAllText(fullPath, string.Join("\n", _rows), Encoding.UTF8);

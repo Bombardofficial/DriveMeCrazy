@@ -16,7 +16,7 @@ public class PlayerJoinManager : MonoBehaviour
     [SerializeField] private GameObject playerJoinCanvasRoot;
 
     /* ???????????????????????? CUSTOMIZATION ???????????????????????? */
-    /*
+    
     [Header("Customization")]
     [SerializeField] bool EnableCusomizationMenu = false;
     [SerializeField] private HatCustomizationUIManager hatUI;
@@ -33,7 +33,7 @@ public class PlayerJoinManager : MonoBehaviour
     private Quaternion lobbyCamStartRot;
     private Coroutine camFlyRoutine;
     private bool customizationCamActive;
-    */
+    
     
     /* ?????????????????????????? INSPECTOR ?????????????????????????? */
     [Header("UI (Lobby)")]
@@ -425,11 +425,11 @@ public class PlayerJoinManager : MonoBehaviour
             playerDummies[seatIdx].SetActive(true);
 
             // also equip hats on the lobby dummy you actually see
-            /*if (hatUI != null && playerDummies[seatIdx] != null)
+            if (hatUI != null && playerDummies[seatIdx] != null)
             {
                 //hatUI.RegisterPlayer(seatIdx, playerDummies[seatIdx]);
                 hatUI.RegisterDummy(seatIdx, playerDummies[seatIdx]);
-            }*/
+            }
 
             // player identity = Passenger.PlayerNumber (NOT seat)
             if (tintLobbyDummies && passenger != null && PlayerManager.Instance != null)
@@ -468,7 +468,7 @@ public class PlayerJoinManager : MonoBehaviour
         if (playerJoinCanvasRoot) playerJoinCanvasRoot.SetActive(false);
 
         // --- CUSTOMIZATION FIRST ---
-        /*if(EnableCusomizationMenu =! false)
+        if(EnableCusomizationMenu =! false)
         {
             if (hatUI != null)
             {
@@ -485,7 +485,7 @@ public class PlayerJoinManager : MonoBehaviour
         {
             hatUI = null;
             Debug.LogWarning("Customization Menu disabled.");
-        }*/
+        }
 
 
 
