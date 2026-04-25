@@ -33,8 +33,11 @@ public class PlayerJoinManager : MonoBehaviour
     private Quaternion lobbyCamStartRot;
     private Coroutine camFlyRoutine;
     private bool customizationCamActive;
-    
-    
+
+    [Header("FeedbackUI")]
+    [SerializeField] private GameObject feedbackUI;
+
+
     /* ?????????????????????????? INSPECTOR ?????????????????????????? */
     [Header("UI (Lobby)")]
     [SerializeField] Image[] seatIcons;          // size 4
@@ -607,6 +610,9 @@ public class PlayerJoinManager : MonoBehaviour
         finalising = true;
         driverInput.enabled = false;
         gameplayHUD.alpha = 0;
+
+        if (feedbackUI != null)
+            feedbackUI.SetActive(false);
 
         /* Music � gameplay OUT, lobby IN */
         if (gameplayReverb) gameplayReverb.enabled = true;

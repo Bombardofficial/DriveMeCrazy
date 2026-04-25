@@ -176777,7 +176777,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tutorialController: {fileID: 1091771128}
   playerJoinCanvasRoot: {fileID: 1317100902}
-  EnableCusomizationMenu: 0
+  EnableCusomizationMenu: 1
   hatUI: {fileID: 0}
   customizationCanvasRoot: {fileID: 0}
   lobbyCamera: {fileID: 0}
@@ -176785,6 +176785,7 @@ MonoBehaviour:
   mainCamera: {fileID: 0}
   customizationFlyTime: 0.8
   cameraAnimatorRev: {fileID: 0}
+  feedbackUI: {fileID: 419289293}
   seatIcons:
   - {fileID: 6750848143244333423}
   - {fileID: 5767742030411327129}
