@@ -176777,7 +176777,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tutorialController: {fileID: 1091771128}
   playerJoinCanvasRoot: {fileID: 1317100902}
-  EnableCusomizationMenu: 0
+  EnableCusomizationMenu: 1
   hatUI: {fileID: 0}
   customizationCanvasRoot: {fileID: 0}
   lobbyCamera: {fileID: 0}
@@ -229293,7 +229293,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: 8b1d867c4bf2dbf48b806021d8a8e9f1, type: 3}
+  m_audioClip: {fileID: 8300000, guid: 597e56875d4b5c54f9eecbb50e67d9d9, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 0.8
   m_Pitch: 1
