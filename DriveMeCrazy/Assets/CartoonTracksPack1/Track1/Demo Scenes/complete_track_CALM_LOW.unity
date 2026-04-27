@@ -96162,7 +96162,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 0.45
+  m_Volume: 0.25
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -131734,7 +131734,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   vehicle: {fileID: 2111085467219387259}
   inputMixer: {fileID: 2111085467219387265}
-  outputDirectory: C:\Users\sagan\Documents\GitHub\DriveMeCrazy\DriveMeCrazy\GameLogging_LM\Friends
+  outputDirectory: C:\Users\sagan\Documents\GitHub\DriveMeCrazy\DriveMeCrazy\GameLogging_LM\OpenWorld_Data
   filePrefix: telemetry_
 --- !u!4 &834105666
 Transform:

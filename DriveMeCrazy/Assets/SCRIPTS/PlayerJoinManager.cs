@@ -560,6 +560,7 @@ public class PlayerJoinManager : MonoBehaviour
         // Start logging of game
         if (TelemetryLogger.Instance != null)
         {
+            TelemetryLogger.Instance.RegisterFinalPlayerScores();
             TelemetryLogger.Instance.StartLogging();
         }
 
@@ -658,7 +659,8 @@ public class PlayerJoinManager : MonoBehaviour
 
         /* Winner banner shake */
         var winner = passengers.Last();
-        winnerText.text = $"Player {PlayerManager.Instance.GetSeatIndex(winner) + 1} WINS!";
+        //winnerText.text = $"Player {PlayerManager.Instance.GetSeatIndex(winner) + 1} WINS!"; // shows player finishing race
+        winnerText.text = $"Player {winner.PlayerNumber} WINS!";
         winnerText.alpha = 0;
 
         winnerText.rectTransform.anchoredPosition = startPos;

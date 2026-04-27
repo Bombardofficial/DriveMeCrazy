@@ -92,7 +92,8 @@ public class TelemetryLogger : MonoBehaviour
                      $"{_hitObstacleIdThisFrame}," +
                      $"{_player1CollisionCounter},{_player2CollisionCounter}," +
                      $"{_player3CollisionCounter},{_player4CollisionCounter}," +
-                     $"{_collisionCountTotal}";
+                     $"{_collisionCountTotal}," +
+                     $"0,0,0,0"; ;
 
         _rows.Add(row);
 
@@ -133,7 +134,9 @@ public class TelemetryLogger : MonoBehaviour
             _currentDriverPlayerNumber = PlayerManager.Instance.CurrentDriver.PlayerNumber;
         }
 
-        _rows.Add("run_time,current_driver_player_number,driver_changed_this_frame,driver_change_count_total,curve_active,drift_check_active,drift_check_result,warning_active,warning_obstacle_id,driver_input_this_frame,inputs_per_second,hit_obstacle_id_this_frame,player1_collision_counter,player2_collision_counter,player3_collision_counter,player4_collision_counter,collision_count_total");
+        //_rows.Add("run_time,current_driver_player_number,driver_changed_this_frame,driver_change_count_total,curve_active,drift_check_active,drift_check_result,warning_active,warning_obstacle_id,driver_input_this_frame,inputs_per_second,hit_obstacle_id_this_frame,player1_collision_counter,player2_collision_counter,player3_collision_counter,player4_collision_counter,collision_count_total");
+        _rows.Add("run_time,current_driver_player_number,driver_changed_this_frame,driver_change_count_total,curve_active,drift_check_active,drift_check_result,warning_active,warning_obstacle_id,driver_input_this_frame,inputs_per_second,hit_obstacle_id_this_frame,player1_collision_counter,player2_collision_counter,player3_collision_counter,player4_collision_counter,collision_count_total,player1_final_points,player2_final_points,player3_final_points,player4_final_points");
+        // --> Added Player scores
     }
 
     public void StopLogging()
@@ -275,6 +278,50 @@ public class TelemetryLogger : MonoBehaviour
 
         if (success)
             _driftCheckResult = true;
+    }
+
+    public void RegisterFinalPlayerScores()
+    {
+        if (!_isLogging)
+            return;
+
+        int p1 = 0;
+        int p2 = 0;
+        int p3 = 0;
+        int p4 = 0;
+
+        if (PlayerManager.Instance != null)
+        {
+            foreach (var p in PlayerManager.Instance.Passengers)
+            {
+                switch (p.PlayerNumber)
+                {
+                    case 1: p1 = p.Points; break;
+                    case 2: p2 = p.Points; break;
+                    case 3: p3 = p.Points; break;
+                    case 4: p4 = p.Points; break;
+                }
+            }
+        }
+
+        string row = $"{(Time.time - _raceStartTime).ToString(CultureInfo.InvariantCulture)}," +
+                     $"{_currentDriverPlayerNumber}," +
+                     $"0," +
+                     $"{_driverChangeCountTotal}," +
+                     $"{(_curveActive ? 1 : 0)}," +
+                     $"{(_driftCheckActive ? 1 : 0)}," +
+                     $"0," +
+                     $"{(_warningActive ? 1 : 0)}," +
+                     $"{_warningObstacleId}," +
+                     $"0," +
+                     $"{_inputsPerSecond.ToString("F4", CultureInfo.InvariantCulture)}," +
+                     $"-1," +
+                     $"{_player1CollisionCounter},{_player2CollisionCounter}," +
+                     $"{_player3CollisionCounter},{_player4CollisionCounter}," +
+                     $"{_collisionCountTotal}," +
+                     $"{p1},{p2},{p3},{p4}";
+
+        _rows.Add(row);
     }
 
 }
